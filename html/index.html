@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Maze Bank Arena - Light Desk</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="desk" class="hidden" role="dialog" aria-label="Arena light desk">
+  <header>
+    <div class="brand">
+      <span class="dot" id="live-dot"></span>
+      <div>
+        <h1>LIGHT DESK</h1>
+        <p>Maze Bank Arena &middot; <span id="show-name">wrestling</span></p>
+      </div>
+    </div>
+    <button class="close" id="close" title="Close (Esc)">&times;</button>
+  </header>
+
+  <section class="row top">
+    <button class="big toggle" id="power">SHOW LIGHTS <b id="power-state">OFF</b></button>
+    <button class="big danger" data-preset="blackout">BLACKOUT</button>
+  </section>
+
+  <section>
+    <h2>House lights</h2>
+    <div class="seg" id="house">
+      <button data-house="show">Show</button>
+      <button data-house="full">Full</button>
+      <button data-house="dim">Dim</button>
+      <button data-house="off">Off</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Mode</h2>
+    <div class="grid modes" id="modes">
+      <button data-mode="static"><i>&#9679;</i>Static</button>
+      <button data-mode="chase"><i>&#10148;</i>Chase</button>
+      <button data-mode="strobe"><i>&#9889;</i>Strobe</button>
+      <button data-mode="pulse"><i>&#9678;</i>Pulse</button>
+      <button data-mode="rainbow"><i>&#9728;</i>Rainbow</button>
+      <button data-mode="sweep"><i>&#8634;</i>Sweep</button>
+      <button data-mode="ballyhoo"><i>&#8776;</i>Ballyhoo</button>
+      <button data-mode="random"><i>&#10022;</i>Random</button>
+      <button data-mode="police"><i>&#9650;</i>Police</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Colours <small>pick a slot, then a colour</small></h2>
+    <div class="slots" id="slots">
+      <button class="slot" data-slot="0"><span></span>A</button>
+      <button class="slot" data-slot="1"><span></span>B</button>
+      <button class="slot" data-slot="2"><span></span>C</button>
+      <label class="custom" title="Any colour for the active slot">
+        <input type="color" id="picker" value="#ffffff"> custom
+      </label>
+      <button class="mini" id="clear-slot" title="Empty slots B / C">&minus; slot</button>
+    </div>
+    <div class="palette" id="palette"></div>
+  </section>
+
+  <section class="row sliders">
+    <div class="slider">
+      <h2>Speed <b id="bpm-val">120</b> bpm</h2>
+      <input type="range" id="bpm" min="30" max="240" step="1" value="120">
+      <button class="mini wide" id="tap">TAP</button>
+    </div>
+    <div class="slider">
+      <h2>Intensity <b id="int-val">80</b>%</h2>
+      <input type="range" id="intensity" min="0" max="100" step="1" value="80">
+    </div>
+  </section>
+
+  <section>
+    <h2>Aim</h2>
+    <div class="seg" id="focus">
+      <button data-focus="floor">Floor</button>
+      <button data-focus="stage">Stage</button>
+      <button data-focus="crowd">Crowd</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Presets</h2>
+    <div class="grid presets" id="presets"></div>
+  </section>
+
+  <footer>Everyone in the bowl sees the same show &middot; <kbd>Esc</kbd> closes</footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

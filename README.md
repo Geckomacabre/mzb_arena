@@ -1,0 +1,230 @@
+# mzb_arena: Maze Bank Arena full interior
+
+A complete, walkable interior for the Maze Bank Arena (Del Perro / La Puerta), built inside the vanilla
+exterior with no changes to the outside. The entire building is open:
+
+- **Seating bowl.** Lower and upper tiers, about 18,650 seats, 11 vomitories, a cross aisle, stairs down to the floor,
+  a four-sided centre-hung video board (16:9 screens, corner LED columns, a crown and a score ring, with its own content
+  for every show), an LED ribbon, banners and EXIT signs. House lights are switchable (full / dimmed).
+- **Street-level concourse.** Four glazed gateways with security (metal detectors, bag tables, ticket scanners,
+  queue lines), a box office, guest services, concession stands, bars, a team store, men's and women's rest rooms
+  (every toilet stall's door swings open as you walk in and closes behind you),
+  vending, ATMs, a canopy with downlights, and murals.
+- **Event level.** A service corridor runs round the back of the lower bowl at floor level, with a tunnel onto the
+  event floor on every side: the event tunnel at the stage end, a team tunnel in the middle of each long side, and a
+  5 m vehicle tunnel at the far end. Along the corridor are the home and visitors' locker rooms, a training room
+  (power rack on a lifting platform, dumbbell rack, benches, bikes, treatment tables), a players' lounge, the officials'
+  room, first aid, staff toilets, a vehicle garage off the far-end tunnel (a hot-water fill station, the snow melt
+  pit), the ice plant (compressors, chiller, receiver, control panels) and three stores. Behind the stage are the
+  backstage hall, two more locker rooms (showers, WCs, lockers), medical, officials, a press conference room,
+  catering, admin, offices and the security control room.
+- **Production control room.** Off the arena offices, behind a keypad door with an ON AIR light: a 10 x 3 video wall
+  of multiviewers with the program and preview monitors in the middle (red / green tally) and studio clocks, a front row
+  of consoles (vision mixer with its T-bar, graphics, two replay positions with jog-wheel controllers) and a back row on
+  a riser (director and producer, the audio console with its meter bridge), acoustic wall panels, and an equipment
+  annex with a row of 19" racks under a cable tray, the engineering bench and the UPS.
+- **Loading dock.** Three working roller doors on the NW loading street, each an industrial shutter with its guide
+  channels, coil hood, gear motor, hand chain, push-button station, beacon, bay sign and bollards: walk or drive up to
+  one and press **E** to open or close it (inside or outside). Inside: heavy pallet racking loaded with stock, the day's
+  delivery on pallets, a waste corner (baler with a finished bale, dumpster, cardboard cages, bins) by the doors, the
+  dock office, the house staging decks, crowd barriers, cable trunks and power distro staged by the backstage opening,
+  and LED high-bays under the plaza deck.
+- **Switchable shows.** Each one is a set of interior entity sets, switched live for every player:
+
+| Show | What you get |
+|---|---|
+| `wrestling` | Wrestling ring (turnbuckles, ropes, printed skirt, steel steps), entrance stage with titantron, ramp, pyro, a walk-through entrance curtain that moves when peds pass, the Gorilla position, commentary and timekeeper desks, ~1,200 floor chairs, a lighting rig and PA |
+| `concert` | End stage with an LED wall, a full band backline (a detailed drum kit on a skirted riser, two guitar stacks, an 8x10 bass rig, a 2x12 combo, pedalboards, boom mics, a guitar vault and flight cases in the wings), a ground-support roof with moving heads, PA hangs, side screens, a general-admission floor with a photo pit barricade and a FOH mix riser |
+| `hockey` | A 56 x 26 m ice rink (slippery: vehicles slide and players glide on it, see below): printed ice with the Maze Bank centre logo, dasher boards with a kick plate and GTA sponsor ads, glass on stanchions (taller at the ends), protective netting over the end glass, goals with nets, open player benches with doors onto the ice and glass behind them, the penalty and timekeeper boxes, the resurfacer's gate at the far end, and the board's hockey score |
+| `basketball` | A printed hardwood court with its run-off, portable basket stanchions (padded base, glass backboard, rim and net, shot clock), team benches, the scorer's table with an LED front, about 1,150 floor seats (courtside rows on both sides, the ends seated to the walls) and the board's basketball score |
+| `tennis` | A hard court with its run-off, the net and posts, the umpire's chair, players' chairs, line judges, sponsor boards behind the baselines, about 1,300 floor seats along both sides and at both ends, and the board's tennis score |
+| `mma` | Fight night: a UFC-size octagon (9.1 m, the canvas 1.2 m up, a 1.8 m black chain-link fence, padded posts, two gates with steps and handrails, a printed canvas), the end stage with an LED wall and a walkway, a ring of cageside press and officials' tables with monitors, about 1,450 floor seats in rows out to the floor's edges, a lighting rig with moving heads and four line-array PA hangs over the cage, and the house dimmed |
+| `house` | The empty arena with the house lights up |
+
+The end-stage shows (wrestling, concert, MMA) mask off the seats behind the stage with black drapes and close the
+vomitories behind them; the LED-wall stages (concert, MMA) are framed by legs and a border on a flown masking truss. The stage end's five lower sections are **telescopic**: for those shows they are stowed into
+riser stacks, and the space becomes a real backstage area behind the masking, reached from the event tunnel. It has
+wardrobe rails, a video village with monitors, catering, work lights and road cases. For the other shows the sections
+are seated as usual.
+
+All brands are GTA V's own, with the sponsor logos taken from the game's textures (Maze Bank, Sprunk, eCola,
+Pisswasser, Cluckin' Bell, Fame or Shame, Burger Shot). The acts, teams and events are made up ("San Andreas Pro
+Wrestling", "Sirens of San Andreas", the Los Santos Blizzard, SAFC, the Maze Bank Open, and so on).
+
+## From the nosebleeds
+
+Every show from the same seat, the back row of the upper tier.
+
+![The empty arena, house lights up](screenshots/nosebleed_house.jpg)
+
+| | |
+|---|---|
+| ![Wrestling](screenshots/nosebleed_wrestling.jpg)<br>**Wrestling** | ![Concert](screenshots/nosebleed_concert.jpg)<br>**Concert** |
+| ![MMA](screenshots/nosebleed_mma.jpg)<br>**Fight night** | ![Hockey](screenshots/nosebleed_hockey.jpg)<br>**Hockey** |
+| ![Basketball](screenshots/nosebleed_basketball.jpg)<br>**Basketball** | ![Tennis](screenshots/nosebleed_tennis.jpg)<br>**Tennis** |
+
+## Requirements
+
+- **Game build 2060 or newer** (`sv_enforceGameBuild 2060`). The interior uses vanilla props from the Diamond Casino
+  Heist, After Hours and other DLC packs, and on older builds those props are missing.
+- No framework or other resources.
+
+## Install
+
+1. Put the `mzb_arena` folder in your `resources` folder.
+2. Add it to `server.cfg`:
+   ```
+   ensure mzb_arena
+   ```
+3. Allow your staff to run the arena command:
+   ```
+   add_ace group.admin command.arena allow
+   ```
+
+**Other map packs.** This resource streams its own `sp1_occl_01.ymap`: Rockstar's occlusion for the area, with the
+occluders that would hide the interior through the glass removed. If another resource streams the same file (for
+example `cfx-gabz-mapdata`), `ensure mzb_arena` **after** it. Otherwise the arena's interior can vanish when you look
+at it from outside. Our file keeps everything else in it as Rockstar shipped it.
+
+The resource also replaces a handful of vanilla `sp1_10` files (the painted fake interior, the glass panes in front of
+the gateway doors, the loading street's roller-door panels and their collision). Any other resource that replaces
+these exact files will conflict with it.
+
+`bob74_ipl` is fine: the arena removes Rockstar's Fame or Shame lobby IPL, which stood where the concourse is now.
+
+**Lighting.** The interior ships its own time-cycle modifiers (`data/mzb_timecycle.xml`: `mzb_arena_int`,
+`mzb_arena_concourse`), so the bowl and the back-of-house rooms look the same at any hour or weather. The glazed
+concourse keeps its daylight, without the outdoor fog.
+
+## Commands (ACE `command.arena`)
+
+The quick switch, for staff on the spot:
+
+```
+/mzb wrestling        switch the show for everyone (late joiners get it too)
+/mzb basketball       ... wrestling concert mma hockey basketball tennis house
+/mzb list             the shows, the current one in [brackets]
+/mzb status           the current show and the dock doors
+/mzb dock a open      the loading street's roller doors (a | b | c | all, open | close | toggle)
+```
+
+`/mzb` also takes the aliases in `Config.ShowAliases` (`/mzb fight` is MMA, `/mzb empty` is the empty house, and so
+on), suggests the show names in chat as you type, and uses the same permission as `/arena`: one ACE line covers both.
+The long form still works:
+
+```
+/arena show <name>
+/arena dock <a|b|c|all> <open|close|toggle>
+/arena status
+```
+
+Every switch is logged in the server console with the player's name. A short cooldown (`Config.SwitchCooldown`)
+stops a switch being spammed, since each one reloads the interior for everyone inside.
+
+`/arenainfo` (everyone, client side) prints the interior and room you are standing in, which helps when reporting
+issues.
+
+## Exports (server)
+
+```lua
+exports.mzb_arena:SetShow('concert')        -- true / false (unknown show; aliases work too)
+exports.mzb_arena:GetShow()                 -- the current show's name
+exports.mzb_arena:GetShows()                -- every show's name, sorted
+exports.mzb_arena:SetDock('a', 'open')      -- 'a' | 'b' | 'c' | 'all', 'open' | 'close' | 'toggle'
+exports.mzb_arena:SetLights({ on = true, mode = 'strobe', colors = { 'red', 'white' }, bpm = 150, house = 'off' })
+exports.mzb_arena:LightPreset('goal')       -- a Config.LightPresets name (a goal horn script can call it)
+exports.mzb_arena:GetLights()               -- the desk's current state
+```
+
+The current state is public in `GlobalState.mzbShow`, `GlobalState.mzbDock` and `GlobalState.mzbLights`, so a job
+script or an ox_target panel can read it.
+
+## Light desk (ACE `command.arena`)
+
+The arena has its own light show on top of the interior's lighting: coloured spot lights from each show's rig (the
+moving heads, beams and washes of the wrestling, concert and MMA rigs) and from the house lights up in the roof (every
+show, and the only ones for hockey, basketball, tennis and the empty house). Every player in the bowl sees the same
+show at the same moment.
+
+`/arenalights` opens the desk: show lights on / off, blackout, the house lights (the show's setting, full, dimmed,
+off), nine modes (static, chase, strobe, pulse, rainbow, sweep, ballyhoo, random, police), up to three colours from a
+palette or a colour picker, the speed in BPM (with a tap button), intensity, the aim (floor, stage, crowd) and presets
+(walk-in, entrance, goal, concert, party, fight, police, house up, blackout, reset). It also runs from chat:
+
+```
+/arenalights on | off | blackout | status
+/arenalights mode chase
+/arenalights color red white          (names from Config.LightColors, or #rrggbb; up to three)
+/arenalights bpm 128 | intensity 80 | focus stage | house dim
+/arenalights preset goal
+```
+
+The interior's own (baked) lights can't change colour in GTA; the house buttons switch them between full, dimmed and
+off, and the desk's colour comes from the spot lights it draws. Players with photosensitivity: `Config.LightMaxStrobeHz`
+caps the strobe (0 turns it into a pulse).
+
+## Slippery ice
+
+While the `hockey` show is up, the rink's surface is GTA's ice: vehicles slide on it, and on foot you keep your
+momentum. You glide on when you let go, overshoot a stop and drift through turns, and a hard turn at a sprint can put
+you on the ice. `Config.Ice` sets how slippery it is, the top gliding speed, and whether players can fall and how
+often.
+
+## Video on the screens (pmms and other TV scripts)
+
+Every show's screens are one object on one render target, **`mzb_screens`**, so a single media player drives them
+all: the titantron with its lower panels and wings (wrestling), the LED wall and the side screens (concert), the LED
+wall (MMA), and the centre-hung board's four faces (every show). The picture and sound come from one source. With
+nothing playing, the screens are clear and the show's own graphics show through.
+
+The object sits at the centre of the arena floor. There is one model per show:
+
+| Show | Model |
+|---|---|
+| `wrestling` | `mzb_screens_wrestling` |
+| `concert` | `mzb_screens_concert` |
+| `mma` | `mzb_screens_mma` |
+| `hockey`, `basketball`, `tennis`, `house` | `mzb_screens_board` |
+
+**pmms:** add these to `Config.models` in pmms' `config.lua`, then stand in the bowl, open pmms and pick the arena
+screens:
+
+```lua
+[`mzb_screens_wrestling`] = { label = "Maze Bank Arena screens", renderTarget = "mzb_screens" },
+[`mzb_screens_concert`]   = { label = "Maze Bank Arena screens", renderTarget = "mzb_screens" },
+[`mzb_screens_mma`]       = { label = "Maze Bank Arena screens", renderTarget = "mzb_screens" },
+[`mzb_screens_board`]     = { label = "Maze Bank Arena screens", renderTarget = "mzb_screens" },
+```
+
+Any other TV or cinema script that plays on a model through a named render target works the same way: register the
+model(s) above with the render target `mzb_screens`. Switching the show swaps the screen object, so start the video
+again after a switch.
+
+## Configuration (`shared/config.lua`)
+
+- `Config.DefaultShow`: the show the server starts with.
+- `Config.Shows`: which entity sets each show turns on. You can remove a show, or make your own mix from the sets
+  listed there.
+- `Config.ShutterSeconds`: how long the roller doors take to open or close.
+- `Config.DockButtons`: the **E** prompt at each roller door (`false` = staff commands only).
+- `Config.DockAccess`: who may use it: `false` for everyone, or an ACE such as `'command.arena'` for staff only.
+- `Config.DockReach` / `Config.DockReachVehicle`: how close you must be, on foot and at the wheel (metres).
+- `Config.Command`: the name of the admin command.
+- `Config.QuickCommand`: the quick switch's name (`mzb`), or `false` to turn it off.
+- `Config.ShowAliases`: other words the quick switch accepts for a show.
+- `Config.SwitchCooldown`: seconds between two switches.
+- `Config.AnnounceSwitch`: `true` tells every player in chat when the show changes.
+- `Config.LightCommand` / `Config.LightAccess`: the light desk's command and who may use it (an ACE, or `false` for
+  everyone).
+- `Config.LightPresets` / `Config.LightColors`: the desk's presets and named colours: add your own.
+- `Config.LightBrightness`, `Config.LightCone`, `Config.LightSpread`, `Config.LightMaxFixtures`,
+  `Config.LightLensGlow`: how the show lights look and how many are drawn.
+- `Config.LightMaxStrobeHz`: the fastest strobe (0 = no strobing).
+- `Config.LightRooms`: the rooms the light show is drawn in.
+- `Config.HouseSets`: the interior's house light sets the desk switches.
+- `Config.Ice`: the hockey ice (on / off, the shows it is down for, how slippery, falls).
+
+## Notes
+
+- There is no ped navmesh inside the building yet. Players can go everywhere, but ambient NPCs will not walk it.
+- Framework independent: plain FiveM natives only, with no ESX / QBCore / Qbox requirement.
