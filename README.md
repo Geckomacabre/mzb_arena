@@ -228,3 +228,9 @@ again after a switch.
 
 - There is no ped navmesh inside the building yet. Players can go everywhere, but ambient NPCs will not walk it.
 - Framework independent: plain FiveM natives only, with no ESX / QBCore / Qbox requirement.
+
+## License
+
+Free to use on your own servers, but **not open source**. You may not sell, re-upload or redistribute this resource,
+or reuse any part of it (models, textures, collision, maps, scripts) in another resource, free or paid. See
+[LICENSE](LICENSE).
