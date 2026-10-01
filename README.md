@@ -229,6 +229,14 @@ again after a switch.
 - There is no ped navmesh inside the building yet. Players can go everywhere, but ambient NPCs will not walk it.
 - Framework independent: plain FiveM natives only, with no ESX / QBCore / Qbox requirement.
 
+## Changes
+
+- **1.0.1**: fixed players sinking through the floor on the four corners of the bowl (the walkway between the lower and
+  upper seats and the mouths of the upper-deck entrances). The collision on the curved parts was built inside out.
+  Basketball is now the Los Santos Panic (purple and gold court with the team's crest) vs the Vice City Narcos, hockey
+  the Los Santos Dust Devils vs the Los Santos Kings. The Arena War banners on the outside of the building
+  (`xs_arena_banners_ipl`) are removed while the resource runs.
+
 ## License
 
 Free to use on your own servers, but **not open source**. You may not sell, re-upload or redistribute this resource,

@@ -10,10 +10,13 @@ end
 
 -- ------------------------------------------------------------------ vanilla clean-up
 -- Rockstar's Fame or Shame lobby (bob74_ipl requests it) stands where our concourse is; the resource streams empty
--- copies of both ymaps, this is the belt to those braces
+-- copies of both ymaps, this is the belt to those braces. The Arena War banners on the outside of the building
+-- (xs_arena_banners_ipl: the big ARENA WAR banner and three cloths) go too - removing the IPL takes its collision
+-- with it. Checked every few seconds: a map or IPL loader may request them after we start.
 CreateThread(function()
-    for _ = 1, 3 do
-        for _, ipl in ipairs({ 'sp1_10_real_interior', 'sp1_10_real_interior_lod' }) do
+    local ipls = { 'sp1_10_real_interior', 'sp1_10_real_interior_lod', 'xs_arena_banners_ipl' }
+    while true do
+        for _, ipl in ipairs(ipls) do
             if IsIplActive(ipl) then RemoveIpl(ipl) end
         end
         Wait(5000)
