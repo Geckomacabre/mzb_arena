@@ -426,7 +426,7 @@ local function pushStall(d, st, peds, dt)
             local r = math.sqrt(lx * lx + ly * ly)
             if r >= 0.05 and r <= w + R then
                 local phi = math.atan(ly, lx)
-                if phi >= -SW.out_max - 0.6 and phi <= SW.in_max + 0.6 then  -- not behind the hinge
+                if phi >= -(d.o or SW.out_max) - 0.6 and phi <= (d.i or SW.in_max) + 0.6 then  -- not behind the hinge
                     local half = math.asin(math.min(1.0, R / r))
                     if math.abs(phi - a) < half then                     -- the leaf is in this body
                         local vin = pd.v.x * ey.x + pd.v.y * ey.y
@@ -442,7 +442,7 @@ local function pushStall(d, st, peds, dt)
             end
         end
     end
-    a = math.max(-SW.out_max, math.min(SW.in_max, a))
+    a = math.max(-(d.o or SW.out_max), math.min(d.i or SW.in_max, a))   -- its own stops: clear of the walls
     if a ~= a0 and dt > 0 then
         st.v = math.max(-4.0, math.min(4.0, (a - a0) / dt))
     end
@@ -453,8 +453,9 @@ local function stepStall(d, st, peds, dt)
     local before = st.a
     st.v = st.v + (-SW.k * st.a - SW.c * st.v) * dt
     st.a = st.a + st.v * dt
-    if st.a > SW.in_max or st.a < -SW.out_max then
-        st.a, st.v = math.max(-SW.out_max, math.min(SW.in_max, st.a)), 0.0
+    local imax, omax = d.i or SW.in_max, d.o or SW.out_max
+    if st.a > imax or st.a < -omax then
+        st.a, st.v = math.max(-omax, math.min(imax, st.a)), 0.0
     end
     pushStall(d, st, peds, dt)
     if math.abs(st.a) < 0.0005 and math.abs(st.v) < 0.001 then st.a, st.v = 0.0, 0.0 end

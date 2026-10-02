@@ -231,6 +231,25 @@ again after a switch.
 
 ## Changes
 
+- **1.0.2**: the event level, backstage and the gateways reworked.
+  - **The Gorilla position** is rebuilt as a proper room between the event tunnel and the stage: the producers' desks
+    (two seats each) along the back wall, the timekeeper's and match producer's desk at the top, the ARENA exit straight
+    onto the stage stairs, and a BACKSTAGE door on each side into the backstage areas behind the masking (they were
+    walled off). Same look as before (dark wood, LED dado, the show's screens), now with a solid panel ceiling.
+  - **Walls popping in and out**: faces that ran across two rooms (the media room's tiled wall, the locker rooms'
+    walls, the reveals of every door, tunnel and vomitory, and many more) are cut at the dividing walls and doorways,
+    and each piece belongs to the room it faces. The floor collision now changes room exactly at each doorway and inside
+    the vomitories: standing just past a door could make the game hide the room you were standing in.
+  - The backstage door into the NW stair is rebuilt square to the stair's angled wall (the wall ran through its frame).
+  - The cream panel sticking out of the wall by the locker-room door in the backstage hall is gone, with the 1 cm
+    ceiling and floor stripes along that wall.
+  - Toilet stall doors no longer swing into the partitions and walls (each door has its own stops).
+  - **Gateway doors**: the north, west and south entrances could not be walked through - the building's collision still
+    had the facade glass across them (only the east one was open). All four are open now.
+  - Mirrors: the concourse rest rooms' mirrors are reflective glass (only one live mirror per room works in GTA); the
+    single-mirror rooms keep live mirrors, fixed.
+  - Outside sounds: the street, the wind and the rain are no longer heard inside (`audio/mzb_arena_game.dat151.rel`
+    and portal audio occlusion).
 - **1.0.1**: fixed players sinking through the floor on the four corners of the bowl (the walkway between the lower and
   upper seats and the mouths of the upper-deck entrances). The collision on the curved parts was built inside out.
   Basketball is now the Los Santos Panic (purple and gold court with the team's crest) vs the Vice City Narcos, hockey
