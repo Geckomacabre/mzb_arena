@@ -244,6 +244,10 @@ again after a switch.
     backstage's east wall moved back to make room (on the south arc, by the locker rooms, it narrows to 2.6 m for a
     few metres). Four side hallways off the west arcs end in fixed double doors (ELECTRICAL, SECURITY, COMMS ROOM,
     PLANT ROOM); the new signs are in `mzb_tx_event`.
+  - **Box office windows**: the 20 ticket windows in the facade's diagonal sections looked straight into the concourse
+    through the arena's own glass and its mullions. They now have closed roller shutters (placed outside the interior,
+    in `mzb_arena_milo.ymap`, so they always draw from the street).
+  - The security control room's north wall and parts of the SE stair's shaft belonged to the neighbouring rooms.
   - The roof deck and trusses over the middle of the bowl belonged to the concourse: looking up from the floor showed
     holes to the sky. A strip of the corridor floor along the east store and the garage belonged to those rooms (a
     gap along the wall).
