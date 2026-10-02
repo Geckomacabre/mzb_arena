@@ -244,6 +244,9 @@ again after a switch.
     backstage's east wall moved back to make room (on the south arc, by the locker rooms, it narrows to 2.6 m for a
     few metres). Four side hallways off the west arcs end in fixed double doors (ELECTRICAL, SECURITY, COMMS ROOM,
     PLANT ROOM); the new signs are in `mzb_tx_event`.
+  - The roof deck and trusses over the middle of the bowl belonged to the concourse: looking up from the floor showed
+    holes to the sky. A strip of the corridor floor along the east store and the garage belonged to those rooms (a
+    gap along the wall).
   - The backstage door into the NW stair is rebuilt square to the stair's angled wall (the wall ran through its frame).
   - The cream panel sticking out of the wall by the locker-room door in the backstage hall is gone, with the 1 cm
     ceiling and floor stripes along that wall.
