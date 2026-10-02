@@ -12,9 +12,12 @@ this_is_a_map 'yes'
 -- ensure mzb_arena AFTER it in server.cfg (see README.md)
 
 data_file 'DLC_ITYP_REQUEST' 'stream/interior/mzb_arena.ytyp'
+-- the interior's audio: every room is sealed from the street, the weather and the rain (audio/mzb_arena_game.dat151.rel);
+-- the portal occlusion (stream/interior/<occlusion hash>.ymt) muffles what is outside through the doors and glass
+data_file 'AUDIO_GAMEDATA' 'audio/mzb_arena_game.dat'
 -- the interior's own time cycle: no daylight / outdoor fog inside the closed rooms, none of the fog in the concourse
 data_file 'TIMECYCLEMOD_FILE' 'data/mzb_timecycle.xml'
-files { 'data/mzb_timecycle.xml', 'html/index.html', 'html/style.css', 'html/app.js' }
+files { 'data/mzb_timecycle.xml', 'audio/mzb_arena_game.dat151.rel', 'html/index.html', 'html/style.css', 'html/app.js' }
 
 shared_scripts { 'shared/config.lua', 'shared/generated.lua' }
 client_scripts { 'client/main.lua', 'client/lights.lua', 'client/ice.lua' }
