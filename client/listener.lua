@@ -76,15 +76,26 @@ local function startMeasure()
     end)
 end
 
+-- only while something runs on the clock (a video, a track): an idle arena asks the server nothing
+local function clockNeeded()
+    local m, mu = GlobalState.mzbMedia, GlobalState.mzbMusic
+    return (m ~= nil and m.kind ~= nil and m.kind ~= 'off') or (mu ~= nil and mu.kind ~= nil and mu.kind ~= 'off')
+end
+
 CreateThread(function()
     while true do
-        startMeasure()
-        Wait(math.max(10, Config.ClockResync or 60) * 1000)
+        if clockNeeded() then
+            startMeasure()
+            Wait(math.max(10, Config.ClockResync or 60) * 1000)
+        else
+            Wait(2000)
+        end
     end
 end)
 
 function MzbServerNow()
     if not offset then
+        startMeasure()                                    -- the first one to ask starts the check
         local deadline = GetGameTimer() + 3000
         while not offset and GetGameTimer() < deadline do Wait(50) end
     end

@@ -1,11 +1,14 @@
 -- mzb_arena - server: what the video screens show (GlobalState.mzbMedia, client/media.lua draws it)
---   GlobalState.mzbMedia = { kind = 'off' | 'youtube' | 'images' | 'image', id (youtube), urls (images / image),
+--   GlobalState.mzbMedia = { kind = 'off' | 'youtube' | 'images' | 'image' | 'look', id (youtube), urls (images /
+--                            image), look (a look: Config.Media.looks, drawn by the page in step with the lights),
 --                            start (server ms at position 0), paused, at (the position while paused, s),
---                            volume (0-100), interval (s per picture), rev (bumped on every new item) }
+--                            volume (0-100), interval (s per picture), rev (bumped on every new item),
+--                            by (who put it on: the one told when it will not play) }
 -- The position runs on this server's GetGameTimer() (server/clock.lua); a client turns it into its own time.
 --   /arenascreen <youtube url | id>            play a video on every screen
 --   /arenascreen <picture url> [more ...]      one picture, or a cycle of them
---   /arenascreen images [set]                  a picture set from Config.Media.imageSets
+--   /arenascreen images [set]                  a picture set from Config.Media.imageSets (no name: the show's own)
+--   /arenascreen look <show|pulse|colour|bars|stripes|waves>   a look in step with the light desk
 --   /arenascreen off | pause | resume | volume <0-100> | interval <s> | status
 
 local M = Config.Media or {}
@@ -27,7 +30,8 @@ local function youtubeId(s)
     s = s:gsub('^%s+', ''):gsub('%s+$', '')
     local id
     if s:match('^[%w_%-]+$') then
-        id = s
+        -- a bare id: not a plain lowercase word, which is a mistyped command far more often than a video
+        if s:match('[%u%d_%-]') then id = s end
     else
         local host, path = s:match('^https?://([^/%?#]+)(.*)$')
         if not host then return nil end
@@ -69,21 +73,21 @@ local function setMedia(m)
     return true
 end
 
-local function fresh(kind)
+local function fresh(kind, src)
     local cur = current()
     return { kind = kind, paused = false, at = 0.0, start = GetGameTimer(), volume = cur.volume or OFF.volume,
-             interval = cur.interval or OFF.interval }
+             interval = cur.interval or OFF.interval, by = src or 0 }
 end
 
-local function playYoutube(s)
+local function playYoutube(s, src)
     local id = youtubeId(s)
     if not id then return false, 'not a YouTube link or id' end
-    local m = fresh('youtube')
+    local m = fresh('youtube', src)
     m.id = id
     return setMedia(m)
 end
 
-local function playImages(list)
+local function playImages(list, src)
     if type(list) ~= 'table' then return false, 'no pictures' end
     local urls = {}
     for _, u in ipairs(list) do
@@ -92,7 +96,7 @@ local function playImages(list)
         if #urls >= (M.maxImages or 24) then break end
     end
     if #urls == 0 then return false, 'pictures must be https URLs (or img/ files listed in Config.Media.imageSets)' end
-    local m = fresh(#urls == 1 and 'image' or 'images')
+    local m = fresh(#urls == 1 and 'image' or 'images', src)
     m.urls = urls
     return setMedia(m)
 end
@@ -136,24 +140,49 @@ local function setInterval(v)
 end
 
 -- anything a person types or pastes: a YouTube link, or one or more picture URLs (split on spaces / commas)
-local function play(input)
+local function play(input, src)
     if type(input) ~= 'string' or #input > 4000 then return false, 'too long' end
     local parts = {}
     for p in input:gmatch('[^%s,]+') do parts[#parts + 1] = p end
     if #parts == 0 then return false, 'nothing to play' end
-    if #parts == 1 and youtubeId(parts[1]) and not looksLikePicture(parts[1]) then return playYoutube(parts[1]) end
-    return playImages(parts)
+    if #parts == 1 and youtubeId(parts[1]) and not looksLikePicture(parts[1]) then return playYoutube(parts[1], src) end
+    return playImages(parts, src)
 end
 
-local function playSet(name)
-    local set = (M.imageSets or {})[name or 'default']
+local LOOKS = {}
+for _, k in ipairs(M.looks or {}) do LOOKS[k] = true end
+
+local function playLook(name, src)
+    if not LOOKS[name] then
+        return false, 'looks: ' .. table.concat(M.looks or {}, ', ')
+    end
+    local m = fresh('look', src)
+    m.look = name
+    return setMedia(m)
+end
+
+-- (server/lights.lua: a light preset that carries a screen look - only while the screens show a look or nothing)
+function MzbScreenLook(name)
+    if not M.enabled or M.presetLooks == false or not LOOKS[name] then return false end
+    local cur = current()
+    if cur.kind ~= 'off' and cur.kind ~= 'look' then return false end
+    if cur.kind == 'look' and cur.look == name then return false end
+    return playLook(name, 0)
+end
+
+local function playSet(name, src)
+    if not name then                                     -- no name: the show's own set, else the arena's
+        local show = GlobalState.mzbShow or Config.DefaultShow
+        name = (M.imageSets or {})[show] and show or ((M.imageSets or {}).arena and 'arena' or 'default')
+    end
+    local set = (M.imageSets or {})[name]
     if not set then
         local names = {}
         for k in pairs(M.imageSets or {}) do names[#names + 1] = k end
         table.sort(names)
         return false, #names > 0 and ('picture sets: ' .. table.concat(names, ', ')) or 'no picture sets in Config.Media.imageSets'
     end
-    return playImages(set)
+    return playImages(set, src)
 end
 
 AddEventHandler('onResourceStart', function(res)
@@ -168,8 +197,9 @@ RegisterNetEvent('mzb_arena:media', function(cmd)
     local src = source
     if not M.enabled or not allowed(src) or throttled(src) or type(cmd) ~= 'table' then return end
     local ok, err = true, nil
-    if cmd.action == 'play' and type(cmd.url) == 'string' then ok, err = play(cmd.url)
-    elseif cmd.action == 'set' and type(cmd.set) == 'string' and #cmd.set <= 64 then ok, err = playSet(cmd.set)
+    if cmd.action == 'play' and type(cmd.url) == 'string' then ok, err = play(cmd.url, src)
+    elseif cmd.action == 'set' and type(cmd.set) == 'string' and #cmd.set <= 64 then ok, err = playSet(cmd.set, src)
+    elseif cmd.action == 'look' and type(cmd.look) == 'string' then ok, err = playLook(cmd.look, src)
     elseif cmd.action == 'stop' then ok = stop()
     elseif cmd.action == 'pause' then ok = pause(true)
     elseif cmd.action == 'resume' then ok = pause(false)
@@ -184,12 +214,14 @@ local function status(src)
     local m = current()
     local what = m.kind == 'youtube' and ('YouTube ' .. m.id)
         or m.kind == 'images' and (#m.urls .. ' pictures, ' .. m.interval .. ' s each')
-        or m.kind == 'image' and ('picture ' .. m.urls[1]) or 'off'
+        or m.kind == 'image' and ('picture ' .. m.urls[1]) or m.kind == 'look' and ('the ' .. tostring(m.look) .. ' look')
+        or 'off'
     MzbReply(src, 'screens', ('%s%s | volume %d%% | at %d s'):format(what, m.paused and ' (paused)' or '',
         m.volume or 0, math.floor(MzbTrackPos(m))))
 end
 
-local HELP = '/%s <youtube url | picture url(s)> | images [set] | off | pause | resume | volume <0-100> | interval <s> | status'
+local HELP = '/%s <youtube url | picture url(s)> | images [set] | look <name> | off | pause | resume | volume <0-100> | ' ..
+             'interval <s> | status'
 
 RegisterCommand(M.command or 'arenascreen', function(src, args, raw)
     if not M.enabled then return MzbReply(src, 'screens', 'the built-in screen player is off (Config.Media.enabled)') end
@@ -202,9 +234,10 @@ RegisterCommand(M.command or 'arenascreen', function(src, args, raw)
     elseif sub == 'resume' or sub == 'play' then ok = pause(false)
     elseif sub == 'volume' and tonumber(args[2]) then ok = setVolume(args[2])
     elseif sub == 'interval' and tonumber(args[2]) then ok = setInterval(args[2])
-    elseif sub == 'images' then ok, err = playSet(args[2])
+    elseif sub == 'images' then ok, err = playSet(args[2], src)
+    elseif sub == 'look' then ok, err = playLook((args[2] or ''):lower(), src)
     elseif sub ~= 'status' then
-        ok, err = play(table.concat(args, ' '))
+        ok, err = play(table.concat(args, ' '), src)
     end
     if not ok and err then return MzbReply(src, 'screens', err) end
     status(src)
@@ -216,6 +249,7 @@ exports('SetScreenMedia', function(input)
     return play(input)
 end)
 exports('ScreenImageSet', function(name) return playSet(name) end)
+exports('ScreenLook', function(name) return playLook(name, 0) end)
 exports('ScreenOff', function() return stop() end)
 exports('ScreenPause', function(on) return pause(on ~= false) end)
 exports('ScreenVolume', function(v) return setVolume(v) end)

@@ -10,7 +10,8 @@
 --   /arenalights color <name|#rrggbb> [second] [third]
 --   /arenalights bpm <30-240> | intensity <0-100> | house <show|full|dim|off>
 --   /arenalights focus <floor|stage|crowd> [more ...]      several: the fixtures take turns (e.g. focus floor crowd)
---   /arenalights ring <on|off>                             the ring lights: the washes over the ring, white
+--   /arenalights ring <on|off|color <c>|level <0-100>|own> the ring lights (the rig's own, on by default): off, a
+--                                                          colour for all of them, their level, back to their own colours
 --   /arenalights preset <name>     (Config.LightPresets)
 
 local MODES = { static = true, chase = true, strobe = true, pulse = true, rainbow = true, sweep = true,
@@ -66,6 +67,13 @@ local function sanitize(patch, cur)
         if #fo == 1 then out.focus = fo[1] elseif #fo > 1 then out.focus = fo end
     end
     if patch.ring ~= nil then out.ring = patch.ring == true end
+    if patch.ringColor == false then
+        out.ringColor = nil
+    elseif patch.ringColor ~= nil then
+        local c = colour(patch.ringColor)
+        if c then out.ringColor = c end
+    end
+    if tonumber(patch.ringLevel) then out.ringLevel = math.max(0.0, math.min(1.0, tonumber(patch.ringLevel))) end
     if HOUSE[patch.house] then out.house = patch.house end
     if tonumber(patch.bpm) then out.bpm = math.floor(math.max(30, math.min(240, tonumber(patch.bpm)))) end
     if tonumber(patch.intensity) then out.intensity = math.max(0.0, math.min(1.0, tonumber(patch.intensity))) end
@@ -92,12 +100,26 @@ end
 local function preset(name)
     local p = Config.LightPresets and Config.LightPresets[name]
     if not p then return false end
-    return setLights(p)
+    setLights(p)
+    -- a look can carry the crowd's mood (its mood field): the house reacts with the lights (server/crowd.lua)
+    if p.mood and MzbCrowdMood then MzbCrowdMood(p.mood) end
+    -- and a screen look (server/media.lua: only while the screens show a look or nothing)
+    if p.screen and MzbScreenLook then MzbScreenLook(p.screen) end
+    return true
 end
 
+-- (server/fights.lua: the bout's cues)
+MzbLightPreset = preset
+
 AddEventHandler('onResourceStart', function(res)
-    if res == GetCurrentResourceName() and GlobalState.mzbLights == nil then
+    if res ~= GetCurrentResourceName() then return end
+    if GlobalState.mzbLights == nil then
         GlobalState.mzbLights = copy(Config.LightDefault)
+    elseif GlobalState.mzbLights.ringv ~= 2 then
+        -- the ring lights were baked into the rigs (always on) before 1.1.0: they are the desk's now, on to start with
+        local l = copy(GlobalState.mzbLights)
+        l.ring, l.ringv = Config.LightDefault.ring ~= false, 2
+        GlobalState.mzbLights = l
     end
 end)
 
@@ -141,13 +163,15 @@ local function status(src)
     local cs = {}
     for _, c in ipairs(l.colors or {}) do cs[#cs + 1] = ('#%02x%02x%02x'):format(c[1], c[2], c[3]) end
     local fo = type(l.focus) == 'table' and table.concat(l.focus, '+') or l.focus
+    local ring = l.ring and ('ON (%s, %d%%)'):format(l.ringColor and ('#%02x%02x%02x'):format(l.ringColor[1],
+        l.ringColor[2], l.ringColor[3]) or 'own colours', math.floor((l.ringLevel or 1.0) * 100 + 0.5)) or 'off'
     reply(src, ('show lights %s | mode %s | move %s | colours %s | %d bpm | intensity %d%% | aim %s | ring lights %s | house %s')
         :format(l.on and 'ON' or 'off', l.mode, l.move or 'none', table.concat(cs, ' '), l.bpm,
-            math.floor(l.intensity * 100 + 0.5), fo, l.ring and 'ON' or 'off', l.house))
+            math.floor(l.intensity * 100 + 0.5), fo, ring, l.house))
 end
 
 local HELP = '/%s [on|off|blackout|status] | mode <m> | move <none|sweep|ballyhoo|fan|nod|cross> | color <c> [c2] [c3] | ' ..
-             'bpm <n> | intensity <0-100> | focus <floor|stage|crowd> [more] | ring <on|off> | ' ..
+             'bpm <n> | intensity <0-100> | focus <floor|stage|crowd> [more] | ring <on|off|color <c>|level <n>|own> | ' ..
              'house <show|full|dim|off> | preset <name>'
 
 RegisterCommand(Config.LightCommand, function(src, args)
@@ -167,6 +191,11 @@ RegisterCommand(Config.LightCommand, function(src, args)
     elseif sub == 'move' and MOVES[args[2] or ''] then setLights({ move = args[2] })
     elseif sub == 'focus' and FOCUS[args[2] or ''] then setLights({ focus = { args[2], args[3], args[4] } })
     elseif sub == 'ring' and (args[2] == 'on' or args[2] == 'off') then setLights({ ring = args[2] == 'on' })
+    elseif sub == 'ring' and (args[2] == 'color' or args[2] == 'colour') and args[3] then
+        if not colour(args[3]) then return reply(src, 'a colour name (Config.LightColors) or #rrggbb') end
+        setLights({ ring = true, ringColor = args[3] })
+    elseif sub == 'ring' and args[2] == 'level' and tonumber(args[3]) then setLights({ ringLevel = tonumber(args[3]) / 100.0 })
+    elseif sub == 'ring' and args[2] == 'own' then setLights({ ringColor = false })
     elseif sub == 'house' and HOUSE[args[2] or ''] then setLights({ house = args[2] })
     elseif sub == 'preset' and args[2] then
         if not preset(args[2]:lower()) then

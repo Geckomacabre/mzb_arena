@@ -7,6 +7,13 @@
 --   /arena status
 --   /mzb <show>                     the quick switch (Config.QuickCommand): /mzb wrestling, /mzb basketball ...
 --   /mzb list | /mzb status | /mzb dock <a|b|c|all> <open|close|toggle>
+-- With ox_lib running (Config.OxLib): /arena or /mzb alone opens its menu on the player's screen, and the answers are
+-- its notifications. The menu's picks come back as mzb_arena:menuPick and are checked here like the typed commands.
+
+-- is ox_lib there to draw the menu and the notifications? (optional: without it, chat)
+local function oxOn()
+    return Config.OxLib and GetResourceState('ox_lib') == 'started'
+end
 
 local function initState()
     if GlobalState.mzbDock == nil then
@@ -24,6 +31,8 @@ end)
 local function reply(src, msg)
     if src == 0 then
         print('[mzb_arena] ' .. msg)
+    elseif oxOn() then
+        TriggerClientEvent('mzb_arena:notify', src, msg)
     else
         TriggerClientEvent('chat:addMessage', src, { args = { 'arena', msg } })
     end
@@ -127,6 +136,30 @@ RegisterNetEvent('mzb_arena:dockButton', function(name)
     GlobalState.mzbDock = doors
 end)
 
+-- the ox_lib menu on a player's screen (client/oxmenu.lua); false when there is no ox_lib (or it is the console)
+local function openMenu(src)
+    if src == 0 or not oxOn() then return false end
+    TriggerClientEvent('mzb_arena:menu', src, { show = GlobalState.mzbShow, shows = showNames() })
+    return true
+end
+
+-- a pick in the menu: the same permission and the same checks as the typed commands
+RegisterNetEvent('mzb_arena:menuPick', function(d)
+    local src = source
+    if type(d) ~= 'table' then return end
+    if not IsPlayerAceAllowed(tostring(src), 'command.' .. Config.Command) then
+        return reply(src, 'you are not allowed to change the arena')
+    end
+    if d.kind == 'show' and type(d.name) == 'string' then
+        switchShow(src, d.name)
+    elseif d.kind == 'dock' and type(d.which) == 'string' then
+        local which = d.which:lower()
+        if which ~= 'a' and which ~= 'b' and which ~= 'c' and which ~= 'all' then return end
+        local action = (d.action == 'open' or d.action == 'close') and d.action or 'toggle'
+        dock(src, which, action)
+    end
+end)
+
 RegisterCommand(Config.Command, function(src, args)
     local sub = args[1] and args[1]:lower()
     if sub == 'show' and args[2] then
@@ -135,6 +168,8 @@ RegisterCommand(Config.Command, function(src, args)
         return dock(src, args[2], args[3])
     elseif sub == 'status' then
         return status(src)
+    elseif not sub and openMenu(src) then
+        return
     end
     reply(src, '/' .. Config.Command .. ' show <name> | /' .. Config.Command .. ' dock <a|b|c|all> <open|close|toggle> | /'
         .. Config.Command .. ' status')
@@ -147,6 +182,7 @@ if Config.QuickCommand then
             return reply(src, 'you are not allowed to change the arena')
         end
         local a = args[1] and args[1]:lower()
+        if not a and openMenu(src) then return end
         if not a or a == 'list' or a == 'help' then
             local out = {}
             for _, n in ipairs(showNames()) do

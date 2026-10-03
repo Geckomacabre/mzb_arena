@@ -1,9 +1,12 @@
 -- mzb_arena - client: the music player (GlobalState.mzbMusic, server/music.lua).
 -- The sound plays in this resource's NUI page (html/music.js; the page is always loaded, the desk is only its visible
 -- part). This side tells it what to play and where in it to be (on the server's clock: client/listener.lua), and ten
--- times a second where the listener is: the zone (bowl / near / building / outside), the distance to the nearest PA
--- hang of the show (Config.Music.hangs) and how far left or right the hangs are. The page turns that into level,
--- pan, filter and echo. Far from the arena the page is told to unload the track; back near, it loads it mid-track.
+-- times a second where the listener is: the zone (bowl / near / building / outside), the camera (where it is, which
+-- way it looks) and the PA hangs of the show (Config.Music.hangs), all from the arena's middle. In the bowl the page
+-- plays the track from each hang as a sound in 3D (Web Audio panners: nearer is louder, left is left, behind is
+-- behind); elsewhere through the walls (level, filter, echo). A track that can't go through Web Audio (YouTube, a
+-- server without CORS) gets the level only. Far from the arena the page is told to unload the track; back near, it
+-- loads it mid-track.
 
 local MU = Config.Music or {}
 local S = GlobalState.mzbMusic or { kind = 'off' }
@@ -19,7 +22,8 @@ local loaded = nil                                  -- the rev the page has
 
 local function config()
     return { volume = MU.volume or 0.8, refDistance = MU.refDistance or 12.0, minGain = MU.minGain or 0.3,
-             rooms = MU.rooms or {}, reverbSeconds = MU.reverbSeconds or 3.2 }
+             rolloff = MU.rolloff or 0.7, panning = MU.panning or 'HRTF', rooms = MU.rooms or {},
+             reverbSeconds = MU.reverbSeconds or 3.2 }
 end
 
 local function sendLoad()
@@ -74,10 +78,15 @@ CreateThread(function()
             local zone = MzbListener.zone
             local p = GetFinalRenderedCamCoord()
             local rot = GetFinalRenderedCamRot(2)
-            local h = math.rad(rot.z)
+            local h, pt = math.rad(rot.z), math.rad(rot.x)
             local rx, ry = math.cos(h), math.sin(h)               -- the camera's right, flat
+            local o = Config.ArenaFrame
+            local fwd = { -ry * math.cos(pt), rx * math.cos(pt), math.sin(pt) }
+            local up = { ry * math.sin(pt), -rx * math.sin(pt), math.cos(pt) }
+            local rel = {}
             local nearest, pan, wsum = 1e9, 0.0, 0.0
-            for _, hang in ipairs(hangs) do
+            for k, hang in ipairs(hangs) do
+                rel[k] = { hang.x - o.x, hang.y - o.y, hang.z - o.z }
                 local dx, dy, dz = hang.x - p.x, hang.y - p.y, hang.z - p.z
                 local d = math.sqrt(dx * dx + dy * dy + dz * dz)
                 if d < nearest then nearest = d end
@@ -89,12 +98,20 @@ CreateThread(function()
             if wsum > 0 then pan = pan / wsum * (MU.pan or 0.6) end
             if #hangs == 0 then nearest = 0.0 end
             SendNUIMessage({ type = 'music', action = 'listen', zone = zone, level = MzbListener.level,
-                             dist = nearest, pan = pan })
+                             dist = nearest, pan = pan, cam = { p.x - o.x, p.y - o.y, p.z - o.z }, fwd = fwd, up = up,
+                             hangs = rel })
             Wait(100)
         else
             Wait(500)
         end
     end
+end)
+
+-- the page says it is listening (it loads a moment after the scripts start): whatever it was sent before that is
+-- lost, so the track is loaded again
+RegisterNUICallback('musicReady', function(_, cb)
+    cb('ok')
+    loaded = nil
 end)
 
 -- ------------------------------------------------------------------ errors from the page: once per track

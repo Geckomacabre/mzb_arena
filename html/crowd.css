@@ -1,0 +1,12 @@
+/* the desk's Crowd section (crowd.js) */
+#crowd-sec .row { align-items: stretch; }
+#crowd-sec .big { flex: 1; white-space: nowrap; }
+#crowd-sec .seg { flex: 2; }
+#crowd-moods button { font-size: 12px; }
+#crowd-mine { margin-top: 9px; }
+#crowd-litter { margin-top: 8px; }
+#crowd-litter button { font-size: 12px; }
+#crowd-staff { margin-top: 8px; width: 100%; font-weight: 700; letter-spacing: 0.06em; }
+#crowd-staff b { color: var(--muted); margin-left: 6px; }
+#crowd-staff.on { border-color: var(--on); box-shadow: inset 0 0 0 1px var(--on); }
+#crowd-staff.on b { color: var(--on); }

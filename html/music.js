@@ -1,7 +1,9 @@
 // mzb_arena - the music player's sound (client/music.lua tells it what to play, where in it to be and where the
 // listener is) and the desk's Music section. The sound runs in this page whether the desk is open or not.
-// Two ways to play: an <audio> fed through Web Audio (level, pan, the room's filter and echo) when the audio's server
-// allows it (CORS), and a plain <audio> / a hidden YouTube player that only get the level when it does not.
+// Two ways to play: an <audio> fed through Web Audio when the audio's server allows it (CORS) - in the bowl the track
+// comes out of every PA hang of the show as a sound in 3D (a PannerNode each; the listener is the game's camera),
+// elsewhere through the walls (the room's filter and echo) - and a plain <audio> / a hidden YouTube player that only
+// get the level when it does not (YouTube can't be fed through Web Audio).
 (() => {
   const res = typeof GetParentResourceName === 'function' ? GetParentResourceName() : 'mzb_arena';
   const $ = (s) => document.querySelector(s);
@@ -14,7 +16,7 @@
   let mode = null;            // 'graph' | 'plain' | 'youtube' | null
   let failed = false;
 
-  // ---- Web Audio: source -> low-pass -> (dry, echo) -> pan -> level -> out
+  // ---- Web Audio: source -> low-pass -> (the hangs in 3D | flat, the echo) -> level -> out
   let ctx = null, graph = null;
   const graphEl = new Audio(); graphEl.crossOrigin = 'anonymous'; graphEl.preload = 'auto';
   const plainEl = new Audio(); plainEl.preload = 'auto';
@@ -42,18 +44,64 @@
     const dry = ctx.createGain(), wet = ctx.createGain(), conv = ctx.createConvolver();
     conv.buffer = impulse((cfg && cfg.reverbSeconds) || 3.2);
     const pan = ctx.createStereoPanner(), master = ctx.createGain();
-    master.gain.value = 0;
-    src.connect(lp); lp.connect(dry); lp.connect(conv); conv.connect(wet);
-    dry.connect(pan); wet.connect(pan); pan.connect(master); master.connect(ctx.destination);
-    graph = { lp, dry, wet, pan, master };
+    const spatial = ctx.createGain(), flat = ctx.createGain();
+    master.gain.value = 0; spatial.gain.value = 0; flat.gain.value = 1;
+    src.connect(lp); lp.connect(conv); conv.connect(wet); wet.connect(master);
+    lp.connect(dry); dry.connect(flat); flat.connect(pan); pan.connect(master);
+    spatial.connect(master); master.connect(ctx.destination);
+    graph = { lp, dry, wet, pan, master, spatial, flat, panners: [] };
     return graph;
   }
 
-  // the level for where the listener is: the operator's volume, your own, the zone, the distance to the PA
+  // the game's x, y, z (z up) as Web Audio's (y up, -z ahead)
+  const wa = (v) => [v[0], v[2], -v[1]];
+  const setParam = (p, v, t) => { if (p) p.setTargetAtTime(v, t, 0.05); };
+
+  // one panner per hang of the show, fed from the low-pass, into the spatial bus
+  function setHangs(hangs) {
+    const g = graph;
+    if (!g || !hangs) return;
+    while (g.panners.length > hangs.length) { const p = g.panners.pop(); p.node.disconnect(); p.gain.disconnect(); }
+    while (g.panners.length < hangs.length) {
+      const node = ctx.createPanner(), gain = ctx.createGain();
+      node.panningModel = (cfg && cfg.panning) || 'HRTF';
+      node.distanceModel = 'inverse';
+      node.refDistance = (cfg && cfg.refDistance) || 12;
+      node.rolloffFactor = (cfg && cfg.rolloff) || 0.7;
+      node.maxDistance = 10000;
+      g.lp.connect(gain); gain.connect(node); node.connect(g.spatial);
+      g.panners.push({ node, gain });
+    }
+    const t = ctx.currentTime, share = 1 / Math.max(1, hangs.length);
+    hangs.forEach((h, i) => {
+      const p = g.panners[i], [x, y, z] = wa(h);
+      if (p.node.positionX) { p.node.positionX.value = x; p.node.positionY.value = y; p.node.positionZ.value = z; }
+      else p.node.setPosition(x, y, z);
+      p.gain.gain.setTargetAtTime(share * 1.6, t, 0.05);
+    });
+  }
+
+  function setListener(cam, fwd, up) {
+    if (!ctx || !cam || !fwd || !up) return;
+    const L = ctx.listener, t = ctx.currentTime;
+    const [x, y, z] = wa(cam), [fx, fy, fz] = wa(fwd), [ux, uy, uz] = wa(up);
+    if (L.positionX) {
+      setParam(L.positionX, x, t); setParam(L.positionY, y, t); setParam(L.positionZ, z, t);
+      setParam(L.forwardX, fx, t); setParam(L.forwardY, fy, t); setParam(L.forwardZ, fz, t);
+      setParam(L.upX, ux, t); setParam(L.upY, uy, t); setParam(L.upZ, uz, t);
+    } else {
+      L.setPosition(x, y, z);
+      L.setOrientation(fx, fy, fz, ux, uy, uz);
+    }
+  }
+
+  // the level for where the listener is: the operator's volume, your own, the zone, and (without the 3D hangs, which
+  // fall off by themselves) the distance to the nearest PA
+  const spatialOn = () => mode === 'graph' && listen.zone === 'bowl' && listen.hangs && listen.hangs.length > 0;
   function level() {
     if (!music || !cfg || music.kind === 'off') return 0;
     const ref = cfg.refDistance || 12;
-    const byDist = listen.zone === 'bowl'
+    const byDist = listen.zone === 'bowl' && !spatialOn()
       ? Math.max(cfg.minGain || 0.3, Math.min(1, ref / Math.max(ref, listen.dist || 0))) : 1;
     return (music.volume || 0) / 100 * (mine / 100) * (cfg.volume || 0.8) * (listen.level || 0) * byDist;
   }
@@ -62,8 +110,11 @@
     const g = level();
     if (mode === 'graph' && graph) {
       const room = (cfg.rooms || {})[listen.zone] || { lowpass: 20000, wet: 0 };
-      const t = ctx.currentTime, k = 0.08;
+      const t = ctx.currentTime, k = 0.08, sp = spatialOn();
+      if (sp) { setHangs(listen.hangs); setListener(listen.cam, listen.fwd, listen.up); }
       graph.master.gain.setTargetAtTime(g, t, k);
+      graph.spatial.gain.setTargetAtTime(sp ? 1 : 0, t, 0.25);
+      graph.flat.gain.setTargetAtTime(sp ? 0 : 1, t, 0.25);
       graph.pan.pan.setTargetAtTime(Math.max(-1, Math.min(1, listen.pan || 0)), t, k);
       graph.lp.frequency.setTargetAtTime(room.lowpass || 20000, t, 0.15);
       graph.wet.gain.setTargetAtTime(room.wet || 0, t, 0.15);
@@ -217,4 +268,7 @@
       apply();
     }
   });
+
+  // this page is listening now: a track sent before it was (the resource just started) is sent again
+  nui('musicReady');
 })();

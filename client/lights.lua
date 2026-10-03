@@ -236,9 +236,38 @@ local function rigFor(show)
     return rig
 end
 
+-- the show's ramp lights (Config.RampLights) and how many places along the ramp they take. Each one is aimed across
+-- the ramp and Config.RampLightTilt degrees down, so its beam lands on the ramp (and whoever is on it) instead of
+-- going up into the dark (the build aims them across and steeply up)
+local ramps = {}
+local function rampFor(show)
+    if not ramps[show] then
+        local list, n, out = (Config.RampLights or {})[show] or {}, 0, {}
+        local tilt = math.rad(Config.RampLightTilt or 15.0)
+        for i, f in ipairs(list) do
+            n = math.max(n, f[7] or 0)
+            local h = math.sqrt(f[4] * f[4] + f[5] * f[5])
+            if h > 0.05 then
+                out[i] = { f[1], f[2], f[3], f[4] / h * math.cos(tilt), f[5] / h * math.cos(tilt), -math.sin(tilt), f[7] }
+            else
+                out[i] = f
+            end
+        end
+        ramps[show] = { out, n }
+    end
+    return ramps[show][1], ramps[show][2]
+end
+
+local function drawRamp(f, r, g, b, lvl, k)
+    DrawSpotLight(f[1], f[2], f[3] + 0.05, f[4], f[5], f[6], r, g, b, Config.RampLightRange or 9.0,
+        (Config.RampLightBrightness or 10.0) * lvl * k, 0.0, Config.RampLightCone or 28.0, 1.0)
+    DrawLightWithRange(f[1], f[2], f[3] + 0.08, r, g, b, Config.RampLightGlowRange or 1.4,
+        (Config.RampLightGlow or 6.0) * lvl * k)
+end
+
 CreateThread(function()
     while true do
-        if drawHere and L and (L.on or L.ring) then
+        if drawHere and L and (L.on or L.ring or Config.RampLightIdle) then
             local show = GlobalState.mzbShow or Config.DefaultShow
             local rig = rigFor(show)
             local focus = (Config.LightFocus or {})[show]
@@ -246,11 +275,25 @@ CreateThread(function()
                 local t = GetNetworkTime() / 1000.0
                 local beat = t * (L.bpm or 120) / 60.0
                 local cone = Config.LightCone or { 9.0, 20.0, 14.0 }
-                -- the ring lights: the washes over the ring / cage / stage, white, on their own aim, show or no show
-                local ringGroup = L.ring and (Config.RingLightGroup or 2) or nil
-                if ringGroup then
-                    local rc = Config.RingLightColor or { 255, 244, 225 }
-                    local rb = Config.RingLightBrightness or 16.0
+                -- the ring lights, show or no show: the rig's own lights (Config.RingLights: they were baked into the
+                -- rig and always on; now in the colours the build gave them, or the desk's ring colour, at its level),
+                -- or for a show without them the washes over the ring / cage / stage, on their own aim
+                local own = (Config.RingLights or {})[show]
+                local ringGroup = (L.ring and not (own and #own > 0)) and (Config.RingLightGroup or 2) or nil
+                if L.ring and own and #own > 0 then
+                    local rc = L.ringColor
+                    local scale = (Config.RingLightScale or 5.0) * (L.ringLevel or 1.0)
+                    if scale > 0.01 then
+                        for _, f in ipairs(own) do
+                            local r, g, b = f[7], f[8], f[9]
+                            if rc then r, g, b = rc[1], rc[2], rc[3] end
+                            DrawSpotLight(f[1], f[2], f[3], f[4], f[5], f[6], r, g, b, f[11] + 4.0, f[10] * scale, 0.0,
+                                f[12], Config.LightFalloff or 1.0)
+                        end
+                    end
+                elseif ringGroup then
+                    local rc = L.ringColor or Config.RingLightColor or { 255, 244, 225 }
+                    local rb = (Config.RingLightBrightness or 16.0) * (L.ringLevel or 1.0)
                     for _, f in ipairs(rig) do
                         if f[7] == ringGroup then
                             spot(f, f[1] + f[4] * 30.0, f[2] + f[5] * 30.0, f[3] + f[6] * 30.0, rc[1], rc[2], rc[3],
@@ -276,6 +319,21 @@ CreateThread(function()
                             spot(f, tx, ty, tz, r, g, b, bright * lvl, cone[f[7]] or (f[7] == 4 and Config.LightConeFloor) or 12.0,
                                 4.0 * lvl * (L.intensity or 0.8))
                         end
+                    end
+                    -- the ramp lights: their place along the ramp is their place in the effect (both sides together)
+                    local ramp, rn = rampFor(show)
+                    if rn > 0 then
+                        for _, f in ipairs(ramp) do
+                            local r, g, b, lvl = look(f[7], rn, t, beat)
+                            if lvl > 0.01 then drawRamp(f, r, g, b, lvl, L.intensity or 0.8) end
+                        end
+                    end
+                elseif Config.RampLightIdle then
+                    -- show lights off: the ramp's lights stay on, steady, in their resting colour
+                    local ramp, rn = rampFor(show)
+                    local c = Config.RampLightIdle
+                    if rn > 0 then
+                        for _, f in ipairs(ramp) do drawRamp(f, c[1], c[2], c[3], 1.0, c[4] or 0.5) end
                     end
                 end
             end
@@ -303,6 +361,7 @@ local function openDesk()
     for _, f in ipairs((Config.LightRig or {})[show] or {}) do
         if f[7] == (Config.RingLightGroup or 2) then hasRing = true end
     end
+    if #((Config.RingLights or {})[show] or {}) > 0 then hasRing = true end
     SendNUIMessage({ type = 'open', state = L, presets = presets, colours = colours, show = show,
                      maxStrobe = Config.LightMaxStrobeHz, hasStage = hasStage, hasRing = hasRing })
 end

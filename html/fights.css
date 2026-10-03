@@ -1,0 +1,40 @@
+/* the fight bar (fights.js): top centre, over the game, for everyone in the arena */
+#fight-hud { position: absolute; top: 2.4vh; left: 50%; transform: translateX(-50%); width: 640px; pointer-events: none;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); }
+#fight-hud.side { left: 2.2vw; transform: none; }
+#fh-bar { display: flex; align-items: stretch; gap: 8px; background: rgba(12, 13, 17, 0.82); border: 1px solid #2a2d38;
+  border-radius: 10px; padding: 8px 10px; }
+.fh-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.fh-side.blue { align-items: flex-end; }
+.fh-name { font-weight: 800; font-size: 14px; letter-spacing: 0.04em; color: #e8eaf0; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; max-width: 100%; }
+.fh-you { font-size: 10px; font-weight: 800; letter-spacing: 0.12em; padding: 0 5px; border-radius: 3px; margin: 0 6px;
+  background: #e8eaf0; color: #111; text-shadow: none; vertical-align: 2px; }
+.fh-hp { width: 100%; height: 9px; background: rgba(255, 255, 255, 0.08); border-radius: 5px; overflow: hidden; display: flex; }
+.fh-side.blue .fh-hp { justify-content: flex-end; }
+.fh-hp i { display: block; height: 100%; border-radius: 5px; transition: width 0.25s linear; }
+.fh-side.red .fh-hp i { background: linear-gradient(90deg, #ff3b4f, #e0203a); }
+.fh-side.blue .fh-hp i { background: linear-gradient(270deg, #3b8bff, #2058e0); }
+.fh-side.low .fh-hp i { animation: fh-blink 0.5s infinite; }
+.fh-side.unknown .fh-hp i { opacity: 0.25; }
+@keyframes fh-blink { 50% { opacity: 0.4; } }
+.fh-mid { width: 128px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.fh-mid b { font-size: 11px; letter-spacing: 0.14em; color: #8a8fa0; white-space: nowrap; }
+.fh-mid span { font-size: 22px; font-weight: 800; color: #e8eaf0; font-variant-numeric: tabular-nums; line-height: 1.1; }
+#fh-banner { margin-top: 8px; text-align: center; font-size: 22px; font-weight: 900; letter-spacing: 0.06em; color: #fff;
+  background: rgba(12, 13, 17, 0.82); border: 1px solid #2a2d38; border-radius: 10px; padding: 8px 12px; }
+#fh-banner.ko { color: #ffd23a; border-color: #ffd23a; animation: fh-pop 0.35s ease-out; }
+@keyframes fh-pop { from { transform: scale(1.25); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+#fh-next { margin: 0 auto; width: max-content; max-width: 100%; font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
+  color: #e8eaf0; background: rgba(12, 13, 17, 0.75); border: 1px solid #2a2d38; border-radius: 14px; padding: 5px 14px; }
+
+/* the desk's Fights section */
+#fights .fight-pick { align-items: center; }
+#fights .vs { color: var(--muted); font-size: 12px; font-weight: 800; }
+#fights .row .big { flex: 1; }
+#fight-when button { font-size: 12px; }
+#fight-card { margin: 8px 0 6px; padding-left: 20px; font-size: 12px; color: var(--text); }
+#fight-card:empty { display: none; }
+#fight-card li { padding: 2px 0; }
+#fight-now { text-transform: none; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  display: inline-block; vertical-align: bottom; }

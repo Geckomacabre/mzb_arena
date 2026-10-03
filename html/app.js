@@ -40,6 +40,10 @@
     $$('#house button').forEach((b) => b.classList.toggle('active', b.dataset.house === state.house));
     $('#ring').classList.toggle('on', !!state.ring);
     $('#ring-state').textContent = state.ring ? 'ON' : 'OFF';
+    if (document.activeElement !== $('#ring-color') && state.ringColor) $('#ring-color').value = hex(state.ringColor);
+    $('#ring-own').classList.toggle('active', !state.ringColor);
+    const rl = Math.round((state.ringLevel == null ? 1 : state.ringLevel) * 100);
+    if (document.activeElement !== $('#ring-level')) { $('#ring-level').value = rl; $('#ring-level-val').textContent = rl; }
     $$('#modes button').forEach((b) => b.classList.toggle('active', b.dataset.mode === effMode()));
     $$('#moves button').forEach((b) => b.classList.toggle('active', b.dataset.move === effMove()));
     const fl = focusList();
@@ -75,6 +79,12 @@
   $$('[data-preset]').forEach((b) => (b.onclick = () => post('preset', { id: b.dataset.preset })));
   $$('#house button').forEach((b) => (b.onclick = () => post('lights', { house: b.dataset.house })));
   $('#ring').onclick = () => post('lights', { ring: !state.ring });
+  $('#ring-color').oninput = (e) => throttled('ringColor', { ring: true, ringColor: rgb(e.target.value) });
+  $('#ring-own').onclick = () => post('lights', { ringColor: false });
+  $('#ring-level').oninput = (e) => {
+    $('#ring-level-val').textContent = e.target.value;
+    throttled('ringLevel', { ringLevel: e.target.value / 100 });
+  };
   // an effect keeps the movement that is running (an old sweep / ballyhoo mode becomes that movement)
   $$('#modes button').forEach((b) => (b.onclick = () => post('lights', { mode: b.dataset.mode, move: effMove(), on: true })));
   $$('#moves button').forEach((b) => (b.onclick = () => post('lights', { mode: effMode(), move: b.dataset.move, on: true })));
@@ -136,8 +146,8 @@
       $('[data-focus="stage"]').disabled = m.hasStage === false;
       $('[data-focus="stage"]').title = m.hasStage === false ? 'This show has no stage' : '';
       $('#ring').disabled = m.hasRing === false;
-      $('#ring').title = m.hasRing === false ? 'This show has no ring / cage / stage washes'
-        : 'The washes over the ring / cage / stage, white, on their own aim';
+      $('#ring').title = m.hasRing === false ? 'This show has no ring / cage / stage lights'
+        : 'The ring / cage / stage lights: on, off, a colour, a level (below)';
       desk.classList.remove('hidden');
       render();
     } else if (m.type === 'state') {

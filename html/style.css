@@ -85,6 +85,19 @@ kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 4p
 #moves button, #focus button { font-size: 12px; }
 button:disabled { opacity: 0.35; cursor: not-allowed; }
 
+/* the ring lights' colour and level (app.js) */
+.ringrow { align-items: center; gap: 8px; margin-top: -2px; }
+.ringrow .custom { margin-left: 0; }
+.ringrow .slider.inline { flex: 1; margin-top: 0; }
+.ringrow .slider h2 { margin-bottom: 2px; }
+
+/* the sections fold (fold.js): a click on the title */
+h2.fold { cursor: pointer; }
+h2.fold::before { content: '\25BE'; display: inline-block; width: 13px; color: var(--muted); letter-spacing: 0; }
+section.folded > h2.fold::before { content: '\25B8'; }
+section.folded > :not(h2) { display: none !important; }
+section.folded > h2 { margin-bottom: 0; }
+
 /* the desk's extra sections (screens, music, followspot) */
 .ext { border-top: 1px solid var(--line); padding-top: 10px; }
 .ext .seg { margin-top: 6px; }

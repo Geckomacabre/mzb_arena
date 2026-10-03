@@ -10,11 +10,25 @@ local S = GlobalState.mzbSpot
 local goal = nil                      -- where the beam should be (vector3)
 local cur = nil                       -- where it is (it glides to goal)
 local grabbing = false
+local asked = nil                     -- free aim asked for, not yet handed over by the server: { quiet }
+
+local function say(msg) TriggerEvent('chat:addMessage', { args = { 'spot', msg } }) end
+
+-- the state names this player as the one aiming by hand
+local function mine()
+    return S ~= nil and S.aim == 'point' and S.by == GetPlayerServerId(PlayerId())
+end
 
 AddStateBagChangeHandler('mzbSpot', 'global', function(_, _, value)
     S = value
-    -- someone else took free aim (or the spot follows a player now): let go
-    if grabbing and (not S or S.aim ~= 'point' or S.by ~= GetPlayerServerId(PlayerId())) then grabbing = false end
+    if asked and mine() then
+        -- the server handed it over: now the spot follows this player's camera
+        asked = nil
+        grabbing = true
+        say('free aim: the spot follows your camera (press again to let go)')
+    elseif grabbing and not mine() then
+        grabbing = false                                  -- someone else took it, or it follows a player now
+    end
     if S and S.aim == 'point' and S.point and not grabbing then
         goal = vector3(S.point.x + 0.0, S.point.y + 0.0, S.point.z + 0.0)
     end
@@ -71,8 +85,6 @@ local function lookedAt()
     end
     return best
 end
-
-local function say(msg) TriggerEvent('chat:addMessage', { args = { 'spot', msg } }) end
 
 -- ------------------------------------------------------------------ the beam
 local visible = { bowl = true, near = true }
@@ -135,26 +147,34 @@ CreateThread(function()
     end
 end)
 
-local function grab()
+-- Free aim is asked for and only taken up once the server hands it over (the state then names this player), so a
+-- player who may not run the spot never aims anything. They are told so if they asked in words (the command, the
+-- desk) and not if they only touched the key: it is bound for every player, and most of them are not the operator.
+local function grab(quiet)
     if not FS.enabled then return end
     if grabbing then
         grabbing = false
         say('free aim released: the spot stays where it is')
         return
     end
-    grabbing = true
     TriggerServerEvent('mzb_arena:spot', { on = true, aim = 'point' })   -- the server checks you may
-    say('free aim: the spot follows your camera (press again to let go)')
+    if mine() then                                       -- it was this player's already (released a moment ago)
+        grabbing = true
+        say('free aim: the spot follows your camera (press again to let go)')
+        return
+    end
+    local ask = { quiet = quiet }
+    asked = ask
     CreateThread(function()                              -- not handed the spot within 2 s: not allowed
         Wait(2000)
-        if grabbing and not (S and S.aim == 'point' and S.by == GetPlayerServerId(PlayerId())) then
-            grabbing = false
-            say('you are not allowed to run the followspot')
+        if asked == ask then
+            asked = nil
+            if not quiet then say('you are not allowed to run the followspot') end
         end
     end)
 end
 
-RegisterCommand('arenaspotaim', grab, false)
+RegisterCommand('arenaspotaim', function() grab(true) end, false)
 RegisterKeyMapping('arenaspotaim', 'Arena followspot: grab / release free aim', 'keyboard', FS.key or 'F7')
 
 local function follow(id)

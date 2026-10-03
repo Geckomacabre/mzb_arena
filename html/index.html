@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <title>Maze Bank Arena - Light Desk</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="crowd.css">
+<link rel="stylesheet" href="fights.css">
 </head>
 <body>
 <div id="desk" class="hidden" role="dialog" aria-label="Arena light desk">
@@ -24,6 +26,13 @@
     <button class="big danger" data-preset="blackout">BLACKOUT</button>
   </section>
 
+  <section class="row ringrow" title="The ring / cage / stage lights">
+    <label class="custom" title="One colour for all the ring lights"><input type="color" id="ring-color" value="#fff6ec"> ring colour</label>
+    <button class="mini" id="ring-own" title="Each ring light in its own colour again">own colours</button>
+    <div class="slider inline"><h2>Ring level <b id="ring-level-val">100</b>%</h2>
+      <input type="range" id="ring-level" min="0" max="100" step="1" value="100"></div>
+  </section>
+
   <section>
     <h2>House lights</h2>
     <div class="seg" id="house">
@@ -32,6 +41,22 @@
       <button data-house="dim">Dim</button>
       <button data-house="off">Off</button>
     </div>
+  </section>
+
+  <section id="crowd-sec">
+    <h2>Crowd <small>you see up to <b id="crowd-mine-val">140</b> people</small></h2>
+    <div class="row">
+      <button class="big toggle" id="crowd" title="Bring the crowd in / send it home (for everyone)">CROWD <b id="crowd-state">OUT</b></button>
+      <div class="seg" id="crowd-moods"></div>
+    </div>
+    <div class="seg" id="crowd-litter" title="What the crowd leaves in the rows and on the floor (for everyone)">
+      <button data-litter="clean">Clean</button>
+      <button data-litter="some">Some litter</button>
+      <button data-litter="trashed">Trashed</button>
+    </div>
+    <button class="mini toggle" id="crowd-staff" title="The staff and the press who come in with the crowd: security, photographers, camera crews, officials (for everyone)">STAFF &amp; PRESS <b id="crowd-staff-state">ON</b></button>
+    <input type="range" id="crowd-mine" min="0" max="220" step="10" value="140"
+           title="How many crowd peds you see: yours alone, saved on your PC">
   </section>
 
   <section>
@@ -117,7 +142,8 @@
       <button id="scr-pause">Pause</button>
       <button id="scr-stop">Off</button>
     </div>
-    <div class="seg sets" id="scr-sets"></div>
+    <div class="seg sets" id="scr-looks" title="Looks drawn in step with the light desk"></div>
+    <div class="seg sets" id="scr-sets" title="The arena's picture sets"></div>
     <div class="slider inline">
       <h2>Volume <b id="scr-vol-val">60</b>%</h2>
       <input type="range" id="scr-vol" min="0" max="100" step="1" value="60">
@@ -142,6 +168,10 @@
       <div class="slider inline" title="Your own level, for you only (/arenamusic mine)">
         <h2>Mine <b id="mus-mine-val">100</b>%</h2>
         <input type="range" id="mus-mine" min="0" max="100" step="1" value="100">
+      </div>
+      <div class="slider inline" title="The arena's own sound for you only: room tone, the crowd's chatter (/arenaambience)">
+        <h2>Room <b id="amb-mine-val">100</b>%</h2>
+        <input type="range" id="amb-mine" min="0" max="100" step="1" value="100">
       </div>
     </div>
   </section>
@@ -169,13 +199,48 @@
     </div>
   </section>
 
+  <section id="fights" class="ext">
+    <h2>Fights <small id="fight-now">no bout on</small></h2>
+    <div class="urlrow fight-pick">
+      <select id="fight-red" title="The red corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
+      <span class="vs">vs</span>
+      <select id="fight-blue" title="The blue corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
+    </div>
+    <div class="seg" id="fight-when" title="When the bout goes on: next on the card, or at a time">
+      <button data-in="0" class="active">Next</button>
+      <button data-in="1">In 1 min</button>
+      <button data-in="5">In 5 min</button>
+      <button data-in="15">In 15 min</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="big" id="fight-add">ADD BOUT</button>
+      <button class="big danger" id="fight-stop" disabled>STOP BOUT</button>
+    </div>
+    <ol id="fight-card"></ol>
+    <button class="mini" id="fight-clear" disabled>Clear the card</button>
+  </section>
+
   <footer>Everyone in the bowl sees the same show &middot; <kbd>Esc</kbd> closes</footer>
+</div>
+<!-- the fight bar (html/fights.js): everyone in the arena sees it while a bout is on, the desk open or not -->
+<div id="fight-hud" class="hidden">
+  <div id="fh-bar">
+    <div class="fh-side red" id="fh-red"><span class="fh-name"><span id="fh-red-name"></span><span class="fh-you hidden" id="fh-red-you">YOU</span></span><div class="fh-hp"><i id="fh-red-hp"></i></div></div>
+    <div class="fh-mid"><b id="fh-round"></b><span id="fh-time"></span></div>
+    <div class="fh-side blue" id="fh-blue"><span class="fh-name"><span class="fh-you hidden" id="fh-blue-you">YOU</span><span id="fh-blue-name"></span></span><div class="fh-hp"><i id="fh-blue-hp"></i></div></div>
+  </div>
+  <div id="fh-banner" class="hidden"></div>
+  <div id="fh-next" class="hidden"></div>
 </div>
 <!-- the music player's YouTube player (html/music.js): heard, never seen -->
 <div id="music-yt" style="position:absolute;left:-400px;top:0;width:200px;height:200px;overflow:hidden"><div id="music-yt-player"></div></div>
 <script src="app.js"></script>
 <script src="media.js"></script>
 <script src="music.js"></script>
+<script src="ambience.js"></script>
 <script src="spot.js"></script>
+<script src="crowd.js"></script>
+<script src="fights.js"></script>
+<script src="fold.js"></script>
 </body>
 </html>

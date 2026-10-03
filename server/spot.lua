@@ -168,6 +168,12 @@ RegisterNetEvent('mzb_arena:spotCmd', function(args)
     command(src, clean)
 end)
 
+-- (server/fights.lua: a followspot that is on follows the player fighters)
+function MzbSpotFollow(id)
+    if not FS.enabled or not current().on then return false end
+    return setSpot({ aim = 'player', target = tonumber(id) }, 0)
+end
+
 -- other resources: a ring announcer script, an entrance cue
 exports('SetFollowSpot', function(patch) return setSpot(patch, 0) end)
 exports('FollowPlayer', function(id) return setSpot({ on = true, aim = 'player', target = tonumber(id) }, 0) end)

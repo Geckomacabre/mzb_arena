@@ -67,7 +67,8 @@ Every show from the same seat, the back row of the upper tier.
 
 - **Game build 2060 or newer** (`sv_enforceGameBuild 2060`). The interior uses vanilla props from the Diamond Casino
   Heist, After Hours and other DLC packs, and on older builds those props are missing.
-- No framework or other resources.
+- No framework or other resources. If your server runs **ox_lib**, the arena uses it for a staff menu and its
+  notifications (below); without it, everything works from chat.
 
 ## Install
 
@@ -118,6 +119,12 @@ The long form still works:
 /arena status
 ```
 
+**With ox_lib** (`Config.OxLib = 'auto'`): `/mzb` or `/arena` with nothing after it opens an ox_lib menu instead:
+pick the show (the one that is up is marked), open and shut the loading dock's doors, or open the light desk. What
+the commands answer comes as an ox_lib notification rather than a chat line. The typed forms above work as before,
+and the menu's picks are checked on the server with the same ACE. ox_lib is not a dependency: without it (or with
+`Config.OxLib = false`) nothing changes. `Config.ShowLabels` has the menu's names and icons for the shows.
+
 Every switch is logged in the server console with the player's name. A short cooldown (`Config.SwitchCooldown`)
 stops a switch being spammed, since each one reloads the interior for everyone inside.
 
@@ -148,8 +155,8 @@ show at the same moment.
 
 `/arenalights` opens the desk: show lights on / off, the ring lights, blackout, the house lights (the show's
 setting, full, dimmed, off), the effect, the movement, up to three colours from a palette or a colour picker, the speed
-in BPM (with a tap button), intensity, the aim and presets. A look is built from independent parts, as on a lighting
-console:
+in BPM (with a tap button), intensity, the aim and presets. The desk's sections fold: click a section's title to put
+it away, and the desk remembers. A look is built from independent parts, as on a lighting console:
 
 - **Effect** (the colour and level of each fixture): static, chase, strobe, pulse, rainbow, fade (a slow crossfade
   through the colours), wave (a band of light rolling round the rig), flash (the whole rig hits on the beat and dies
@@ -158,8 +165,10 @@ console:
 - **Movement** (where the beams go, with any effect): still, sweep, ballyhoo, fan (the spots open out and close in),
   nod (tilting out to the stands and back) and cross (pairs swinging across each other).
 - **Aim**: floor, stage, crowd - or several at once (the fixtures take turns), e.g. floor and crowd.
-- **Ring lights**: the washes on the truss over the ring (the cage, the concert stage) light it white on their own
-  aim, with the show lights on or off - TV lighting for the match while the rest of the rig runs the show.
+- **Ring lights**: the ring truss's, the cage truss's and the concert rig's own lights (they light the ring, the cage
+  and the stage, with the show lights on or off - TV lighting for the match while the rest of the rig runs the
+  show). They are on by default, each in the colour the build gave it; the desk turns them off, gives them all one
+  colour, or sets their level.
 - **Presets**: walk-in, entrance, goal, concert, party, fight, police, TV ring, storm, inferno, hype, house up,
   blackout, reset.
 
@@ -172,13 +181,109 @@ It also runs from chat:
 /arenalights color red white          (names from Config.LightColors, or #rrggbb; up to three)
 /arenalights focus floor crowd        (one to three of floor, stage, crowd)
 /arenalights ring on | off
+/arenalights ring color red           (one colour for all of them; ring own = each its own colour again)
+/arenalights ring level 60            (0-100)
 /arenalights bpm 128 | intensity 80 | house dim
 /arenalights preset storm
 ```
 
 The interior's own (baked) lights can't change colour in GTA; the house buttons switch them between full, dimmed and
-off, and the desk's colour comes from the spot lights it draws. Players with photosensitivity: `Config.LightMaxStrobeHz`
-caps the strobe (0 turns it into a pulse).
+off, and the desk's colour comes from the spot lights it draws. That is why the rigs' ring lights are drawn by the
+script (`shared/rig_lights.lua`, taken from the rig models, which no longer carry them). Players with
+photosensitivity: `Config.LightMaxStrobeHz` caps the strobe (0 turns it into a pulse).
+
+## The crowd (ACE `command.arena`)
+
+Staff can fill the house: people in the bowl's seats, in the floor chairs of the shows that have them (wrestling, MMA,
+basketball, tennis) and on the concert's standing floor, a row of them on the barricade. The stage end is only seated
+for the shows that seat it: the end-stage shows kill the seats behind their masking, as real ones do.
+
+```
+/arenacrowd on | off | toggle         bring the crowd in / send it home (for everyone)
+/arenacrowd mood show                 doors | show | peak | cheer
+/arenacrowd staff on | off | toggle   the staff and the press who come in with the crowd
+/arenacrowd litter some               clean | some | trashed: what the crowd leaves in the rows and on the floor
+/arenacrowd                           what the crowd is doing
+/arenacrowd mine 80                   how many crowd peds YOU see: anyone may set it, it is saved on your PC
+```
+
+The desk (`/arenalights`) has the same controls in its Crowd section, with a slider for your own count.
+
+- **Moods**: `doors` (in their seats, on their phones, a few standing about), `show` (watching: most sit, some clap
+  and film), `peak` (the whole house on its feet) and `cheer` (applause). `Config.CrowdMoods` sets what each one does
+  and how much of the house sits. The light desk's presets carry a mood too (`mood` in `Config.LightPresets`: Goal!
+  brings the house to its feet cheering, Walk-in sits it down); `Config.CrowdPresetMoods = false` leaves the crowd
+  to you.
+- **How many**: the game has room for 256 peds of every kind at once, and the arena has more than seventeen thousand
+  seats. Each player sees up to `Config.Crowd.MaxPeds` people (210; `/arenacrowd mine` goes up to `MaxPedsLimit`,
+  240): half of them are the house, the same for everyone, filling ringside and the lower rows first with people all
+  round the bowl; the other half fill the seats round wherever you are. They sit in parties of one to four, the way
+  a house fills. Lower it on a busy server: other players and the street's peds count against the same 256.
+- **Round the building**: with the crowd come the concourse's people (`Config.Concourse`, 163 spots from the build):
+  vendors and bartenders behind the tills with fans queueing, cooks, the shops' clerks, guards at the detectors and
+  in the security office, medics, cleaners, people at the lobbies' high tables. The nearest 36 are made (8 while you
+  are in the bowl, so the seats get the rest).
+- **Cost**: the crowd is made of local peds, so nothing is synced but its on / off and its mood, and each player only
+  makes it while inside the arena. It stops making people while the game is close to its ped limit
+  (`Config.Crowd.PoolLimit`), and `Config.Crowd.Collision = false` lets players walk through it. People fade in
+  rather than pop up (`FadeMs`), and a show can have its own mix of peds (`Config.Crowd.ShowModels`).
+- **Staff and press** come in with the crowd, 9 to 18 per show, on top of your own count: security inside the
+  barricades with their backs to the action, ringside / cageside / pit photographers (their cameras flash), camera
+  operators with a shoulder camera or behind a tripod camera, the concert's crew at the mixing desk, ball kids
+  kneeling at the tennis net and the back corners, and officials who sit at the basketball scorer's table, in the
+  tennis umpire's chair, on the line judges' chairs and at the hockey timekeeper's desk. Every spot is the build's
+  and checked like the seats: a floor under it, nothing in the way, clear of the chairs, the props and the tunnels'
+  mouths. Who stands there is `Config.CrowdRoles` (their peds, what they do, the camera they hold or stand behind);
+  `Config.CrowdStaffEnabled = false` turns them off for good.
+- **Litter**: cups, cans, wrappers, food bags and bottles at the crowd's feet, in the rows and on the floor, at the
+  level staff set (`clean`, `some`, `trashed`); it stays when the crowd goes home. Each piece is picked from its spot,
+  so everyone sees the same mess, and only the nearest 260 within 60 m of you are put down (`Config.Litter`).
+
+```lua
+exports.mzb_arena:SetCrowd({ on = true, mood = 'peak' })   -- any of on, mood, staff, litter
+exports.mzb_arena:GetCrowd()                               -- { on, mood, staff, litter }; also GlobalState.mzbCrowd
+```
+
+The spots come from the build (`client/crowd_slots.lua`): the seats and chairs of the interior itself, each one
+checked against its collision.
+
+## Fights
+
+Bouts in the wrestling ring and the MMA cage: watch two NPCs fight, put a card of bouts on, take on an NPC yourself,
+or fight another player. The server runs every bout: it makes the NPC fighters (networked, so everyone sees the same
+fight), rings the rounds and calls the result from what it sees itself, never from what a client says.
+
+```
+/arenafight                              the bout on and the card (anyone)
+/arenafight challenge                    an NPC takes you on (anyone in the arena; Config.Fights.challenge)
+/arenafight challenge <id>               challenge a player, who answers /arenafight accept within 30 s
+/arenafight npc [in <minutes>]           staff: an NPC bout on the card (now, or at a time)
+/arenafight vs <id> [in <minutes>]       staff: a player against an NPC
+/arenafight pvp <id> <id> [in <minutes>] staff: player against player
+/arenafight stop | clear                 staff: stop the bout on / empty the card
+```
+
+The desk has a Fights section: pick the red and blue corners (an NPC or any player in the arena), when (next, or in
+1, 5 or 15 minutes), add the bout; stop it; clear the card.
+
+- **A bout**: a walk-out (the names on the screen, the fighters to their corners: a player who is not in the ring
+  at the bell forfeits), then three rounds of a minute with breaks between them (`Config.Fights.rounds`,
+  `roundSeconds`, `breakSeconds`). A fighter whose health falls to `koHealth` (125 of 200) is knocked out; one out
+  of the ring for ten seconds loses on a count-out; one who leaves the server forfeits; after the last round the one
+  with more health left wins on points. Nobody dies: the fighters are held above the line during the rounds and the
+  loser is helped up healed. Players fight with their fists only.
+- **The show goes with it**: everyone in the arena gets the fight bar at the top of the screen (the names, how much
+  each has left, the round and its clock, the result, the next bout on the card), the bell and the knockout. The
+  light desk's presets and the crowd's mood follow the bout (`Config.Fights.presets` / `moods`: entrance for the
+  walk-out, fight for the rounds, goal for the result), and a followspot that is on follows the player fighters.
+- **The card**: bouts go in the order they were added; one with a time waits for it; 20 seconds between bouts
+  (`gap`). Switching to another show stops the bout on (no contest) and holds the card until the ring or the cage is
+  back.
+- Fighting another player needs the server to let players hurt each other (most do). The building has no ped
+  navmesh yet, so the NPC fighters start face to face in the ring and are held inside it.
+
+Exports (server): `AddBout(red, blue, inMinutes)` (red / blue = `'npc'` or a server id), `StopBout()`, `GetBout()`;
+the state is `GlobalState.mzbFight` (and `mzbFightCard`).
 
 ## Slippery ice
 
@@ -227,22 +332,35 @@ light desk's **Screens** section (paste a link, play / pause / off, volume, pict
 |---|---|
 | `/arenascreen <youtube link or id>` | play a video (watch, youtu.be, shorts, embed and live links all work) |
 | `/arenascreen <picture url> [more ...]` | one picture, or a cycle of several (https only) |
-| `/arenascreen images [set]` | a picture set from `Config.Media.imageSets` |
+| `/arenascreen images [set]` | a picture set from `Config.Media.imageSets` (no name: the show's own set) |
+| `/arenascreen look <name>` | an LED-wall look drawn in step with the lights: show, pulse, colour, bars, stripes, waves |
 | `/arenascreen pause` / `resume` / `off` | |
 | `/arenascreen volume <0-100>` / `interval <s>` | the video's volume; seconds per picture |
 | `/arenascreen status` | what is on |
+| `/arenascreeninfo` | for you only: whether the screens' page loaded and is being drawn (to report a dark screen) |
 
 The video's sound comes from the screens' browser, which is not positional: it is full in the bowl, low in the rooms
 that open onto it (concourse, tunnel, backstage, stairs: `Config.Listener`) and silent outside the building.
-Your own pictures go in `html/img/` and into a set in `Config.Media.imageSets` as `img/<file>`; restart the resource.
+
+**Picture sets** ship for every show (`html/img/`, from the arena's own boards: the house's welcome and sponsor
+cards, SAPW for wrestling, the Sirens for the concert, SAFC for MMA, and a live card each for hockey, basketball and
+tennis). Your own pictures go in `html/img/` and into a set in `Config.Media.imageSets` as `img/<file>`; restart the
+resource.
+
+**Looks** are drawn by the page itself from the light desk's colours, effect and speed, with the show's name or logo
+over them (`show` breathes the show's artwork). The desk's presets bring one up with the lights (`screen` in `Config.LightPresets`) while the screens show a
+look or nothing; `Config.Media.presetLooks = false` leaves the screens to you.
+
+**How it is drawn:** the page is loaded from the resource's own https address and drawn over the screens' texture
+(`Config.Media.method = 'replace'`). `'rendertarget'` is the older way, kept for servers where another script owns
+the texture.
 
 **Living with pmms and TV scripts:** the built-in player only touches the `mzb_screens` render target while it is
 playing something. Turn it off (`/arenascreen off`) before starting pmms on the screens, or set
 `Config.Media.enabled = false` to leave the screens to the other script for good.
 
 **YouTube:** some videos refuse to play embedded (the owner turned embedding off, or age / region limits); the
-screens then stay dark. YouTube also expects a web page origin for embeds; if every video fails on your server
-build, that is the cause and a picture cycle still works.
+screens then stay dark, and a picture cycle or a look still works.
 
 Exports (server): `SetScreenMedia(urlOrListOfPictureUrls)`, `ScreenImageSet(name)`, `ScreenOff()`,
 `ScreenPause(on)`, `ScreenVolume(0-100)`, `GetScreenMedia()`. Client: `IsScreenMediaOn()`.
@@ -260,19 +378,31 @@ in the desk's **Music** section or use chat; every player hears the same moment 
 | `/arenamusic status` | what is playing (anyone may ask) |
 | `/arenamusic mine <0-100>` | **your own** level, for you only, kept between sessions (anyone; also the desk's "Mine" slider) |
 
-How it sounds: the level falls with the distance to the nearest PA hang of the show (`Config.Music.hangs`: the ring
-truss's corners for wrestling and MMA, either side of the stage for the concert, the centre-hung board otherwise), it
-pans towards the hangs as you turn, and the room shapes it: full with the arena's echo in the bowl, muffled and quieter
-in the rooms that open onto it (concourse, tunnel, backstage, stairs), faint elsewhere in the building, nothing
-outside. Far from the arena (`Config.Music.range`) the track is not even loaded.
+How it sounds: each PA hang of the show is its own source in the world (`Config.Music.hangs`: the ring truss's
+corners for wrestling and MMA, either side of the stage for the concert, the centre-hung board otherwise). You hear
+each one from where it hangs, louder as you walk up to it and from the side it is on as you turn, and the room shapes
+it: full with the arena's echo in the bowl, muffled and quieter in the rooms that open onto it (concourse, tunnel,
+backstage, stairs), faint elsewhere in the building, nothing outside. Far from the arena (`Config.Music.range`) the
+track is not even loaded.
 
-**What gets the full treatment:** the filter, the pan and the echo need the browser to read the audio, which the
-audio's server must allow (CORS: `Access-Control-Allow-Origin`). Files and streams from servers that do not send it
-still play, but with the level only (no pan, filter or echo); so does YouTube (the player is a hidden YouTube
-embed, whose sound a page cannot touch). Plain `http://` links may be blocked by the game's browser: use `https://`.
+**What gets the full treatment:** placing the sound at the hangs, the filter and the echo need the browser to read
+the audio, which the audio's server must allow (CORS: `Access-Control-Allow-Origin`). Files and streams from servers
+that do not send it still play, but with the level only; so does YouTube (the player is a hidden YouTube embed,
+whose sound a page cannot touch). Plain `http://` links may be blocked by the game's browser: use `https://`.
 A link that will not play is reported once to whoever started it, not to everyone.
 
 Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `MusicVolume(0-100)`, `GetMusic()`.
+
+## The arena's own sound
+
+An empty hall is not silent. Inside the building every player hears a low room tone, and with the crowd in, its
+murmur: fuller in the bowl, muffled in the rooms that open onto it, faint in the rest of the building, rising to a
+roar with the crowd's mood (`peak`, `cheer`). It is made in the page (no sound files), so it costs nothing to
+stream. `/arenaambience <0-100>` sets its level for you only (anyone; kept between sessions; 0 = off).
+
+Footsteps are quieter in the bowl (`Config.Ambience.quietFootsteps`), and the rooms' reverb is shorter than before
+(`audio/mzb_arena_game.dat151.rel`): steps no longer ring round the hall. `Config.Ambience` has the levels by zone
+and by mood; `enabled = false` turns the tone and the murmur off for everyone.
 
 ## Followspot (ACE `command.arena`)
 
@@ -304,6 +434,19 @@ wrestling stage trusses, washes on the concert's wash bar, and four floor beams 
 (wrestling, concert, MMA), either side of the middle, shooting up and out over the floor. `Config.LightMaxFixtures`
 is 40: the roof's house lights are the ones left out when a rig has more. Move or remove any of them to taste.
 
+**Ramp lights** (`Config.RampLights`): twelve small fixtures along the wrestling ramp's two top edges, each aimed
+across the ramp and a little down, so its beam lands on the ramp and whoever walks it, in the desk's colours and
+effects (a chase runs from the stage to the ring), their lenses glowing so the edges read as two rows of lights.
+With the show lights off they rest in `Config.RampLightIdle` (a dim blue; `false` = dark). They do not count against
+`Config.LightMaxFixtures`.
+
+## Props of your own (`Config.ShowProps`)
+
+Vanilla props put down for a show without CodeWalker: `Config.ShowProps[show]` is a list of
+`{ model, x, y, z, heading, ground = true }` (local props, frozen, made while you are in the arena; `/arenainfo`
+prints where you stand). The config has two ready to try: a camera crane on the wrestling stage deck and a green
+screen for interviews.
+
 ## Configuration (`shared/config.lua`)
 
 - `Config.DefaultShow`: the show the server starts with.
@@ -324,25 +467,83 @@ is 40: the roof's house lights are the ones left out when a rig has more. Move o
 - `Config.LightBrightness`, `Config.LightCone`, `Config.LightSpread`, `Config.LightMaxFixtures`,
   `Config.LightLensGlow`: how the show lights look and how many are drawn.
 - `Config.LightMaxStrobeHz`: the fastest strobe (0 = no strobing).
-- `Config.RingLightGroup`, `Config.RingLightColor`, `Config.RingLightBrightness`: which of the rig's fixtures are the
-  ring lights (2 = the washes), their colour and brightness.
+- `Config.RingLightScale`: how bright the rigs' own ring lights are drawn (`shared/rig_lights.lua` has each one's
+  place, colour and strength). `Config.RingLightGroup`, `Config.RingLightColor`, `Config.RingLightBrightness`: for a
+  show without lights of its own, which of the rig's fixtures stand in (2 = the washes), their colour and brightness.
+- `Config.Ambience`: the room tone and the crowd's murmur. `Config.Concourse`: the people round the building.
 - `Config.LightRooms`: the rooms the light show is drawn in.
 - `Config.HouseSets`: the interior's house light sets the desk switches.
 - `Config.Ice`: the hockey ice (on / off, the shows it is down for, how slippery, falls).
+- `Config.CrowdCommand` / `Config.CrowdAccess`: the crowd's command and who may bring it in (an ACE, or `false` for
+  everyone).
+- `Config.Crowd`: how many people a player sees, the share that fills the seats near them, the ped models, whether
+  they collide. `Config.CrowdMoods` / `Config.CrowdAnims`: what the crowd does in each mood.
+- `Config.CrowdRoles` / `Config.CrowdStaffEnabled`: the staff and the press (their peds, what they do, their cameras).
+- `Config.Litter`: the litter (how much, how near, the props).
+- `Config.Fights`: the bouts (rounds, times, the knockout line, the count-out, who may challenge, the NPC fighters'
+  models and names, the rings, the cues for the lights and the crowd).
+- `Config.RampLights`: the wrestling ramp's lights. `Config.ShowProps`: props of your own per show.
 
 ## Notes
 
-- There is no ped navmesh inside the building yet. Players can go everywhere, but ambient NPCs will not walk it.
+- There is no ped navmesh inside the building yet. Players can go everywhere, but ambient NPCs will not walk it (the
+  crowd and the staff stand where they are put; the NPC fighters start face to face).
 - Framework independent: plain FiveM natives only, with no ESX / QBCore / Qbox requirement.
 
 ## Changes
 
-- **1.1.0**: the light desk grows up.
+- **1.1.0**: the house fills up, and the desk runs the whole show.
+  - **The crowd**: people in the bowl's seats, in the shows' floor chairs and on the concert's standing floor,
+    brought in and sent home from the desk or `/arenacrowd`, in four moods (doors, show, peak, cheer). They are
+    local peds: each player sees up to 210 (their own setting), half of them the house's fixed order, half in the
+    seats round them. The light desk's presets set the mood with the look. Round the building: vendors, queues,
+    cooks, clerks, guards, medics, cleaners and people at the lobbies' tables.
+  - **Built-in screen player**: YouTube videos, picture cycles and single pictures on every video screen of the
+    show, the same moment for every player (`/arenascreen`, the desk's Screens section), a picture set for every
+    show, and LED-wall looks that follow the lights. It draws on the screens only while it plays, so pmms and TV
+    scripts still work.
+  - **Music player**: `/arenamusic <url>` or the desk's Music section, heard from the show's PA hangs, each one a
+    source in the world: the room's filter and an arena echo, muffled next door, nothing outside. Files, streams and
+    YouTube; every player has their own level (`/arenamusic mine`).
+  - **The arena's own sound**: a room tone and the crowd's murmur (`/arenaambience`), quieter footsteps and a
+    shorter reverb.
+  - **Ring lights you can run**: the rigs' own lights over the ring, the cage and the stage are drawn by the desk
+    now (they were always on): off, one colour, a level.
+  - **Walls that stay**: about four thousand faces of the interior belonged to the room next door, and the game
+    leaves another room's faces out unless you are looking through a doorway to it. From the seats that was the
+    vomitories' side walls and the ad panels on the cross aisle; in the rest rooms and stairs off the lobbies a wedge
+    of the dark wall over the doorway; inside the two stairs, parts of their walls; under the stands, the ring
+    corridors' ceilings; from the floor, patches of the stage end's masking drape. Every face now belongs to the room
+    that sees it. The corner vomitories' corridor walls are closed to the bowl's (you looked down a gap behind them).
+  - **Floor gaps**: fourteen thin gaps where a floor stopped short of a wall's foot in the event level's ring
+    corridors (you could see out under the building) are closed.
+  - **Locker rooms**: the stretches of the two big locker rooms' walls that were the neighbouring rooms' plaster are
+    tiled like the rest.
+  - **ox_lib** (optional): `/mzb` or `/arena` alone opens an ox_lib menu of the shows, the dock doors and the light
+    desk, and the answers are ox_lib notifications, when the server runs ox_lib. Not a dependency.
+  - **Followspot**: one or two operator-run followspots (`/arenaspot`, the desk's Followspot section), locked onto
+    a player or aimed by hand from the operator's camera (F7).
+  - **More stage lights**: `Config.LightRigExtra` adds fixtures to a show's rig. Out of the box: six more heads on
+    the wrestling stage trusses, five washes on the concert's wash bar and four floor beams at the back of the stage
+    end. `Config.LightMaxFixtures` is 40.
+  - **Staff and press** with the crowd: security, photographers with flashes, shoulder and tripod camera crews, the
+    concert's crew, ball kids, and officials seated at the scorer's table, in the umpire's chair, on the line judges'
+    chairs and at the timekeeper's desk, in every show but the empty house (`/arenacrowd staff`).
+  - **Litter**: clean, some or trashed, the same for everyone (`/arenacrowd litter`, the desk).
+  - **Fights** in the ring and the cage: NPC bouts, a card with times, challenge an NPC or another player; the server
+    calls knockouts, count-outs, forfeits and points; a fight bar for everyone in the arena (`/arenafight`, the
+    desk's Fights section).
+  - **Ramp lights**: twelve fixtures along the wrestling ramp's edges, run by the desk.
+  - **Props of your own** per show (`Config.ShowProps`).
+  - The desk's sections fold away (click a title); it remembers which.
+  - New exports: `SetCrowd`, `GetCrowd`, `SetScreenMedia`, `ScreenImageSet`, `ScreenOff`, `ScreenPause`,
+    `ScreenVolume`, `GetScreenMedia`, `PlayMusic`, `StopMusic`, `PauseMusic`, `MusicVolume`, `GetMusic`,
+    `SetFollowSpot`, `FollowPlayer`, `GetFollowSpot`, `AddBout`, `StopBout`, `GetBout`.
+- **1.1.0** (continued): the light desk grows up.
   - Eight new effects (fade, wave, flash, alternate, bounce, twinkle, lightning, fire) and the
     movement is its own control (still, sweep, ballyhoo, fan, nod, cross), so any effect runs with any movement.
     Sweep and ballyhoo as modes still work (from chat, exports and old presets).
   - Aims combine: floor, stage and crowd in any mix, the fixtures taking turns.
-  - **Ring lights**: the washes over the ring light it white whether the show lights are on or not.
   - New presets: TV ring, storm, inferno, hype. Blackout also kills the ring lights.
 - **1.1.0** (continued): the event level, backstage and the gateways reworked.
   - **The Gorilla position** is rebuilt as a proper room between the event tunnel and the stage: the producers' desks

@@ -11,7 +11,9 @@
   function render() {
     const m = media || { kind: 'off' };
     const now = m.kind === 'youtube' ? `YouTube ${m.id}` : m.kind === 'images' ? `${(m.urls || []).length} pictures`
-      : m.kind === 'image' ? 'one picture' : 'off';
+      : m.kind === 'image' ? 'one picture' : m.kind === 'look' ? `the ${m.look} look` : 'off';
+    Array.from(document.querySelectorAll('#scr-looks button')).forEach((b) =>
+      b.classList.toggle('active', m.kind === 'look' && b.dataset.look === m.look));
     $('#scr-now').textContent = now + (m.paused ? ' (paused)' : '');
     $('#scr-pause').textContent = m.paused ? 'Resume' : 'Pause';
     $('#scr-pause').disabled = m.kind === 'off';
@@ -35,6 +37,18 @@
     if (m.type !== 'media') return;
     if (m.media) media = m.media;
     if (m.enabled !== undefined) $('#screens').classList.toggle('hidden', !m.enabled);
+    if (m.looks) {
+      const box = $('#scr-looks');
+      box.innerHTML = '';
+      m.looks.forEach((name) => {
+        const b = document.createElement('button');
+        b.dataset.look = name;
+        b.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+        b.title = 'A look drawn in step with the lights: ' + name;
+        b.onclick = () => post({ action: 'look', look: name });
+        box.appendChild(b);
+      });
+    }
     if (m.sets) {
       const box = $('#scr-sets');
       box.innerHTML = '';
