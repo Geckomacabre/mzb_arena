@@ -150,7 +150,9 @@ local function command(src, args)
     status(src)
 end
 
-RegisterCommand(FS.command or 'arenaspot', function(src, args) command(src, args) end, false)
+RegisterCommand(FS.command or 'arenaspot', function(src, args)
+    if src == 0 then command(src, args) end          -- players come through mzb_arena:spotCmd
+end, false)
 
 local cmdThrottled = MzbThrottle(250)
 RegisterNetEvent('mzb_arena:spotCmd', function(args)
