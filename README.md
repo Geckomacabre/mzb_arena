@@ -304,6 +304,16 @@ FiveM ("Arena followspot").
 
 Exports (server): `SetFollowSpot(patch)`, `FollowPlayer(serverId)`, `GetFollowSpot()`.
 
+## More stage lights (`Config.LightRigExtra`)
+
+The light desk runs fixtures of your own on top of the build's rig: `Config.LightRigExtra[show]` is a list of
+`{ x, y, z, dx, dy, dz, g }` (world position, the direction it points at rest, the group: 1 moving head, 2 wash,
+3 house light, 4 floor beam). Floor beams keep their own aim whatever the desk's aim is, and take the desk's colour
+and effect. Out of the box it adds, at the stage end: moving heads half way between the build's heads on the
+wrestling stage trusses, washes on the concert's wash bar, and four floor beams along the back of the stage end
+(wrestling, concert, MMA), either side of the middle, shooting up and out over the floor. `Config.LightMaxFixtures`
+is 40: the roof's house lights are the ones left out when a rig has more. Move or remove any of them to taste.
+
 ## Configuration (`shared/config.lua`)
 
 - `Config.DefaultShow`: the show the server starts with.

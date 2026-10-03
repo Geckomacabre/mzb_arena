@@ -154,6 +154,9 @@ local ARENA_V = vector3(-ARENA_U.y, ARENA_U.x, 0.0)                             
 
 -- where fixture f (i of n) aims at time t
 local function aim(i, n, f, t, beat, focus, fo, mv)
+    if f[7] == 4 then                                                    -- a floor beam keeps its own aim, always
+        return f[1] + f[4] * 30.0, f[2] + f[5] * 30.0, f[3] + f[6] * 30.0
+    end
     if f[7] == 2 and fo == 'floor' then                                  -- a wash keeps its own aim on the floor
         return f[1] + f[4] * 30.0, f[2] + f[5] * 30.0, f[3] + f[6] * 30.0
     end
@@ -216,11 +219,28 @@ local function spot(f, tx, ty, tz, r, g, b, bright, cone, glow)
     end
 end
 
+-- the show's rig: the build's fixtures (Config.LightRig) and the owner's own (Config.LightRigExtra), in group order
+-- (the roof's house lights last, so they are the ones Config.LightMaxFixtures leaves out)
+local rigs = {}
+local function rigFor(show)
+    if rigs[show] then return rigs[show] end
+    local all = {}
+    for _, f in ipairs((Config.LightRig or {})[show] or {}) do all[#all + 1] = f end
+    for _, f in ipairs((Config.LightRigExtra or {})[show] or {}) do all[#all + 1] = f end
+    local order = {}
+    for i, f in ipairs(all) do order[i] = { f = f, k = (f[7] == 3 and 5 or f[7]) * 10000 + i } end
+    table.sort(order, function(a, b) return a.k < b.k end)
+    local rig = {}
+    for i, o in ipairs(order) do rig[i] = o.f end
+    rigs[show] = rig
+    return rig
+end
+
 CreateThread(function()
     while true do
         if drawHere and L and (L.on or L.ring) then
             local show = GlobalState.mzbShow or Config.DefaultShow
-            local rig = (Config.LightRig or {})[show] or {}
+            local rig = rigFor(show)
             local focus = (Config.LightFocus or {})[show]
             if focus and #rig > 0 then
                 local t = GetNetworkTime() / 1000.0
@@ -253,7 +273,8 @@ CreateThread(function()
                             local fo = fl[((i - 1) % #fl) + 1]
                             if fo == 'stage' and not focus.stage then fo = 'floor' end
                             local tx, ty, tz = aim(i, n, f, t, beat, focus, fo, mv)
-                            spot(f, tx, ty, tz, r, g, b, bright * lvl, cone[f[7]] or 12.0, 4.0 * lvl * (L.intensity or 0.8))
+                            spot(f, tx, ty, tz, r, g, b, bright * lvl, cone[f[7]] or (f[7] == 4 and Config.LightConeFloor) or 12.0,
+                                4.0 * lvl * (L.intensity or 0.8))
                         end
                     end
                 end

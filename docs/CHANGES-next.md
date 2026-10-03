@@ -30,3 +30,10 @@
 - Desk Followspot section (on / off, follow a player in the arena, looked at, free aim, size, intensity, colour),
   `/arenaspot`, server exports `SetFollowSpot`, `FollowPlayer`, `GetFollowSpot`.
 - New files: `client/spot.lua`, `server/spot.lua`, `html/spot.js`. Config: `Config.FollowSpot`.
+
+## More stage lights
+- New: `Config.LightRigExtra[show]` adds fixtures to the show's rig without touching the build's file; merged in
+  client/lights.lua in group order (house lights last, so they are what `Config.LightMaxFixtures` leaves out).
+- New fixture group 4, floor beams: they keep their own aim (`Config.LightConeFloor` sets their beam).
+- Out of the box: 6 heads on the wrestling stage trusses, 5 washes on the concert wash bar, 4 floor beams at the back
+  of the stage end for wrestling, concert and MMA. `Config.LightMaxFixtures` 32 -> 40.
