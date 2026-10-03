@@ -54,11 +54,11 @@ button.active { background: #262a36; border-color: var(--accent); box-shadow: in
 .seg button { flex: 1; padding: 9px 4px; font-size: 13px; font-weight: 600; }
 
 .grid { display: grid; gap: 6px; }
-.modes { grid-template-columns: repeat(3, 1fr); }
-.modes button { padding: 9px 6px; font-size: 13px; display: flex; align-items: center; gap: 7px; justify-content: center; }
+.modes { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.modes button { padding: 9px 3px; font-size: 12px; display: flex; align-items: center; gap: 5px; justify-content: center; min-width: 0; white-space: nowrap; }
 .modes i { font-style: normal; color: var(--muted); }
 .modes button.active i { color: var(--accent); }
-.presets { grid-template-columns: repeat(5, 1fr); }
+.presets { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .presets button { padding: 9px 2px; font-size: 12px; font-weight: 600; }
 
 .slots { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
@@ -81,3 +81,6 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 
 footer { margin-top: 10px; font-size: 11px; color: var(--muted); text-align: center; }
 kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; font-size: 10px; }
+
+#moves button, #focus button { font-size: 12px; }
+button:disabled { opacity: 0.35; cursor: not-allowed; }

@@ -146,17 +146,34 @@ moving heads, beams and washes of the wrestling, concert and MMA rigs) and from 
 show, and the only ones for hockey, basketball, tennis and the empty house). Every player in the bowl sees the same
 show at the same moment.
 
-`/arenalights` opens the desk: show lights on / off, blackout, the house lights (the show's setting, full, dimmed,
-off), nine modes (static, chase, strobe, pulse, rainbow, sweep, ballyhoo, random, police), up to three colours from a
-palette or a colour picker, the speed in BPM (with a tap button), intensity, the aim (floor, stage, crowd) and presets
-(walk-in, entrance, goal, concert, party, fight, police, house up, blackout, reset). It also runs from chat:
+`/arenalights` opens the desk: show lights on / off, the ring lights, blackout, the house lights (the show's
+setting, full, dimmed, off), the effect, the movement, up to three colours from a palette or a colour picker, the speed
+in BPM (with a tap button), intensity, the aim and presets. A look is built from independent parts, as on a lighting
+console:
+
+- **Effect** (the colour and level of each fixture): static, chase, strobe, pulse, rainbow, fade (a slow crossfade
+  through the colours), wave (a band of light rolling round the rig), flash (the whole rig hits on the beat and dies
+  away), alternate (every other fixture, swapping on the beat), bounce (a block of light running end to end), twinkle,
+  random, lightning (dark, with ragged white flickers), fire (warm flicker) and police.
+- **Movement** (where the beams go, with any effect): still, sweep, ballyhoo, fan (the spots open out and close in),
+  nod (tilting out to the stands and back) and cross (pairs swinging across each other).
+- **Aim**: floor, stage, crowd - or several at once (the fixtures take turns), e.g. floor and crowd.
+- **Ring lights**: the washes on the truss over the ring (the cage, the concert stage) light it white on their own
+  aim, with the show lights on or off - TV lighting for the match while the rest of the rig runs the show.
+- **Presets**: walk-in, entrance, goal, concert, party, fight, police, TV ring, storm, inferno, hype, house up,
+  blackout, reset.
+
+It also runs from chat:
 
 ```
 /arenalights on | off | blackout | status
-/arenalights mode chase
+/arenalights mode wave                (the effect)
+/arenalights move fan                 (none | sweep | ballyhoo | fan | nod | cross)
 /arenalights color red white          (names from Config.LightColors, or #rrggbb; up to three)
-/arenalights bpm 128 | intensity 80 | focus stage | house dim
-/arenalights preset goal
+/arenalights focus floor crowd        (one to three of floor, stage, crowd)
+/arenalights ring on | off
+/arenalights bpm 128 | intensity 80 | house dim
+/arenalights preset storm
 ```
 
 The interior's own (baked) lights can't change colour in GTA; the house buttons switch them between full, dimmed and
@@ -220,6 +237,8 @@ again after a switch.
 - `Config.LightBrightness`, `Config.LightCone`, `Config.LightSpread`, `Config.LightMaxFixtures`,
   `Config.LightLensGlow`: how the show lights look and how many are drawn.
 - `Config.LightMaxStrobeHz`: the fastest strobe (0 = no strobing).
+- `Config.RingLightGroup`, `Config.RingLightColor`, `Config.RingLightBrightness`: which of the rig's fixtures are the
+  ring lights (2 = the washes), their colour and brightness.
 - `Config.LightRooms`: the rooms the light show is drawn in.
 - `Config.HouseSets`: the interior's house light sets the desk switches.
 - `Config.Ice`: the hockey ice (on / off, the shows it is down for, how slippery, falls).
@@ -231,6 +250,13 @@ again after a switch.
 
 ## Changes
 
+- **1.1.0**: the light desk grows up.
+  - Eight new effects (fade, wave, flash, alternate, bounce, twinkle, lightning, fire) and the
+    movement is its own control (still, sweep, ballyhoo, fan, nod, cross), so any effect runs with any movement.
+    Sweep and ballyhoo as modes still work (from chat, exports and old presets).
+  - Aims combine: floor, stage and crowd in any mix, the fixtures taking turns.
+  - **Ring lights**: the washes over the ring light it white whether the show lights are on or not.
+  - New presets: TV ring, storm, inferno, hype. Blackout also kills the ring lights.
 - **1.0.2**: the event level, backstage and the gateways reworked.
   - **The Gorilla position** is rebuilt as a proper room between the event tunnel and the stage: the producers' desks
     (two seats each) along the back wall, the timekeeper's and match producer's desk at the top, the ARENA exit straight

@@ -71,7 +71,8 @@ Config.AnnounceSwitch = false
 -- The arena's own light show: coloured spot lights from the show's rig (its moving heads and washes) and the house
 -- lights up in the roof, the same for every player (synced to the network clock). Open the desk with /arenalights, or
 -- run it from chat: /arenalights help. The baked lights of the interior stay as they are; the desk's house buttons
--- switch them between the show's setting, full, dimmed and off.
+-- switch them between the show's setting, full, dimmed and off. A look is a colour effect (mode) and a movement (move)
+-- picked independently, one or more aims (floor, stage, crowd: the fixtures take turns), and the ring lights.
 Config.LightCommand = 'arenalights'
 Config.LightAccess = 'command.arena'   -- who may run the lights: an ACE (default: the arena's staff ACE), false = anyone
 Config.LightMaxFixtures = 32           -- spot lights drawn per frame at most (the show rigs have 24 to 36)
@@ -84,8 +85,13 @@ Config.LightSpread = 6.0               -- m: how far apart the spots land round 
 Config.LightMaxStrobeHz = 8.0          -- flashes per second at most in strobe mode (0 turns strobe into a pulse)
 -- the rooms the show is drawn in (players elsewhere in the building don't pay for it)
 Config.LightRooms = { bowl = true, concourse = true, tunnel = true, backstage = true }
-Config.LightDefault = { on = false, mode = 'static', colors = { { 255, 255, 255 } }, bpm = 120, intensity = 0.8,
-                        focus = 'floor', house = 'show' }
+Config.LightDefault = { on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120,
+                        intensity = 0.8, focus = 'floor', ring = false, house = 'show' }
+-- the ring lights (the desk's RING LIGHTS button, /arenalights ring on): the show rig's washes over the ring / cage /
+-- stage (rig group 2) light it white on their own aim, whether the show lights are on or not
+Config.RingLightGroup = 2
+Config.RingLightColor = { 255, 244, 225 }
+Config.RingLightBrightness = 16.0
 -- named colours for chat (/arenalights color red blue) and the desk's palette
 Config.LightColors = {
     white = { 255, 255, 255 }, warm = { 255, 196, 120 }, red = { 255, 24, 24 }, orange = { 255, 110, 0 },
@@ -94,18 +100,23 @@ Config.LightColors = {
 }
 -- one-touch looks (the desk's preset buttons, /arenalights preset <name>); nil fields keep what is set
 Config.LightPresets = {
-    walkin    = { label = 'Walk-in',   on = true,  mode = 'pulse',    colors = { { 20, 60, 255 }, { 140, 30, 255 } }, bpm = 50,  focus = 'crowd', house = 'dim' },
-    entrance  = { label = 'Entrance',  on = true,  mode = 'sweep',    colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 128, focus = 'stage', house = 'off' },
-    goal      = { label = 'Goal!',     on = true,  mode = 'strobe',   colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 150, focus = 'floor', house = 'off' },
-    concert   = { label = 'Concert',   on = true,  mode = 'chase',    colors = { { 255, 20, 200 }, { 0, 230, 255 }, { 255, 255, 255 } }, bpm = 124, focus = 'stage', house = 'off' },
-    party     = { label = 'Party',     on = true,  mode = 'rainbow',  bpm = 128, focus = 'floor', house = 'off' },
-    fight     = { label = 'Fight',     on = true,  mode = 'ballyhoo', colors = { { 255, 255, 255 }, { 255, 24, 24 } }, bpm = 90, focus = 'floor', house = 'dim' },
-    police    = { label = 'Police',    on = true,  mode = 'police',   bpm = 120, focus = 'floor', house = 'dim' },
+    walkin    = { label = 'Walk-in',   on = true,  mode = 'pulse', move = 'none',    colors = { { 20, 60, 255 }, { 140, 30, 255 } }, bpm = 50,  focus = 'crowd', house = 'dim' },
+    entrance  = { label = 'Entrance',  on = true,  mode = 'sweep', move = 'none',    colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 128, focus = 'stage', house = 'off' },
+    goal      = { label = 'Goal!',     on = true,  mode = 'strobe', move = 'none',   colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 150, focus = 'floor', house = 'off' },
+    concert   = { label = 'Concert',   on = true,  mode = 'chase', move = 'none',    colors = { { 255, 20, 200 }, { 0, 230, 255 }, { 255, 255, 255 } }, bpm = 124, focus = 'stage', house = 'off' },
+    party     = { label = 'Party',     on = true,  mode = 'rainbow', move = 'none',  bpm = 128, focus = 'floor', house = 'off' },
+    fight     = { label = 'Fight',     on = true,  mode = 'ballyhoo', move = 'none', colors = { { 255, 255, 255 }, { 255, 24, 24 } }, bpm = 90, focus = 'floor', house = 'dim' },
+    police    = { label = 'Police',    on = true,  mode = 'police', move = 'none',   bpm = 120, focus = 'floor', house = 'dim' },
+    tv        = { label = 'TV ring',   on = false, ring = true, house = 'dim' },
+    storm     = { label = 'Storm',     on = true,  mode = 'lightning', move = 'none', colors = { { 20, 60, 255 } }, bpm = 90, focus = { 'floor', 'crowd' }, house = 'off' },
+    inferno   = { label = 'Inferno',   on = true,  mode = 'fire',     move = 'nod', bpm = 70, focus = { 'stage', 'crowd' }, house = 'off' },
+    hype      = { label = 'Hype',      on = true,  mode = 'flash',    move = 'fan', colors = { { 255, 255, 255 }, { 255, 170, 0 } }, bpm = 128, focus = { 'floor', 'crowd' }, house = 'off' },
     houseup   = { label = 'House up',  on = false, house = 'full' },
-    blackout  = { label = 'Blackout',  on = false, house = 'off' },
-    reset     = { label = 'Reset',     on = false, mode = 'static', colors = { { 255, 255, 255 } }, bpm = 120, intensity = 0.8, focus = 'floor', house = 'show' },
+    blackout  = { label = 'Blackout',  on = false, ring = false, house = 'off' },
+    reset     = { label = 'Reset',     on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120, intensity = 0.8, focus = 'floor', ring = false, house = 'show' },
 }
-Config.LightPresetOrder = { 'walkin', 'entrance', 'goal', 'concert', 'party', 'fight', 'police', 'houseup', 'blackout', 'reset' }
+Config.LightPresetOrder = { 'walkin', 'entrance', 'goal', 'concert', 'party', 'fight', 'police', 'tv', 'storm', 'inferno',
+                            'hype', 'houseup', 'blackout', 'reset' }
 -- the interior's house light sets the desk's house buttons switch (full / dim; off = neither)
 Config.HouseSets = { full = 'mzb_set_house_lights', dim = 'mzb_set_house_lights_dim' }
 

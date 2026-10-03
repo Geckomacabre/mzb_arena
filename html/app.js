@@ -7,6 +7,11 @@
   const desk = $('#desk');
   let state = null;
   let activeSlot = 0;
+  // the old sweep / ballyhoo modes were a movement with a static colour: show them as such
+  const MOVING = { sweep: 1, ballyhoo: 1 };
+  const effMode = () => (MOVING[state.mode] ? 'static' : state.mode);
+  const effMove = () => (state.move && state.move !== 'none' ? state.move : MOVING[state.mode] ? state.mode : 'none');
+  const focusList = () => (Array.isArray(state.focus) ? state.focus : [state.focus || 'floor']);
 
   const post = (name, body) =>
     fetch(`https://${res}/${name}`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -33,8 +38,12 @@
     $('#power-state').textContent = state.on ? 'ON' : 'OFF';
     $('#live-dot').classList.toggle('live', !!state.on);
     $$('#house button').forEach((b) => b.classList.toggle('active', b.dataset.house === state.house));
-    $$('#modes button').forEach((b) => b.classList.toggle('active', b.dataset.mode === state.mode));
-    $$('#focus button').forEach((b) => b.classList.toggle('active', b.dataset.focus === state.focus));
+    $('#ring').classList.toggle('on', !!state.ring);
+    $('#ring-state').textContent = state.ring ? 'ON' : 'OFF';
+    $$('#modes button').forEach((b) => b.classList.toggle('active', b.dataset.mode === effMode()));
+    $$('#moves button').forEach((b) => b.classList.toggle('active', b.dataset.move === effMove()));
+    const fl = focusList();
+    $$('#focus button').forEach((b) => b.classList.toggle('active', fl.includes(b.dataset.focus)));
     const cs = state.colors || [];
     $$('#slots .slot').forEach((b) => {
       const i = +b.dataset.slot;
@@ -65,8 +74,17 @@
   $('#power').onclick = () => post('lights', { on: !state.on });
   $$('[data-preset]').forEach((b) => (b.onclick = () => post('preset', { id: b.dataset.preset })));
   $$('#house button').forEach((b) => (b.onclick = () => post('lights', { house: b.dataset.house })));
-  $$('#modes button').forEach((b) => (b.onclick = () => post('lights', { mode: b.dataset.mode, on: true })));
-  $$('#focus button').forEach((b) => (b.onclick = () => post('lights', { focus: b.dataset.focus })));
+  $('#ring').onclick = () => post('lights', { ring: !state.ring });
+  // an effect keeps the movement that is running (an old sweep / ballyhoo mode becomes that movement)
+  $$('#modes button').forEach((b) => (b.onclick = () => post('lights', { mode: b.dataset.mode, move: effMove(), on: true })));
+  $$('#moves button').forEach((b) => (b.onclick = () => post('lights', { mode: effMode(), move: b.dataset.move, on: true })));
+  // the aims toggle; one always stays
+  $$('#focus button').forEach((b) => (b.onclick = () => {
+    const fl = focusList().slice();
+    const k = fl.indexOf(b.dataset.focus);
+    if (k >= 0) { if (fl.length > 1) fl.splice(k, 1); } else fl.push(b.dataset.focus);
+    post('lights', { focus: fl });
+  }));
   $$('#slots .slot').forEach((b) => (b.onclick = () => { activeSlot = +b.dataset.slot; render(); }));
   $('#picker').oninput = (e) => setColour(rgb(e.target.value));
   $('#clear-slot').onclick = () => {
@@ -115,6 +133,11 @@
         pr.appendChild(b);
       });
       $('[data-mode="strobe"]').title = m.maxStrobe === 0 ? 'Strobe is off on this server (pulses instead)' : '';
+      $('[data-focus="stage"]').disabled = m.hasStage === false;
+      $('[data-focus="stage"]').title = m.hasStage === false ? 'This show has no stage' : '';
+      $('#ring').disabled = m.hasRing === false;
+      $('#ring').title = m.hasRing === false ? 'This show has no ring / cage / stage washes'
+        : 'The washes over the ring / cage / stage, white, on their own aim';
       desk.classList.remove('hidden');
       render();
     } else if (m.type === 'state') {

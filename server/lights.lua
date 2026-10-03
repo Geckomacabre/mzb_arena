@@ -1,15 +1,22 @@
 -- mzb_arena - server: the light desk's state (GlobalState.mzbLights, synced to every client incl. late joiners)
---   GlobalState.mzbLights = { on, mode, colors = { {r, g, b} x 1..3 }, bpm, intensity (0..1), focus, house }
+--   GlobalState.mzbLights = { on, mode, move, colors = { {r, g, b} x 1..3 }, bpm, intensity (0..1),
+--                             focus (one of floor / stage / crowd, or a list of them), ring, house }
 -- Who may change it: Config.LightAccess (an ACE; false = anyone). The desk (NUI) and chat both land in setLights.
 --   /arenalights                   open the desk
 --   /arenalights on | off | blackout | status | help
---   /arenalights mode <static|chase|strobe|pulse|rainbow|sweep|ballyhoo|random|police>
+--   /arenalights mode <static|chase|strobe|pulse|rainbow|sweep|ballyhoo|random|police|fade|wave|flash|alternate|
+--                      twinkle|lightning|fire|bounce>       the colour effect
+--   /arenalights move <none|sweep|ballyhoo|fan|nod|cross>    the beams' movement (combines with any mode)
 --   /arenalights color <name|#rrggbb> [second] [third]
---   /arenalights bpm <30-240> | intensity <0-100> | focus <floor|stage|crowd> | house <show|full|dim|off>
+--   /arenalights bpm <30-240> | intensity <0-100> | house <show|full|dim|off>
+--   /arenalights focus <floor|stage|crowd> [more ...]      several: the fixtures take turns (e.g. focus floor crowd)
+--   /arenalights ring <on|off>                             the ring lights: the washes over the ring, white
 --   /arenalights preset <name>     (Config.LightPresets)
 
 local MODES = { static = true, chase = true, strobe = true, pulse = true, rainbow = true, sweep = true,
-                ballyhoo = true, random = true, police = true }
+                ballyhoo = true, random = true, police = true, fade = true, wave = true, flash = true,
+                alternate = true, twinkle = true, lightning = true, fire = true, bounce = true }
+local MOVES = { none = true, sweep = true, ballyhoo = true, fan = true, nod = true, cross = true }
 local FOCUS = { floor = true, stage = true, crowd = true }
 local HOUSE = { show = true, full = true, dim = true, off = true }
 
@@ -46,7 +53,19 @@ local function sanitize(patch, cur)
     if type(patch) ~= 'table' then return out end
     if patch.on ~= nil then out.on = patch.on == true end
     if MODES[patch.mode] then out.mode = patch.mode end
-    if FOCUS[patch.focus] then out.focus = patch.focus end
+    if MOVES[patch.move] then out.move = patch.move end
+    if FOCUS[patch.focus] then
+        out.focus = patch.focus
+    elseif type(patch.focus) == 'table' then                 -- several aims: each one once, in a fixed order
+        local fo = {}
+        for _, k in ipairs({ 'floor', 'stage', 'crowd' }) do
+            for _, v in ipairs(patch.focus) do
+                if v == k then fo[#fo + 1] = k; break end
+            end
+        end
+        if #fo == 1 then out.focus = fo[1] elseif #fo > 1 then out.focus = fo end
+    end
+    if patch.ring ~= nil then out.ring = patch.ring == true end
     if HOUSE[patch.house] then out.house = patch.house end
     if tonumber(patch.bpm) then out.bpm = math.floor(math.max(30, math.min(240, tonumber(patch.bpm)))) end
     if tonumber(patch.intensity) then out.intensity = math.max(0.0, math.min(1.0, tonumber(patch.intensity))) end
@@ -121,13 +140,15 @@ local function status(src)
     local l = current()
     local cs = {}
     for _, c in ipairs(l.colors or {}) do cs[#cs + 1] = ('#%02x%02x%02x'):format(c[1], c[2], c[3]) end
-    reply(src, ('show lights %s | mode %s | colours %s | %d bpm | intensity %d%% | aim %s | house %s')
-        :format(l.on and 'ON' or 'off', l.mode, table.concat(cs, ' '), l.bpm, math.floor(l.intensity * 100 + 0.5),
-            l.focus, l.house))
+    local fo = type(l.focus) == 'table' and table.concat(l.focus, '+') or l.focus
+    reply(src, ('show lights %s | mode %s | move %s | colours %s | %d bpm | intensity %d%% | aim %s | ring lights %s | house %s')
+        :format(l.on and 'ON' or 'off', l.mode, l.move or 'none', table.concat(cs, ' '), l.bpm,
+            math.floor(l.intensity * 100 + 0.5), fo, l.ring and 'ON' or 'off', l.house))
 end
 
-local HELP = '/%s [on|off|blackout|status] | mode <m> | color <c> [c2] [c3] | bpm <n> | intensity <0-100> | ' ..
-             'focus <floor|stage|crowd> | house <show|full|dim|off> | preset <name>'
+local HELP = '/%s [on|off|blackout|status] | mode <m> | move <none|sweep|ballyhoo|fan|nod|cross> | color <c> [c2] [c3] | ' ..
+             'bpm <n> | intensity <0-100> | focus <floor|stage|crowd> [more] | ring <on|off> | ' ..
+             'house <show|full|dim|off> | preset <name>'
 
 RegisterCommand(Config.LightCommand, function(src, args)
     if not allowed(src) then return reply(src, 'you are not allowed to run the arena lights') end
@@ -143,7 +164,9 @@ RegisterCommand(Config.LightCommand, function(src, args)
     elseif (sub == 'color' or sub == 'colour') and args[2] then setLights({ colors = { args[2], args[3], args[4] } })
     elseif sub == 'bpm' and tonumber(args[2]) then setLights({ bpm = tonumber(args[2]) })
     elseif sub == 'intensity' and tonumber(args[2]) then setLights({ intensity = tonumber(args[2]) / 100.0 })
-    elseif sub == 'focus' and FOCUS[args[2] or ''] then setLights({ focus = args[2] })
+    elseif sub == 'move' and MOVES[args[2] or ''] then setLights({ move = args[2] })
+    elseif sub == 'focus' and FOCUS[args[2] or ''] then setLights({ focus = { args[2], args[3], args[4] } })
+    elseif sub == 'ring' and (args[2] == 'on' or args[2] == 'off') then setLights({ ring = args[2] == 'on' })
     elseif sub == 'house' and HOUSE[args[2] or ''] then setLights({ house = args[2] })
     elseif sub == 'preset' and args[2] then
         if not preset(args[2]:lower()) then

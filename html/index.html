@@ -20,6 +20,7 @@
 
   <section class="row top">
     <button class="big toggle" id="power">SHOW LIGHTS <b id="power-state">OFF</b></button>
+    <button class="big toggle" id="ring" title="The washes over the ring / cage / stage, white, on their own aim">RING LIGHTS <b id="ring-state">OFF</b></button>
     <button class="big danger" data-preset="blackout">BLACKOUT</button>
   </section>
 
@@ -34,17 +35,35 @@
   </section>
 
   <section>
-    <h2>Mode</h2>
+    <h2>Effect</h2>
     <div class="grid modes" id="modes">
       <button data-mode="static"><i>&#9679;</i>Static</button>
       <button data-mode="chase"><i>&#10148;</i>Chase</button>
       <button data-mode="strobe"><i>&#9889;</i>Strobe</button>
       <button data-mode="pulse"><i>&#9678;</i>Pulse</button>
       <button data-mode="rainbow"><i>&#9728;</i>Rainbow</button>
-      <button data-mode="sweep"><i>&#8634;</i>Sweep</button>
-      <button data-mode="ballyhoo"><i>&#8776;</i>Ballyhoo</button>
-      <button data-mode="random"><i>&#10022;</i>Random</button>
+      <button data-mode="fade"><i>&#9680;</i>Fade</button>
+      <button data-mode="wave"><i>&#8767;</i>Wave</button>
+      <button data-mode="flash"><i>&#10041;</i>Flash</button>
+      <button data-mode="alternate"><i>&#8693;</i>Alternate</button>
+      <button data-mode="bounce"><i>&#8596;</i>Bounce</button>
+      <button data-mode="twinkle"><i>&#10022;</i>Twinkle</button>
+      <button data-mode="random"><i>&#9670;</i>Random</button>
+      <button data-mode="lightning"><i>&#9735;</i>Lightning</button>
+      <button data-mode="fire"><i>&#9832;</i>Fire</button>
       <button data-mode="police"><i>&#9650;</i>Police</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Movement</h2>
+    <div class="seg" id="moves">
+      <button data-move="none">Still</button>
+      <button data-move="sweep">Sweep</button>
+      <button data-move="ballyhoo">Ballyhoo</button>
+      <button data-move="fan">Fan</button>
+      <button data-move="nod">Nod</button>
+      <button data-move="cross">Cross</button>
     </div>
   </section>
 
@@ -75,7 +94,7 @@
   </section>
 
   <section>
-    <h2>Aim</h2>
+    <h2>Aim <small>one or more: the fixtures take turns</small></h2>
     <div class="seg" id="focus">
       <button data-focus="floor">Floor</button>
       <button data-focus="stage">Stage</button>
