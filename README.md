@@ -268,7 +268,7 @@ again after a switch.
   - **Ring lights**: the washes over the ring light it white whether the show lights are on or not.
   - New presets: TV ring, storm, inferno, hype. Blackout also kills the ring lights.
   - A CodeWalker project per show in `codewalker/` (the arena with that show's sets switched on).
-- **1.0.2**: the event level, backstage and the gateways reworked.
+- **1.1.0** (continued): the event level, backstage and the gateways reworked.
   - **The Gorilla position** is rebuilt as a proper room between the event tunnel and the stage: the producers' desks
     (two seats each) along the back wall, the timekeeper's and match producer's desk at the top, the ARENA exit straight
     onto the stage stairs, and a BACKSTAGE opening on each side into the backstage areas behind the masking (they were
@@ -313,6 +313,11 @@ again after a switch.
     single-mirror rooms keep live mirrors, fixed.
   - Outside sounds: the street, the wind and the rain are no longer heard inside (`audio/mzb_arena_game.dat151.rel`
     and portal audio occlusion).
+  - The interior's exit-portal count includes its mirrors, as in 1.0.2: 48 for the rebuilt interior (44 openings and
+    4 mirrors). Also in the CodeWalker projects' placement ymaps.
+- **1.0.2**: the interior's exit-portal count now includes its mirrors, the way Rockstar's own interiors count them
+  (62 instead of 44). Preventive: no arena fault was reported, but the same miscount was involved in a client crash
+  in another interior. Only `stream/interior/mzb_arena_milo.ymap` changed.
 - **1.0.1**: fixed players sinking through the floor on the four corners of the bowl (the walkway between the lower and
   upper seats and the mouths of the upper-deck entrances). The collision on the curved parts was built inside out.
   Basketball is now the Los Santos Panic (purple and gold court with the team's crest) vs the Vice City Narcos, hockey
