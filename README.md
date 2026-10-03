@@ -274,6 +274,26 @@ A link that will not play is reported once to whoever started it, not to everyon
 
 Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `MusicVolume(0-100)`, `GetMusic()`.
 
+## Followspot (ACE `command.arena`)
+
+One or two followspots high on the bowl's long sides (`Config.FollowSpot.fixtures`), run by an operator from the
+desk's **Followspot** section or chat:
+
+| Command | What it does |
+|---|---|
+| `/arenaspot on` / `off` | |
+| `/arenaspot follow <id \| me \| look>` | lock onto a player: a server id, yourself, or whoever is under your crosshair |
+| `/arenaspot free` or the key **F7** | grab free aim: the spot follows your camera; again to let go (it stays put) |
+| `/arenaspot color <name \| #rrggbb>` / `size <2-15>` / `intensity <0-100>` | |
+| `/arenaspot status` | |
+
+Locked onto a player, every client follows that player itself, so it is smooth and sends nothing over the network.
+Free aim sends the operator's aim point at most 8 times a second (`Config.FollowSpot.sendRate`); the server keeps it
+inside the arena and only one operator aims at a time. Players can rebind the key under Settings > Key Bindings >
+FiveM ("Arena followspot").
+
+Exports (server): `SetFollowSpot(patch)`, `FollowPlayer(serverId)`, `GetFollowSpot()`.
+
 ## Configuration (`shared/config.lua`)
 
 - `Config.DefaultShow`: the show the server starts with.

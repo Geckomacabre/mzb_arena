@@ -21,3 +21,12 @@
 - Server exports `PlayMusic`, `StopMusic`, `PauseMusic`, `MusicVolume`, `GetMusic`.
 - The screen player now takes its position from the same server clock as the music (no extra event).
 - New files: `client/music.lua`, `server/music.lua`, `html/music.js`. Config: `Config.Music`.
+
+## Followspot
+- New: one or two operator-run followspots high on the bowl's long sides (`Config.FollowSpot`). Lock onto a player
+  (server id, yourself, or whoever is under your crosshair: every client tracks the ped itself) or grab free aim with
+  a key (default F7, `RegisterKeyMapping`): the operator's camera point goes to the server at most 8 times a second,
+  is checked to lie inside the arena and passed on to the players near it, who glide the beam after it.
+- Desk Followspot section (on / off, follow a player in the arena, looked at, free aim, size, intensity, colour),
+  `/arenaspot`, server exports `SetFollowSpot`, `FollowPlayer`, `GetFollowSpot`.
+- New files: `client/spot.lua`, `server/spot.lua`, `html/spot.js`. Config: `Config.FollowSpot`.
