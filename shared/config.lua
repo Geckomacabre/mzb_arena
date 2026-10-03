@@ -169,3 +169,43 @@ Config.Media = {
         -- default = { 'img/sponsor1.png', 'img/sponsor2.png', 'https://example.com/poster.jpg' },
     },
 }
+
+-- ------------------------------------------------------------------ the music player (client/music.lua, server/music.lua)
+-- Music off the light desk, heard from the show's PA: the sound plays in this resource's own page (html/music.js),
+-- which turns its level down with the distance to the nearest PA hang, pans it to where the hang is, and gives it the
+-- room's sound - full and echoing in the bowl, muffled next door, faint elsewhere in the building, nothing outside.
+-- Direct links to audio files and streams (mp3, ogg, m4a, icecast ...) or YouTube links. The filter and the echo need
+-- the audio's server to allow it (CORS); YouTube and streams that don't get the level and nothing more.
+-- Run it from the desk's Music section or /arenamusic <url | pause | resume | stop | volume n | status>; every player
+-- sets their own level with /arenamusic mine <0-100> (kept between sessions).
+Config.Music = {
+    enabled = true,
+    command = 'arenamusic',
+    access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
+    volume = 0.8,                -- the loudness at 100% on the desk, next to a PA hang
+    defaultVolume = 70,          -- the desk's volume (0-100) when the resource starts
+    range = 200.0,               -- m from the arena's middle: the audio is loaded only this close
+    resync = 30,                 -- s between two position checks (a drifting player seeks back)
+    refDistance = 12.0,          -- m from the nearest hang at which the level starts to fall
+    minGain = 0.3,               -- the level never falls below this in the room (the far end of the bowl)
+    pan = 0.6,                   -- how far the sound pans left / right to the hangs (0 = not at all, 1 = fully)
+    reverbSeconds = 3.2,         -- the length of the arena's echo
+    -- the room's sound per Config.Listener zone: a low-pass filter (Hz) and how much echo is mixed in (0-1)
+    rooms = {
+        bowl = { lowpass = 20000, wet = 0.30 },
+        near = { lowpass = 1100, wet = 0.22 },
+        building = { lowpass = 420, wet = 0.12 },
+    },
+    -- the PA hangs per show (world positions from the arena's build; move them if you move the rig)
+    hangs = {
+        wrestling = { vector3(-335.059, -1969.540, 30.75), vector3(-323.370, -1979.349, 30.75),
+                      vector3(-313.561, -1967.660, 30.75), vector3(-325.250, -1957.851, 30.75) },  -- the ring truss
+        mma = { vector3(-335.059, -1969.540, 28.75), vector3(-323.370, -1979.349, 28.75),
+                vector3(-313.561, -1967.660, 28.75), vector3(-325.250, -1957.851, 28.75) },
+        concert = { vector3(-347.541, -1966.338, 29.70), vector3(-330.572, -1946.115, 29.70) },     -- either side of the stage
+        hockey = { vector3(-324.310, -1968.600, 33.0) },                                             -- the centre-hung board
+        basketball = { vector3(-324.310, -1968.600, 33.0) },
+        tennis = { vector3(-324.310, -1968.600, 33.0) },
+        house = { vector3(-324.310, -1968.600, 33.0) },
+    },
+}
