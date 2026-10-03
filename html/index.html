@@ -107,8 +107,26 @@
     <div class="grid presets" id="presets"></div>
   </section>
 
+  <section id="screens" class="ext">
+    <h2>Screens <small id="scr-now">off</small></h2>
+    <div class="urlrow">
+      <input type="text" id="scr-url" maxlength="4000" placeholder="YouTube link, or picture URL(s)" spellcheck="false">
+      <button class="mini" id="scr-play">PLAY</button>
+    </div>
+    <div class="seg">
+      <button id="scr-pause">Pause</button>
+      <button id="scr-stop">Off</button>
+    </div>
+    <div class="seg sets" id="scr-sets"></div>
+    <div class="slider inline">
+      <h2>Volume <b id="scr-vol-val">60</b>%</h2>
+      <input type="range" id="scr-vol" min="0" max="100" step="1" value="60">
+    </div>
+  </section>
+
   <footer>Everyone in the bowl sees the same show &middot; <kbd>Esc</kbd> closes</footer>
 </div>
 <script src="app.js"></script>
+<script src="media.js"></script>
 </body>
 </html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>mzb_arena screens</title>
+<!-- the video screens' picture (client/media.lua draws this page onto the screens' render target) -->
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+  #yt, #yt iframe, .pic { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .pic { object-fit: contain; opacity: 0; transition: opacity 0.6s; background: #000; }
+  .pic.on { opacity: 1; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div id="yt" class="hidden"><div id="yt-player"></div></div>
+<img class="pic" id="pic-a" alt="">
+<img class="pic" id="pic-b" alt="">
+<script src="screen.js"></script>
+</body>
+</html>
