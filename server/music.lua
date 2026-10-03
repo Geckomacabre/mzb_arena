@@ -127,7 +127,9 @@ local function command(src, args)
 end
 
 -- the console (players' /arenamusic runs in client/music.lua, which handles "mine" and forwards the rest)
-RegisterCommand(MU.command or 'arenamusic', function(src, args) command(src, args) end, false)
+RegisterCommand(MU.command or 'arenamusic', function(src, args)
+    if src == 0 then command(src, args) end          -- players come through mzb_arena:musicCmd
+end, false)
 
 local throttled = MzbThrottle(250)
 
