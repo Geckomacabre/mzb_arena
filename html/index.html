@@ -124,9 +124,34 @@
     </div>
   </section>
 
+  <section id="music" class="ext">
+    <h2>Music <small id="mus-now">off</small></h2>
+    <div class="urlrow">
+      <input type="text" id="mus-url" maxlength="500" placeholder="Audio file, stream or YouTube link" spellcheck="false">
+      <button class="mini" id="mus-play">PLAY</button>
+    </div>
+    <div class="seg">
+      <button id="mus-pause">Pause</button>
+      <button id="mus-stop">Stop</button>
+    </div>
+    <div class="row sliders">
+      <div class="slider inline">
+        <h2>Volume <b id="mus-vol-val">70</b>%</h2>
+        <input type="range" id="mus-vol" min="0" max="100" step="1" value="70">
+      </div>
+      <div class="slider inline" title="Your own level, for you only (/arenamusic mine)">
+        <h2>Mine <b id="mus-mine-val">100</b>%</h2>
+        <input type="range" id="mus-mine" min="0" max="100" step="1" value="100">
+      </div>
+    </div>
+  </section>
+
   <footer>Everyone in the bowl sees the same show &middot; <kbd>Esc</kbd> closes</footer>
 </div>
+<!-- the music player's YouTube player (html/music.js): heard, never seen -->
+<div id="music-yt" style="position:absolute;left:-400px;top:0;width:200px;height:200px;overflow:hidden"><div id="music-yt-player"></div></div>
 <script src="app.js"></script>
 <script src="media.js"></script>
+<script src="music.js"></script>
 </body>
 </html>

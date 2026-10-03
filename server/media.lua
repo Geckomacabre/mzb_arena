@@ -179,15 +179,6 @@ RegisterNetEvent('mzb_arena:media', function(cmd)
     if not ok and err then MzbReply(src, 'screens', err) end
 end)
 
--- a client starting the video or checking its drift: the position now, on the server's clock
-local syncThrottled = MzbThrottle(1000)
-RegisterNetEvent('mzb_arena:mediaWhere', function()
-    local src = source
-    if syncThrottled(src) then return end
-    local cur = current()
-    TriggerClientEvent('mzb_arena:mediaWhere', src, cur.rev or 0, MzbTrackPos(cur), GetGameTimer())
-end)
-
 -- ------------------------------------------------------------------ chat
 local function status(src)
     local m = current()

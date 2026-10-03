@@ -50,28 +50,16 @@ local function create()
     sentRev = nil
 end
 
--- hand the browser the item and where it should be now (asked of the server: its clock is the one that counts)
-local whereCb = nil
-RegisterNetEvent('mzb_arena:mediaWhere', function(rev, pos, _)
-    if whereCb and type(rev) == 'number' and type(pos) == 'number' then
-        whereCb(rev, pos)
-    end
-end)
-
+-- hand the browser the item and where it should be now (on the server's clock: client/listener.lua)
 local function sync(full)
-    local asked = GetGameTimer()
-    whereCb = function(rev, pos)
-        whereCb = nil
-        if not dui or rev ~= (S.rev or 0) then return end
-        pos = pos + (S.paused and 0 or (GetGameTimer() - asked) / 2000.0)   -- half the round trip has gone by
-        if full then
-            post({ type = 'load', media = S, pos = pos })
-            sentRev = S.rev
-        else
-            post({ type = 'sync', pos = pos, paused = S.paused == true })
-        end
+    if not dui then return end
+    local pos = MzbTrackPos(S)
+    if full then
+        post({ type = 'load', media = S, pos = pos })
+        sentRev = S.rev
+    else
+        post({ type = 'sync', pos = pos, paused = S.paused == true })
     end
-    TriggerServerEvent('mzb_arena:mediaWhere')
 end
 
 local needSync = false
@@ -89,16 +77,14 @@ end)
 
 -- the browser exists while ours is on and the player is near; every so often it is told where it should be
 CreateThread(function()
-    local lastAsk, lastSync = -100000, 0
+    local lastSync = 0
     while true do
         if on() and near() then
             if not dui then create() end
             local now = GetGameTimer()
             if dui and sentRev ~= S.rev and IsDuiAvailable(dui) then
-                if now - lastAsk > 2000 then                         -- the answer loads it (asked again if lost)
-                    sync(true)
-                    lastAsk, lastSync = now, now
-                end
+                sync(true)
+                lastSync = now
             elseif dui and (needSync or (S.kind ~= 'image' and not S.paused
                 and now - lastSync > (M.resync or 30) * 1000)) then
                 needSync = false

@@ -247,6 +247,33 @@ build, that is the cause and a picture cycle still works.
 Exports (server): `SetScreenMedia(urlOrListOfPictureUrls)`, `ScreenImageSet(name)`, `ScreenOff()`,
 `ScreenPause(on)`, `ScreenVolume(0-100)`, `GetScreenMedia()`. Client: `IsScreenMediaOn()`.
 
+## Music player (ACE `command.arena`)
+
+Music off the light desk, heard from the show's PA speakers, with no sound resource needed (no xsound). Paste a link
+in the desk's **Music** section or use chat; every player hears the same moment of the track (late joiners too):
+
+| Command | What it does |
+|---|---|
+| `/arenamusic <url>` | play a direct audio file or stream (mp3, ogg, m4a, an icecast / shoutcast stream) or a YouTube link |
+| `/arenamusic pause` / `resume` / `stop` | |
+| `/arenamusic volume <0-100>` | the level for everyone |
+| `/arenamusic status` | what is playing (anyone may ask) |
+| `/arenamusic mine <0-100>` | **your own** level, for you only, kept between sessions (anyone; also the desk's "Mine" slider) |
+
+How it sounds: the level falls with the distance to the nearest PA hang of the show (`Config.Music.hangs`: the ring
+truss's corners for wrestling and MMA, either side of the stage for the concert, the centre-hung board otherwise), it
+pans towards the hangs as you turn, and the room shapes it: full with the arena's echo in the bowl, muffled and quieter
+in the rooms that open onto it (concourse, tunnel, backstage, stairs), faint elsewhere in the building, nothing
+outside. Far from the arena (`Config.Music.range`) the track is not even loaded.
+
+**What gets the full treatment:** the filter, the pan and the echo need the browser to read the audio, which the
+audio's server must allow (CORS: `Access-Control-Allow-Origin`). Files and streams from servers that do not send it
+still play, but with the level only (no pan, filter or echo); so does YouTube (the player is a hidden YouTube
+embed, whose sound a page cannot touch). Plain `http://` links may be blocked by the game's browser: use `https://`.
+A link that will not play is reported once to whoever started it, not to everyone.
+
+Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `MusicVolume(0-100)`, `GetMusic()`.
+
 ## Configuration (`shared/config.lua`)
 
 - `Config.DefaultShow`: the show the server starts with.
