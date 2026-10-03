@@ -180,6 +180,16 @@ The interior's own (baked) lights can't change colour in GTA; the house buttons 
 off, and the desk's colour comes from the spot lights it draws. Players with photosensitivity: `Config.LightMaxStrobeHz`
 caps the strobe (0 turns it into a pulse).
 
+## CodeWalker projects
+
+`codewalker/` has a CodeWalker project per show (`mzb_arena_<show>.cwproj`: house, wrestling, concert, mma, hockey,
+basketball, tennis). Each one loads the interior (`mzb_arena.ytyp`, its collision), the drawables of the rooms and of
+that show's entity sets, and every texture dictionary, all from `stream/`, plus its own copy of the interior's
+placement (`codewalker/ymap/mzb_arena_milo_<show>.ymap`) in which that show's sets are switched on - so CodeWalker
+opens the arena with the show built. Open one with CodeWalker's Project window (File > Open project). The copies are
+for viewing and editing in CodeWalker only: the game streams `stream/interior/mzb_arena_milo.ymap`, and nothing in
+`codewalker/` is streamed.
+
 ## Slippery ice
 
 While the `hockey` show is up, the rink's surface is GTA's ice: vehicles slide on it, and on foot you keep your
@@ -257,6 +267,7 @@ again after a switch.
   - Aims combine: floor, stage and crowd in any mix, the fixtures taking turns.
   - **Ring lights**: the washes over the ring light it white whether the show lights are on or not.
   - New presets: TV ring, storm, inferno, hype. Blackout also kills the ring lights.
+  - A CodeWalker project per show in `codewalker/` (the arena with that show's sets switched on).
 - **1.0.2**: the event level, backstage and the gateways reworked.
   - **The Gorilla position** is rebuilt as a proper room between the event tunnel and the stage: the producers' desks
     (two seats each) along the back wall, the timekeeper's and match producer's desk at the top, the ARENA exit straight
