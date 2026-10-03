@@ -146,6 +146,29 @@
     </div>
   </section>
 
+  <section id="spot" class="ext">
+    <h2>Followspot <small id="spot-now">off</small></h2>
+    <div class="row">
+      <button class="big toggle" id="spot-power">FOLLOWSPOT <b id="spot-state">OFF</b></button>
+    </div>
+    <div class="urlrow" style="margin-top:6px">
+      <select id="spot-target" title="Follow a player in the arena"><option value="">Follow a player...</option></select>
+      <button class="mini" id="spot-look" title="Follow whoever is under your crosshair">LOOKED AT</button>
+      <button class="mini" id="spot-free" title="Aim by hand with your camera (closes the desk; the key releases it)">FREE AIM</button>
+    </div>
+    <div class="row sliders">
+      <div class="slider inline">
+        <h2>Size <b id="spot-size-val">5</b></h2>
+        <input type="range" id="spot-size" min="2" max="15" step="0.5" value="5">
+      </div>
+      <div class="slider inline">
+        <h2>Intensity <b id="spot-int-val">100</b>%</h2>
+        <input type="range" id="spot-int" min="0" max="100" step="1" value="100">
+      </div>
+      <label class="custom" title="The spot's colour"><input type="color" id="spot-color" value="#fff8eb"></label>
+    </div>
+  </section>
+
   <footer>Everyone in the bowl sees the same show &middot; <kbd>Esc</kbd> closes</footer>
 </div>
 <!-- the music player's YouTube player (html/music.js): heard, never seen -->
@@ -153,5 +176,6 @@
 <script src="app.js"></script>
 <script src="media.js"></script>
 <script src="music.js"></script>
+<script src="spot.js"></script>
 </body>
 </html>

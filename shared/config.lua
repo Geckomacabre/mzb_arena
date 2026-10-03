@@ -209,3 +209,27 @@ Config.Music = {
         house = { vector3(-324.310, -1968.600, 33.0) },
     },
 }
+
+-- ------------------------------------------------------------------ the followspot (client/spot.lua, server/spot.lua)
+-- One or two operator-run followspots high on the bowl's long sides. Lock them onto a player (every client tracks that
+-- ped itself, so it is smooth and costs no traffic) or aim them by hand: grab free aim with the key below and the
+-- spot follows your camera (sent at most Config.FollowSpot.sendRate times a second; the others glide after it).
+-- Run it from the desk's Followspot section or /arenaspot <on | off | follow <id|me|look> | free | color c | size n |
+-- intensity n | status>.
+Config.FollowSpot = {
+    enabled = true,
+    command = 'arenaspot',
+    access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
+    key = 'F7',                  -- grab / release free aim (players can rebind it: Settings > Key Bindings > FiveM)
+    -- the lamps: just under the roof's house-light positions on the long sides (rig group 3)
+    fixtures = { vector3(-334.807, -1984.162, 51.6), vector3(-313.813, -1953.038, 51.6) },
+    brightness = 40.0,           -- DrawSpotLight brightness at full intensity
+    hardness = 0.75,             -- a followspot has a hard edge (0 = soft)
+    falloff = 1.0,
+    size = 5.0,                  -- the beam's radius (degrees) a new spot starts at; the desk sets 2-15
+    color = { 255, 248, 235 },   -- a warm white
+    intensity = 1.0,
+    sendRate = 8,                -- free aim: points a second at most
+    bounds = { radius = 70.0, zMin = 15.0, zMax = 60.0 },   -- where a free-aim point may be: the arena, no further
+    lookAngle = 8.0,             -- "follow look": the player nearest your crosshair within this many degrees
+}
