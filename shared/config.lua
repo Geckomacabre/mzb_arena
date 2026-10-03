@@ -75,7 +75,8 @@ Config.AnnounceSwitch = false
 -- picked independently, one or more aims (floor, stage, crowd: the fixtures take turns), and the ring lights.
 Config.LightCommand = 'arenalights'
 Config.LightAccess = 'command.arena'   -- who may run the lights: an ACE (default: the arena's staff ACE), false = anyone
-Config.LightMaxFixtures = 32           -- spot lights drawn per frame at most (the show rigs have 24 to 36)
+Config.LightMaxFixtures = 40           -- spot lights drawn per frame at most (the show rigs have 24 to 36, up to 46 with
+                                       -- Config.LightRigExtra; the roof's house lights are the ones left out)
 Config.LightLensGlow = true            -- a small glow at each fixture's lens, so the rig itself flashes
 Config.LightBrightness = 12.0          -- DrawSpotLight brightness at full intensity
 Config.LightHardness = 0.0             -- DrawSpotLight roundness (0 = soft edge)
@@ -232,4 +233,43 @@ Config.FollowSpot = {
     sendRate = 8,                -- free aim: points a second at most
     bounds = { radius = 70.0, zMin = 15.0, zMax = 60.0 },   -- where a free-aim point may be: the arena, no further
     lookAngle = 8.0,             -- "follow look": the player nearest your crosshair within this many degrees
+}
+
+-- ------------------------------------------------------------------ more stage lights (client/lights.lua)
+-- Fixtures of your own, added to the show's rig (Config.LightRig, from the build) and run by the light desk like the
+-- rest: { x, y, z, dx, dy, dz, g } with g 1 a moving head, 2 a wash (the ring lights use these too), 3 a house light,
+-- 4 a floor beam (it keeps its own aim, whatever the desk's aim is). The ones below light the stage end: heads and
+-- washes half way between the build's fixtures on the same truss (so they hang on real steel), and four floor
+-- beams along the back of the stage end, either side of the entrance, shooting up and out over the floor.
+Config.LightConeFloor = 5.0            -- the floor beams' radius: narrow, a beam rather than a wash
+Config.LightRigExtra = {
+    wrestling = {
+        { -343.987, -1956.896, 29.522, 0.140, 0.154, -0.978, 1 },   -- the stage truss
+        { -345.547, -1958.796, 29.532, 0.284, 0.196, -0.939, 1 },
+        { -347.169, -1960.650, 29.546, 0.236, 0.380, -0.894, 1 },
+        { -336.881, -1948.424, 29.541, -0.247, -0.298, -0.922, 1 },  -- the stage truss, other side
+        { -334.837, -1956.479, 28.758, 0.178, -0.476, -0.861, 1 },   -- the low truss over the ramp
+        { -336.472, -1958.393, 28.737, 0.288, -0.237, -0.928, 1 },
+        { -348.084, -1956.484, 20.550, 0.231, -0.194, 0.954, 4 },    -- floor beams, back of the stage
+        { -346.156, -1954.186, 20.550, 0.231, -0.194, 0.954, 4 },
+        { -342.299, -1949.589, 20.550, 0.231, -0.194, 0.954, 4 },
+        { -340.370, -1947.291, 20.550, 0.231, -0.194, 0.954, 4 },
+    },
+    concert = {
+        { -343.293, -1960.601, 31.777, -0.207, 0.319, -0.925, 2 },  -- the wash bar over the stage
+        { -341.058, -1957.937, 31.776, -0.271, 0.246, -0.931, 2 },
+        { -338.822, -1955.273, 31.777, -0.332, 0.170, -0.928, 2 },
+        { -336.586, -1952.609, 31.779, -0.390, 0.094, -0.916, 2 },
+        { -334.349, -1949.945, 31.784, -0.443, 0.020, -0.896, 2 },
+        { -348.084, -1956.484, 20.550, 0.231, -0.194, 0.954, 4 },    -- floor beams, back of the stage
+        { -346.156, -1954.186, 20.550, 0.231, -0.194, 0.954, 4 },
+        { -342.299, -1949.589, 20.550, 0.231, -0.194, 0.954, 4 },
+        { -340.370, -1947.291, 20.550, 0.231, -0.194, 0.954, 4 },
+    },
+    mma = {
+        { -348.084, -1956.484, 20.550, 0.231, -0.194, 0.954, 4 },    -- floor beams, back of the stage
+        { -346.156, -1954.186, 20.550, 0.231, -0.194, 0.954, 4 },
+        { -342.299, -1949.589, 20.550, 0.231, -0.194, 0.954, 4 },
+        { -340.370, -1947.291, 20.550, 0.231, -0.194, 0.954, 4 },
+    },
 }
