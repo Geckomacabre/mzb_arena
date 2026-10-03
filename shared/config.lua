@@ -132,3 +132,40 @@ Config.Ice = {
     fallChance = 0.35,           -- the chance per sharp sprinting turn
     fallCooldown = 4.0,          -- s between two falls
 }
+
+-- ------------------------------------------------------------------ where a listener is (client/listener.lua)
+-- The screens' video sound and the music player both play in a browser, which has no idea where you stand. So the
+-- client works it out: the room the game has you in, sorted into the bowl, the rooms next to it, the rest of the
+-- building and outside. The two players turn their level, filter and echo from that. A room not named here counts as
+-- "building" while you are inside the arena's interior.
+Config.Listener = {
+    near = { concourse = true, tunnel = true, backstage = true, stair_nw = true, stair_se = true,
+             ring_north = true, ring_east = true, ring_south = true },   -- open onto the bowl: heard through the gaps
+    level = { bowl = 1.0, near = 0.35, building = 0.06, outside = 0.0 },  -- the level in each, before distance
+}
+-- how clients agree on "now" with the server (whose clock the media and music positions run on): ask now and then
+Config.ClockResync = 60          -- s between two clock checks (a check is three quick round trips; the best one wins)
+
+-- ------------------------------------------------------------------ media on the video screens (client/media.lua, server/media.lua)
+-- A YouTube video, a cycle of pictures or one picture on every video screen of the show, drawn by a hidden browser
+-- (html/screen.html) onto the screens' render target. While nothing of ours is on, the render target is left alone,
+-- so pmms or a TV script can use the same screens; when ours is on it wins. Run it from the desk's Screens section or
+-- with /arenascreen <youtube url | picture url(s) | images [set] | off | pause | resume | volume n | status>.
+Config.Media = {
+    enabled = true,              -- false: no built-in screen player at all (leave the screens to another script)
+    command = 'arenascreen',
+    access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
+    width = 1280, height = 720,  -- the browser's size in pixels (the picture is stretched over every screen)
+    range = 160.0,               -- m from the arena's middle: the browser exists only this close, and goes further out
+    volume = 0.6,                -- the video's loudness at 100% on the desk, in the bowl (the sound is not positional)
+    defaultVolume = 60,          -- the desk's volume a new video starts at (0-100)
+    interval = 8,                -- s per picture in a cycle (the desk / command can change it: 2-120)
+    resync = 30,                 -- s between two position checks of a running video (a late or drifting one seeks)
+    maxImages = 24,              -- pictures in one cycle at most
+    -- picture sets for /arenascreen images [name]: https URLs, or files of this resource under html/img/ (add them to
+    -- the folder; fxmanifest.lua already ships everything in it). A set is shown in this order, Config.Media.interval
+    -- seconds each.
+    imageSets = {
+        -- default = { 'img/sponsor1.png', 'img/sponsor2.png', 'https://example.com/poster.jpg' },
+    },
+}

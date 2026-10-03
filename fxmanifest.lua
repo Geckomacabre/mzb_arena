@@ -17,11 +17,12 @@ data_file 'DLC_ITYP_REQUEST' 'stream/interior/mzb_arena.ytyp'
 data_file 'AUDIO_GAMEDATA' 'audio/mzb_arena_game.dat'
 -- the interior's own time cycle: no daylight / outdoor fog inside the closed rooms, none of the fog in the concourse
 data_file 'TIMECYCLEMOD_FILE' 'data/mzb_timecycle.xml'
-files { 'data/mzb_timecycle.xml', 'audio/mzb_arena_game.dat151.rel', 'html/index.html', 'html/style.css', 'html/app.js' }
+files { 'data/mzb_timecycle.xml', 'audio/mzb_arena_game.dat151.rel', 'html/index.html', 'html/style.css', 'html/app.js',
+        'html/media.js', 'html/screen.html', 'html/screen.js', 'html/img/*' }
 
 shared_scripts { 'shared/config.lua', 'shared/generated.lua' }
-client_scripts { 'client/main.lua', 'client/lights.lua', 'client/ice.lua' }
-server_scripts { 'server/main.lua', 'server/lights.lua' }
+client_scripts { 'client/main.lua', 'client/lights.lua', 'client/ice.lua', 'client/listener.lua', 'client/media.lua' }
+server_scripts { 'server/main.lua', 'server/lights.lua', 'server/clock.lua', 'server/media.lua' }
 
 -- the light desk (/arenalights)
 ui_page 'html/index.html'

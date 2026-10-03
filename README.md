@@ -217,6 +217,36 @@ Any other TV or cinema script that plays on a model through a named render targe
 model(s) above with the render target `mzb_screens`. Switching the show swaps the screen object, so start the video
 again after a switch.
 
+## Built-in screen player (ACE `command.arena`)
+
+The arena can play on its own screens without another resource: a YouTube video, a cycle of pictures or one
+picture, on every screen of the show at once, the same moment for every player (late joiners too). Run it from the
+light desk's **Screens** section (paste a link, play / pause / off, volume, picture sets) or from chat:
+
+| Command | What it does |
+|---|---|
+| `/arenascreen <youtube link or id>` | play a video (watch, youtu.be, shorts, embed and live links all work) |
+| `/arenascreen <picture url> [more ...]` | one picture, or a cycle of several (https only) |
+| `/arenascreen images [set]` | a picture set from `Config.Media.imageSets` |
+| `/arenascreen pause` / `resume` / `off` | |
+| `/arenascreen volume <0-100>` / `interval <s>` | the video's volume; seconds per picture |
+| `/arenascreen status` | what is on |
+
+The video's sound comes from the screens' browser, which is not positional: it is full in the bowl, low in the rooms
+that open onto it (concourse, tunnel, backstage, stairs: `Config.Listener`) and silent outside the building.
+Your own pictures go in `html/img/` and into a set in `Config.Media.imageSets` as `img/<file>`; restart the resource.
+
+**Living with pmms and TV scripts:** the built-in player only touches the `mzb_screens` render target while it is
+playing something. Turn it off (`/arenascreen off`) before starting pmms on the screens, or set
+`Config.Media.enabled = false` to leave the screens to the other script for good.
+
+**YouTube:** some videos refuse to play embedded (the owner turned embedding off, or age / region limits); the
+screens then stay dark. YouTube also expects a web page origin for embeds; if every video fails on your server
+build, that is the cause and a picture cycle still works.
+
+Exports (server): `SetScreenMedia(urlOrListOfPictureUrls)`, `ScreenImageSet(name)`, `ScreenOff()`,
+`ScreenPause(on)`, `ScreenVolume(0-100)`, `GetScreenMedia()`. Client: `IsScreenMediaOn()`.
+
 ## Configuration (`shared/config.lua`)
 
 - `Config.DefaultShow`: the show the server starts with.
