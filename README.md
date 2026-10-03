@@ -247,6 +247,9 @@ again after a switch.
   - **Box office windows**: the 20 ticket windows in the facade's diagonal sections looked straight into the concourse
     through the arena's own glass and its mullions. They now have closed roller shutters (placed outside the interior,
     in `mzb_arena_milo.ymap`, so they always draw from the street).
+  - The Gorilla's doors are signed (ARENA to the stage, BACKSTAGE either side).
+  - A 13 cm slot along one riser row of the lower seats (over the rooms under them, both sides and the east end) is
+    closed: the rooms' ceilings showed through it, and from the bowl it was a black line.
   - The security control room's north wall and parts of the SE stair's shaft belonged to the neighbouring rooms.
   - The roof deck and trusses over the middle of the bowl belonged to the concourse: looking up from the floor showed
     holes to the sky. A strip of the corridor floor along the east store and the garage belonged to those rooms (a
