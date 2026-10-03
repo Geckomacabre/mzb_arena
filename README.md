@@ -234,8 +234,10 @@ again after a switch.
 - **1.0.2**: the event level, backstage and the gateways reworked.
   - **The Gorilla position** is rebuilt as a proper room between the event tunnel and the stage: the producers' desks
     (two seats each) along the back wall, the timekeeper's and match producer's desk at the top, the ARENA exit straight
-    onto the stage stairs, and a BACKSTAGE door on each side into the backstage areas behind the masking (they were
-    walled off). Same look as before (dark wood, LED dado, the show's screens), now with a solid panel ceiling.
+    onto the stage stairs, and a BACKSTAGE opening on each side into the backstage areas behind the masking (they were
+    walled off). Same look as before (dark wood, LED dado, the show's screens), now with a solid panel ceiling. All four
+    openings (the walk-out, the entrance from the tunnel and the two BACKSTAGE ones) have the walk-through curtain,
+    each wider than its opening and hung just under its head, instead of doors.
   - **Walls popping in and out**: faces that ran across two rooms (the media room's tiled wall, the locker rooms'
     walls, the reveals of every door, tunnel and vomitory, and many more) are cut at the dividing walls and doorways,
     and each piece belongs to the room it faces. The floor collision now changes room exactly at each doorway and inside
@@ -247,7 +249,17 @@ again after a switch.
   - **Box office windows**: the 20 ticket windows in the facade's diagonal sections looked straight into the concourse
     through the arena's own glass and its mullions. They now have closed roller shutters (placed outside the interior,
     in `mzb_arena_milo.ymap`, so they always draw from the street).
-  - The Gorilla's doors are signed (ARENA to the stage, BACKSTAGE either side).
+  - The Gorilla's openings are signed (ARENA to the stage, BACKSTAGE either side).
+  - **Stair landings**: the top landings of the NW and SE stairs (concourse level) were open over the flight below for
+    about 1.5 m (a 4.5 m drop). A concrete parapet, 1 m high with collision, now continues the dividing wall.
+  - **Bowl exits**: the floors of the passages from the bowl into the ring corridor were black matting; they are the
+    corridor's concrete now.
+  - **Flickering walls (z-fighting)**: wherever two surfaces lay in exactly the same plane they flickered in a sawtooth
+    against each other - the black fascia band round the front of the upper tier over the concrete, the stowed seating's
+    fascia, stair and seat nosings over the treads, the PA speakers' grilles, the Gorilla's LED dado, finishes in the
+    toilets, locker rooms and backstage, the locker-room mirror over its tiles, the flight cases' trims and corners. The
+    surface that belongs on top now sits 3-6 mm proud of the one under it (the mirror's reflection plane moved with
+    it). The side hallways' door details and signs are spaced off the door and back plate the same way.
   - A 13 cm slot along one riser row of the lower seats (over the rooms under them, both sides and the east end) is
     closed: the rooms' ceilings showed through it, and from the bowl it was a black line.
   - The security control room's north wall and parts of the SE stair's shaft belonged to the neighbouring rooms.

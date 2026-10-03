@@ -236,8 +236,12 @@ end
 local curtains = {}                -- name -> { { e1, e2, pivot, a1, v1, a2, v2, b, vb } ... }
 local CS = Config.CurtainSwing
 
-local function curtainAxes()
-    local h = math.rad(Config.CurtainHeading)
+local function curtainHeading(c)
+    return c.heading or Config.CurtainHeading
+end
+
+local function curtainAxes(c)
+    local h = math.rad(curtainHeading(c))
     return vector3(math.cos(h), math.sin(h), 0.0), vector3(-math.sin(h), math.cos(h), 0.0)   -- along, through
 end
 
@@ -253,11 +257,11 @@ local function deleteCurtains()
     curtains = {}
 end
 
-local function curtainPiece(model, p, id)
+local function curtainPiece(model, p, id, heading)
     local e = CreateObjectNoOffset(model, p.x, p.y, p.z, false, false, false)
     SetEntityCollision(e, false, false)
     FreezeEntityPosition(e, true)
-    SetEntityRotation(e, 0.0, 0.0, Config.CurtainHeading, 2, false)
+    SetEntityRotation(e, 0.0, 0.0, heading, 2, false)
     SetEntityLodDist(e, 120)
     ForceRoomForEntity(e, id, `bowl`)
     return e
@@ -266,9 +270,10 @@ end
 local function spawnCurtains()
     local id = arenaInterior()
     if id == 0 or not IsInteriorReady(id) then return false end
-    local ax = curtainAxes()
     for name, c in pairs(Config.Curtains) do
         if not curtains[name] then
+            local ax = curtainAxes(c)
+            local heading = curtainHeading(c)
             local tops = { loadModel(c.tops[1]), loadModel(c.tops[2]) }
             local lows = { loadModel(c.lows[1]), loadModel(c.lows[2]) }
             local strips = {}
@@ -276,7 +281,7 @@ local function spawnCurtains()
                 local x = -c.halfWidth + (i - 0.5) * 2.0 * c.halfWidth / c.strips
                 local p = c.top + ax * x
                 local k = (i % 2) + 1
-                strips[i] = { e1 = curtainPiece(tops[k], p, id), e2 = curtainPiece(lows[k], p - vector3(0.0, 0.0, c.l1), id),
+                strips[i] = { e1 = curtainPiece(tops[k], p, id, heading), e2 = curtainPiece(lows[k], p - vector3(0.0, 0.0, c.l1), id, heading),
                               pivot = p, a1 = 0.0, v1 = 0.0, a2 = 0.0, v2 = 0.0, b = 0.0, vb = 0.0 }
             end
             curtains[name] = strips
@@ -322,7 +327,6 @@ local function pushStrip(c, s, lx, ly, pz, vy, dt)
 end
 
 local function stepCurtains(dt)
-    local ax, ay = curtainAxes()
     local peds = {}
     local centre = Config.Curtains.stage.top
     for _, ped in ipairs(GetGamePool('CPed')) do
@@ -331,6 +335,8 @@ local function stepCurtains(dt)
     end
     for name, strips in pairs(curtains) do
         local c = Config.Curtains[name]
+        local ax, ay = curtainAxes(c)
+        local heading = curtainHeading(c)
         local reach = c.stripWidth * 0.5 + CS.body
         for _, s in ipairs(strips) do
             for _, pd in ipairs(peds) do
@@ -349,10 +355,10 @@ local function stepCurtains(dt)
             s.b = clamp(s.b + s.vb * dt, -CS.bmax, CS.bmax)
             -- pitch about a piece's own x swings its bottom through the curtain (+y), roll about its y swings it along
             -- the curtain (a positive roll takes the bottom to -x); the bottom piece hangs from the top one's lower edge
-            SetEntityRotation(s.e1, math.deg(s.a1), -math.deg(s.b), Config.CurtainHeading, 2, false)
+            SetEntityRotation(s.e1, math.deg(s.a1), -math.deg(s.b), heading, 2, false)
             local hinge = GetOffsetFromEntityInWorldCoords(s.e1, 0.0, 0.0, -c.l1)
             SetEntityCoordsNoOffset(s.e2, hinge.x, hinge.y, hinge.z, false, false, false)
-            SetEntityRotation(s.e2, math.deg(s.a2), -math.deg(s.b), Config.CurtainHeading, 2, false)
+            SetEntityRotation(s.e2, math.deg(s.a2), -math.deg(s.b), heading, 2, false)
         end
     end
 end

@@ -3,11 +3,22 @@ Config.Curtains = {
     stage = { top = vector3(-345.338, -1950.955, 24.480), halfWidth = 2.120, strips = 14, stripWidth = 0.3179,
         drop = 3.410, l1 = 1.535,
         tops = { 'mzb_curtain_stage_top_a', 'mzb_curtain_stage_top_b' }, lows = { 'mzb_curtain_stage_low_a', 'mzb_curtain_stage_low_b' } },
-    gorilla = { top = vector3(-349.819, -1947.195, 22.080), halfWidth = 1.080, strips = 7, stripWidth = 0.3236,
+    -- the Gorilla: the walk-out to the stage stair, the entrance from the tunnel, the BACKSTAGE openings either side
+    -- (those two run across the others: heading = the strips' +x, along their opening)
+    gorilla = { top = vector3(-349.582, -1947.394, 22.140), halfWidth = 1.620, strips = 11, stripWidth = 0.3236,
         drop = 2.510, l1 = 1.129,
         tops = { 'mzb_curtain_gorilla_top_a', 'mzb_curtain_gorilla_top_b' }, lows = { 'mzb_curtain_gorilla_low_a', 'mzb_curtain_gorilla_low_b' } },
+    gorilla_in = { top = vector3(-353.849, -1943.814, 22.140), halfWidth = 2.020, strips = 13, stripWidth = 0.3236,
+        drop = 2.510, l1 = 1.129,
+        tops = { 'mzb_curtain_gorilla_top_a', 'mzb_curtain_gorilla_top_b' }, lows = { 'mzb_curtain_gorilla_low_a', 'mzb_curtain_gorilla_low_b' } },
+    gorilla_n = { top = vector3(-346.198, -1941.931, 22.140), halfWidth = 0.660, strips = 5, stripWidth = 0.3236,
+        drop = 2.510, l1 = 1.129, heading = -40.000,
+        tops = { 'mzb_curtain_gorilla_top_a', 'mzb_curtain_gorilla_top_b' }, lows = { 'mzb_curtain_gorilla_low_a', 'mzb_curtain_gorilla_low_b' } },
+    gorilla_s = { top = vector3(-354.375, -1951.675, 22.140), halfWidth = 0.660, strips = 5, stripWidth = 0.3236,
+        drop = 2.510, l1 = 1.129, heading = -40.000,
+        tops = { 'mzb_curtain_gorilla_top_a', 'mzb_curtain_gorilla_top_b' }, lows = { 'mzb_curtain_gorilla_low_a', 'mzb_curtain_gorilla_low_b' } },
 }
-Config.CurtainHeading = 50.000       -- the strips' +x: along the curtains (arena +v)
+Config.CurtainHeading = 50.000       -- the strips' +x: along the curtains (arena +v); a curtain's own heading overrides it
 Config.CurtainSwing = { k1 = 6.00, d1 = 1.80, c1 = 5.00, k2 = 4.00, d2 = 1.00, c2 = 9.00, kb = 9.00, db = 3.00, body = 0.34, push1 = 0.50, push2 = 0.80, amax = 1.20, bmax = 0.30 }
 Config.CurtainShows = { wrestling = true }   -- the shows whose stage has the curtains
 -- the toilet stalls' doors (ar_stalls): hinge (x, y, z = the floor), yaw = the shut leaf's +x, s = which side
