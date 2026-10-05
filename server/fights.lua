@@ -50,7 +50,7 @@ local function inRing(venue, c)
     if not venue or not c or math.abs(c.z - venue.z) > 2.5 then return false end
     local u, v = arena(c.x, c.y)
     if venue.shape == 'circle' then return u * u + v * v <= (venue.radius or 4.0) ^ 2 end
-    local h = venue.half or 3.4
+    local h = venue.half or 2.8
     return math.abs(u) <= h and math.abs(v) <= h
 end
 

@@ -113,7 +113,7 @@ local function drive(ped, c)
     SetPedDiesWhenInjured(ped, false)
     SetPedKeepTask(ped, true)
     if v then                                          -- held inside the ring / the cage
-        SetPedSphereDefensiveArea(ped, AF.x, AF.y, v.z, v.shape == 'circle' and (v.radius or 4.0) or (v.half or 3.4),
+        SetPedSphereDefensiveArea(ped, AF.x, AF.y, v.z, v.shape == 'circle' and (v.radius or 4.0) or (v.half or 2.8),
             false, false)
     end
     if F.state == 'intro' then

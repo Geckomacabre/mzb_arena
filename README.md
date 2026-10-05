@@ -33,7 +33,7 @@ exterior with no changes to the outside. The entire building is open:
 
 | Show | What you get |
 |---|---|
-| `wrestling` | Wrestling ring (turnbuckles, ropes, printed skirt, steel steps), entrance stage with titantron, ramp, pyro, a walk-through entrance curtain that moves when peds pass, the Gorilla position, commentary and timekeeper desks, ~1,200 floor chairs, a lighting rig and PA |
+| `wrestling` | A 20 ft wrestling ring (round posts, turnbuckles, ropes, printed skirt, steel steps), entrance stage with titantron, ramp, pyro, a walk-through entrance curtain that moves when peds pass, the Gorilla position, commentary and timekeeper desks, ~1,200 floor chairs, a lighting rig and PA |
 | `concert` | End stage with an LED wall, a full band backline (a detailed drum kit on a skirted riser, two guitar stacks, an 8x10 bass rig, a 2x12 combo, pedalboards, boom mics, a guitar vault and flight cases in the wings), a ground-support roof with moving heads, PA hangs, side screens, a general-admission floor with a photo pit barricade and a FOH mix riser |
 | `hockey` | A 56 x 26 m ice rink (slippery: vehicles slide and players glide on it, see below): printed ice with the Maze Bank centre logo, dasher boards with a kick plate and GTA sponsor ads, glass on stanchions (taller at the ends), protective netting over the end glass, goals with nets, open player benches with doors onto the ice and glass behind them, the penalty and timekeeper boxes, the resurfacer's gate at the far end, and the board's hockey score |
 | `basketball` | A printed hardwood court with its run-off, portable basket stanchions (padded base, glass backboard, rim and net, shot clock), team benches, the scorer's table with an LED front, about 1,150 floor seats (courtside rows on both sides, the ends seated to the walls) and the board's basketball score |
@@ -393,16 +393,11 @@ A link that will not play is reported once to whoever started it, not to everyon
 
 Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `MusicVolume(0-100)`, `GetMusic()`.
 
-## The arena's own sound
+## Footsteps and reverb
 
-An empty hall is not silent. Inside the building every player hears a low room tone, and with the crowd in, its
-murmur: fuller in the bowl, muffled in the rooms that open onto it, faint in the rest of the building, rising to a
-roar with the crowd's mood (`peak`, `cheer`). It is made in the page (no sound files), so it costs nothing to
-stream. `/arenaambience <0-100>` sets its level for you only (anyone; kept between sessions; 0 = off).
-
-Footsteps are quieter in the bowl (`Config.Ambience.quietFootsteps`), and the rooms' reverb is shorter than before
-(`audio/mzb_arena_game.dat151.rel`): steps no longer ring round the hall. `Config.Ambience` has the levels by zone
-and by mood; `enabled = false` turns the tone and the murmur off for everyone.
+Footsteps are the game's quiet ones inside the building (`Config.QuietFootsteps`), and the rooms' reverb is shorter
+than before (`audio/mzb_arena_game.dat151.rel`): steps no longer ring round the hall. The arena makes no room tone
+and no crowd noise of its own: play what you like through the music player.
 
 ## Followspot (ACE `command.arena`)
 
@@ -443,9 +438,16 @@ With the show lights off they rest in `Config.RampLightIdle` (a dim blue; `false
 ## Props of your own (`Config.ShowProps`)
 
 Vanilla props put down for a show without CodeWalker: `Config.ShowProps[show]` is a list of
-`{ model, x, y, z, heading, ground = true }` (local props, frozen, made while you are in the arena; `/arenainfo`
-prints where you stand). The config has two ready to try: a camera crane on the wrestling stage deck and a green
-screen for interviews.
+`{ model, x, y, z, heading, ground = true, room = 'backstage' }` (local props, frozen, made while you are in the
+arena; `ground` drops the prop onto the floor under it, `room` is the interior room it stands in when that is not the
+bowl; `/arenainfo` prints where you stand). Out of the box:
+
+- **The interview set** (wrestling, MMA): a green screen in the backstage hall, off the east wall north of the
+  tunnel, with a TV camera on it and two studio lights.
+- **A camera crane** on the wrestling stage deck beside the titantron, its arm up over the stage's lip towards the
+  ring.
+
+Take a line out of the list to remove a prop, or move it.
 
 ## Configuration (`shared/config.lua`)
 
@@ -470,7 +472,7 @@ screen for interviews.
 - `Config.RingLightScale`: how bright the rigs' own ring lights are drawn (`shared/rig_lights.lua` has each one's
   place, colour and strength). `Config.RingLightGroup`, `Config.RingLightColor`, `Config.RingLightBrightness`: for a
   show without lights of its own, which of the rig's fixtures stand in (2 = the washes), their colour and brightness.
-- `Config.Ambience`: the room tone and the crowd's murmur. `Config.Concourse`: the people round the building.
+- `Config.QuietFootsteps`: the quiet footsteps inside. `Config.Concourse`: the people round the building.
 - `Config.LightRooms`: the rooms the light show is drawn in.
 - `Config.HouseSets`: the interior's house light sets the desk switches.
 - `Config.Ice`: the hockey ice (on / off, the shows it is down for, how slippery, falls).
@@ -492,6 +494,15 @@ screen for interviews.
 
 ## Changes
 
+- **1.1.1**: the ring to size, a ramp without steps.
+  - **The ring is 20 ft x 20 ft** (it was 24 ft), on round posts. The fights' corners and ring-out line
+    (`Config.Fights.venues.wrestling`) follow it.
+  - **The ramp is one flat slope** from the stage's lip to the floor at the barricade: the two steps at its foot are
+    gone. The ramp lights (`Config.RampLights`) follow it.
+  - **A camera crane** on the wrestling stage and **an interview set** (green screen, camera, lights) in the
+    backstage hall, both from `Config.ShowProps`.
+  - The synthesised room tone and crowd noise are gone, with `/arenaambience`, the desk's "Room" slider and
+    `Config.Ambience`. The quiet footsteps stay (`Config.QuietFootsteps`), and so does the shorter reverb.
 - **1.1.0**: the house fills up, and the desk runs the whole show.
   - **The crowd**: people in the bowl's seats, in the shows' floor chairs and on the concert's standing floor,
     brought in and sent home from the desk or `/arenacrowd`, in four moods (doors, show, peak, cheer). They are

@@ -261,29 +261,9 @@ Config.Music = {
     },
 }
 
--- ------------------------------------------------------------------ the arena's own sound (client/ambience.lua)
--- The building is never silent: a low room tone in every room of it, the crowd's chatter while the crowd is in and
--- its roar in the loud moods, all made by the NUI page (html/ambience.js, no files). Per Config.Listener zone: the
--- room tone's level, the crowd's level and a low-pass (Hz: the bowl heard through the concourse's walls). Per crowd
--- mood (Config.CrowdMoods): how much they chatter and how much they roar. Everyone has their own level of it on the
--- desk (Music: Room) or with /arenaambience <0-100>. quietFootsteps: the game's quiet footsteps inside the building.
-Config.Ambience = {
-    enabled = true,
-    command = 'arenaambience',
-    volume = 0.5,
-    quietFootsteps = true,
-    zones = {
-        bowl = { tone = 0.30, walla = 1.0, lowpass = 9000 },
-        near = { tone = 0.26, walla = 0.45, lowpass = 1800 },
-        building = { tone = 0.20, walla = 0.10, lowpass = 500 },
-    },
-    moods = {
-        doors = { walla = 0.9, roar = 0.0 },
-        show = { walla = 0.55, roar = 0.12 },
-        peak = { walla = 0.7, roar = 0.55 },
-        cheer = { walla = 0.6, roar = 0.9 },
-    },
-}
+-- ------------------------------------------------------------------ footsteps (client/footsteps.lua)
+-- The game's quiet footsteps while you are inside the building (false: the game's own).
+Config.QuietFootsteps = true
 
 -- ------------------------------------------------------------------ the followspot (client/spot.lua, server/spot.lua)
 -- One or two operator-run followspots high on the bowl's long sides. Lock them onto a player (every client tracks that
@@ -362,18 +342,18 @@ Config.RampLightGlowRange = 1.4        -- ... and how far it reaches (m)
 Config.RampLightIdle = { 120, 170, 255, 0.45 }   -- r, g, b, level while the show lights are off (false = dark)
 Config.RampLights = {
     wrestling = {
-        { -340.441, -1956.866, 21.034, 0.290, 0.346, 0.892, 1 },
-        { -338.667, -1954.751, 21.034, -0.290, -0.346, 0.892, 1 },
-        { -339.331, -1957.798, 20.851, 0.290, 0.346, 0.892, 2 },
-        { -337.556, -1955.683, 20.851, -0.290, -0.346, 0.892, 2 },
-        { -338.220, -1958.730, 20.667, 0.290, 0.346, 0.892, 3 },
-        { -336.446, -1956.615, 20.667, -0.290, -0.346, 0.892, 3 },
-        { -337.109, -1959.662, 20.484, 0.290, 0.346, 0.892, 4 },
-        { -335.335, -1957.548, 20.484, -0.290, -0.346, 0.892, 4 },
-        { -335.998, -1960.594, 20.300, 0.290, 0.346, 0.892, 5 },
-        { -334.224, -1958.480, 20.300, -0.290, -0.346, 0.892, 5 },
-        { -334.888, -1961.526, 20.117, 0.290, 0.346, 0.892, 6 },
-        { -333.113, -1959.412, 20.117, -0.290, -0.346, 0.892, 6 },
+        { -340.441, -1956.866, 21.019, 0.290, 0.346, 0.892, 1 },
+        { -338.667, -1954.751, 21.019, -0.290, -0.346, 0.892, 1 },
+        { -339.139, -1957.958, 20.762, 0.290, 0.346, 0.892, 2 },
+        { -337.365, -1955.844, 20.762, -0.290, -0.346, 0.892, 2 },
+        { -337.837, -1959.051, 20.504, 0.290, 0.346, 0.892, 3 },
+        { -336.063, -1956.937, 20.504, -0.290, -0.346, 0.892, 3 },
+        { -336.535, -1960.144, 20.246, 0.290, 0.346, 0.892, 4 },
+        { -334.760, -1958.030, 20.246, -0.290, -0.346, 0.892, 4 },
+        { -335.232, -1961.237, 19.989, 0.290, 0.346, 0.892, 5 },
+        { -333.458, -1959.122, 19.989, -0.290, -0.346, 0.892, 5 },
+        { -333.930, -1962.329, 19.731, 0.290, 0.346, 0.892, 6 },
+        { -332.156, -1960.215, 19.731, -0.290, -0.346, 0.892, 6 },
     },
 }
 
@@ -553,7 +533,7 @@ Config.Fights = {
     -- where they fight, per show: a square of half side `half` or a circle of `radius` round the arena's middle
     -- (Config.ArenaFrame), the canvas height, and the corners { u, v } in the arena's frame (u along it, v across)
     venues = {
-        wrestling = { shape = 'square', half = 3.4, z = 20.77, red = { -2.6, -2.6 }, blue = { 2.6, 2.6 } },
+        wrestling = { shape = 'square', half = 2.8, z = 20.77, red = { -2.0, -2.0 }, blue = { 2.0, 2.0 } },   -- the 20 ft ring
         mma = { shape = 'circle', radius = 4.1, z = 20.75, red = { -3.2, 0.0 }, blue = { 3.2, 0.0 } },
     },
 }
@@ -561,14 +541,26 @@ Config.Fights = {
 -- ------------------------------------------------------------------ props of your own (client/props.lua)
 -- Vanilla props put down for a show without CodeWalker: { model, x, y, z, heading [, ground = true] }. x y z is where
 -- the model's own origin goes (CreateObjectNoOffset); ground = true sets it down on the floor under it instead. Local
--- props, frozen, made while you are in the arena; /arenainfo prints where you stand. Two ready to try (take the --
--- off): a camera crane on the wrestling stage deck's +v side, its arm along the arena (turn it 180 if the camera end
--- faces the titantron), and a green screen for interviews - pick its place in the media room or backstage.
+-- props, frozen, made while you are in the arena; /arenainfo prints where you stand. room = the interior room a prop
+-- stands in when that is not the bowl. Out of the box:
+--   * the interview set in the backstage hall (wrestling and MMA): a green screen standing off the east wall north of
+--     the tunnel, a TV camera on it and two studio lights. The subject stands on the green floor, facing the hall
+--   * a camera crane (the movie set's) on the wrestling stage deck, right of the titantron as the house sees it, its
+--     arm up over the stage's lip towards the ring
 Config.ShowProps = {
-    -- wrestling = {
-    --     { 'prop_dolly_02', -336.218, -1946.076, 21.05, 320.0, ground = true },     -- the movie set's camera crane
-    --     { 'prop_ld_greenscreen_01', x, y, z, heading, ground = true },             -- 5.5 x 4.2 x 3.2 m
-    -- },
+    wrestling = {
+        { 'prop_dolly_02', -336.218, -1946.076, 21.273, 320.0 },                                -- the camera crane
+        { 'prop_ld_greenscreen_01', -361.594, -1924.979, 21.153, 230.0, room = 'backstage' },   -- 5.5 x 4.2 x 3.2 m
+        { 'prop_tv_cam_02', -365.730, -1921.508, 20.562, 50.0, room = 'backstage' },
+        { 'prop_studio_light_02', -365.531, -1925.004, 19.734, 99.2, room = 'backstage' },
+        { 'prop_studio_light_02', -362.253, -1921.097, 19.734, 0.8, room = 'backstage' },
+    },
+    mma = {
+        { 'prop_ld_greenscreen_01', -361.594, -1924.979, 21.153, 230.0, room = 'backstage' },
+        { 'prop_tv_cam_02', -365.730, -1921.508, 20.562, 50.0, room = 'backstage' },
+        { 'prop_studio_light_02', -365.531, -1925.004, 19.734, 99.2, room = 'backstage' },
+        { 'prop_studio_light_02', -362.253, -1921.097, 19.734, 0.8, room = 'backstage' },
+    },
 }
 
 -- ------------------------------------------------------------------ litter (client/litter.lua)
