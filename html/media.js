@@ -16,10 +16,13 @@
       : m.kind === 'feed' ? `camera: ${m.camName || '?'}` : m.black ? 'off (dark)' : 'own graphics';
     Array.from(document.querySelectorAll('#scr-looks button')).forEach((b) =>
       b.classList.toggle('active', m.kind === 'look' && b.dataset.look === m.look));
-    const text = now + (m.fade ? ' (fading out)' : m.paused ? ' (paused)' : '');
+    const video = m.kind === 'youtube';                                // Loop is a video's: the rest has no end
+    const text = now + (video && m.loop ? ', looped' : '') + (m.fade ? ' (fading out)' : m.paused ? ' (paused)' : '');
     $('#scr-now').textContent = text; $('#q-scr-now').textContent = text;
     $('#scr-pause').textContent = m.paused ? 'Resume' : 'Pause';
     $('#scr-pause').disabled = off;
+    $('#scr-loop').disabled = !video;
+    $('#scr-loop').classList.toggle('active', video && !!m.loop);
     $('#scr-fade').disabled = $('#q-scr-fade').disabled = off || !!m.fade;
     $('#scr-stop').classList.toggle('active', off && !!m.black);       // dark
     $('#scr-own').classList.toggle('active', off && !m.black);         // the show's own graphics
@@ -32,6 +35,7 @@
   $('#scr-play').onclick = play;
   $('#scr-url').addEventListener('keyup', (e) => { if (e.key === 'Enter') play(); });
   $('#scr-pause').onclick = () => post({ action: media.paused ? 'resume' : 'pause' });
+  $('#scr-loop').onclick = () => post({ action: 'loop', on: !media.loop });
   $('#scr-stop').onclick = $('#q-scr-off').onclick = () => post({ action: 'stop' });
   $('#scr-fade').onclick = $('#q-scr-fade').onclick = () => post({ action: 'fade' });
   $('#scr-own').onclick = () => post({ action: 'own' });

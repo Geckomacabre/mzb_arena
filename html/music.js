@@ -179,6 +179,7 @@
   const position = () => (music && music.kind === 'youtube' ? (yt && ytIn && yt.getCurrentTime ? yt.getCurrentTime() || 0 : 0) : (el.paused ? 0 : el.currentTime));
   setInterval(() => {
     if (!g || !playing() || failed || music.paused || !(position() > 0)) return;
+    ytLength();                                                  // (the player did not have it when it was taken in)
     const d = new Uint8Array(g.meter.fftSize);
     g.meter.getByteTimeDomainData(d);
     let heard = false;
@@ -205,6 +206,15 @@
   // loaded and held at its start, and started when the moment comes, so its first second is not lost to the loading
   let startTimer = null;
   const startLater = (fn) => { clearTimeout(startTimer); startTimer = setTimeout(fn, Math.max(0, -now() * 1000)); };
+  // The track's length, once this page knows it: the server has no way to tell, and needs it to start a looped
+  // track again at its end (the client passes it on; said once per track). A looped track then comes back as a
+  // position check with a place before its start: it goes to its beginning and waits there, as a new one does
+  let lengthTold = null;
+  function tellLength(len) {
+    if (!music || music.live || !isFinite(len) || !(len >= 1) || lengthTold === music.rev) return;
+    lengthTold = music.rev;
+    nui('musicLength', { rev: music.rev, len });
+  }
 
   // ---- files and streams: the <audio> element, in the graph from the start
   function seekPlay() {
@@ -246,7 +256,8 @@
     el.src = t.url;
   }
   el.onerror = () => { if (music && music.kind === 'file' && !failed && el.getAttribute('src')) tryNext(); };
-  el.onloadedmetadata = () => { if (music && music.kind === 'file') { apply(); seekPlay(); state(); } };
+  el.onloadedmetadata = () => { if (music && music.kind === 'file') { apply(); seekPlay(); state(); tellLength(el.duration); } };
+  el.ondurationchange = () => { if (music && music.kind === 'file') tellLength(el.duration); };   // (known late for some files)
 
   // ---- YouTube: a hidden player whose own <video> element is taken into the graph
   let yt = null, ytIn = false, ytNode = null, ytVideo = null, ytApi = false, ytWanted = null, ytSeq = 0;
@@ -279,8 +290,19 @@
         state();
       } catch (e) {
         report('the YouTube player\'s sound could not be taken into the room (' + ((e && e.name) || 'error') + ')');
+        return;
       }
+      ytLength();
     }, 50);
+  }
+
+  // its length, for a looped track (a live video has none: what the player gives for one is how long it has run)
+  function ytLength() {
+    if (!yt || !ytIn || !music || music.kind !== 'youtube' || lengthTold === music.rev) return;
+    try {
+      const data = yt.getVideoData ? yt.getVideoData() : null;
+      if (!(data && data.isLive)) tellLength(yt.getDuration ? +yt.getDuration() : 0);
+    } catch (e) { /* the player is gone */ }
   }
 
   function loadYoutube(id) {
@@ -370,10 +392,13 @@
   function renderDesk() {
     const on = desk.kind === 'file' || desk.kind === 'youtube';
     const text = desk.kind === 'off' ? 'off' : desk.kind === 'loading' ? 'fetching ' + (desk.title || '') + ' ...'
-      : (desk.title || '') + (desk.fade ? ' (fading out)' : desk.paused ? ' (paused)' : '');
+      : (desk.title || '') + (desk.loop ? ', looped' : '') + (desk.fade ? ' (fading out)' : desk.paused ? ' (paused)' : '');
     for (const n of [$('#mus-now'), $('#q-mus-now')]) { n.classList.remove('err'); n.textContent = text; }
     $('#mus-pause').textContent = desk.paused ? 'Resume' : 'Pause';
     $('#mus-pause').disabled = !on || !!desk.live;
+    // Loop: for a track with an end that is the music's own (a video's sound is looped with its picture, on the screens)
+    $('#mus-loop').disabled = !(on || desk.kind === 'loading') || !!desk.live || !!desk.screen;
+    $('#mus-loop').classList.toggle('active', desk.kind !== 'off' && !!desk.loop);
     $('#mus-fade').disabled = $('#q-mus-fade').disabled = !on || !!desk.fade;
     $('#q-mus-stop').disabled = desk.kind === 'off';
     if (document.activeElement !== $('#mus-vol')) { $('#mus-vol').value = desk.volume || 0; $('#mus-vol-val').textContent = desk.volume || 0; }
@@ -383,6 +408,7 @@
   $('#mus-play').onclick = play;
   $('#mus-url').addEventListener('keyup', (e) => { if (e.key === 'Enter') play(); });
   $('#mus-pause').onclick = () => nui('music', { action: desk.paused ? 'resume' : 'pause' });
+  $('#mus-loop').onclick = () => nui('music', { action: 'loop', on: !desk.loop });
   $('#mus-stop').onclick = $('#q-mus-stop').onclick = () => nui('music', { action: 'stop' });
   $('#mus-fade').onclick = $('#q-mus-fade').onclick = () => nui('music', { action: 'fade' });
   const slider = (id, label, send) => {

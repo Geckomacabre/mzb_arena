@@ -2,7 +2,8 @@
 --   GlobalState.mzbMedia = { kind = 'off' | 'youtube' | 'images' | 'image' | 'look' | 'feed', id (youtube), urls
 --                            (images / image), look (a look: Config.Media.looks, drawn by the page in step with the
 --                            lights), cam / camName (a camera feed: the player whose view of the game is on the
---                            screens), len (a video's length in s, once a page has said it: it is switched off then),
+--                            screens), len (a video's length in s, once a page has said it: it is switched off then,
+--                            or with loop it starts again; loops = how many times it has),
 --                            start (server ms at position 0; a video's is a moment after the Play,
 --                            Config.Media.leadIn, so every player has it loaded by then), paused, at (the position
 --                            while paused, s), fade ({ at = server ms, dur = s }: fading to black, off when it is
@@ -20,6 +21,7 @@
 --   /arenascreen off                           the screens go dark (Config.Media.offBlack)
 --   /arenascreen own                           back to the show's own graphics (another media script can have them)
 --   /arenascreen fade [seconds]                fade to black, then off
+--   /arenascreen loop [on|off]                 a video starts again at its end (nothing after it: the other way)
 --   /arenascreen pause | resume | volume <0-100> | interval <s> | status
 
 local M = Config.Media or {}
@@ -122,6 +124,7 @@ local function playYoutube(s, src)
     local m = fresh('youtube', src)
     m.id = id
     m.start = m.start + lead()
+    m.loop = M.loop == true                              -- (what a new video starts with: the desk's Loop changes it)
     setMedia(m)
     if fromSpeakers() then MzbMusicForScreen(id, src, m.rev, m.start) end
     return true
@@ -193,6 +196,34 @@ local function setVolume(v)
     cur.volume = math.floor(math.max(0, math.min(100, v)))
     GlobalState.mzbMedia = cur
     return true
+end
+
+-- Loop on / off (nil: the other way), for the video that is on: at its end it starts again instead of being switched
+-- off. seconds: the video's length, from a script that knows it (else the page of whoever put it on says so)
+local function setLoop(on, seconds)
+    local cur = copy(current())
+    if cur.kind ~= 'youtube' then
+        return false, cur.kind == 'off' and 'the screens are off'
+            or 'only a video is looped: pictures go round as they are, a look or a camera feed has no end'
+    end
+    if on == nil then on = not cur.loop end
+    cur.loop = on == true
+    seconds = tonumber(seconds)
+    if seconds and seconds == seconds and seconds >= 1.0 and seconds <= 43200.0 then cur.len = seconds end
+    GlobalState.mzbMedia = cur
+    return true
+end
+
+-- a looped video at its end: from its beginning again, a moment ahead as a new video is (Config.Media.leadIn), so
+-- every player's screens are back at its start and hold there until they all start together - and its sound from the
+-- speakers with it, on the same clock. It stays the item it was (the same rev: nothing is loaded again), the screens
+-- stay on and the show lights are left as they are
+local function again()
+    local cur = copy(current())
+    cur.start, cur.at, cur.paused = GetGameTimer() + lead(), 0.0, false
+    cur.loops = (cur.loops or 0) + 1
+    GlobalState.mzbMedia = cur
+    if MzbMusicScreenAgain then MzbMusicScreenAgain(cur.rev, cur.start) end
 end
 
 local function setInterval(v)
@@ -358,6 +389,8 @@ end)
 -- The server does not know how long a video is; the page playing it does. The first page to say so that may - the
 -- one of whoever put the video on, or of anyone allowed to run the screens - is believed, and when the video has
 -- run that long the screens are switched off (and the show lights go out with it) instead of sitting on its last frame.
+-- A looped video (Loop) starts again instead: nothing is switched off and the lights stay as they are, until Loop is
+-- taken off or the staff stop it.
 local lenThrottled = MzbThrottle(2000)
 RegisterNetEvent('mzb_arena:mediaLength', function(rev, seconds)
     local src = source
@@ -376,7 +409,7 @@ CreateThread(function()
         Wait(500)
         local cur = current()
         if cur.kind == 'youtube' and cur.len and not cur.paused and not cur.fade and MzbTrackPos(cur) >= cur.len + 0.5 then
-            stop()
+            if cur.loop then again() else stop() end
         end
     end
 end)
@@ -419,6 +452,7 @@ RegisterNetEvent('mzb_arena:media', function(cmd)
     elseif cmd.action == 'resume' then ok = pause(false)
     elseif cmd.action == 'volume' then ok = setVolume(cmd.value)
     elseif cmd.action == 'interval' then ok = setInterval(cmd.value)
+    elseif cmd.action == 'loop' then ok, err = setLoop(cmd.on == true)
     end
     if not ok and err then MzbReply(src, 'screens', err) end
 end)
@@ -431,12 +465,16 @@ local function status(src)
         or m.kind == 'image' and ('picture ' .. m.urls[1]) or m.kind == 'look' and ('the ' .. tostring(m.look) .. ' look')
         or m.kind == 'feed' and ('camera: %s (%d watching)'):format(tostring(m.camName), viewerCount)
         or (m.black and 'off (dark)' or 'off (the show\'s own graphics)')
-    MzbReply(src, 'screens', ('%s%s | volume %d%% | at %d s'):format(what,
-        m.fade and ' (fading out)' or m.paused and ' (paused)' or '', m.volume or 0, math.floor(MzbTrackPos(m))))
+    -- Loop is a video's: on with no length yet means no page that may say it has played the video so far
+    local loop = m.kind ~= 'youtube' and '' or not m.loop and ' | loop off' or m.len and ' | loop on'
+        or ' | loop on (waiting to hear how long the video is)'
+    MzbReply(src, 'screens', ('%s%s | volume %d%% | at %d s%s'):format(what,
+        m.fade and ' (fading out)' or m.paused and ' (paused)' or '', m.volume or 0, math.floor(MzbTrackPos(m)), loop))
 end
 
 local HELP = '/%s <youtube url | picture url(s)> | images [set] | look [player id | off] (a camera feed) | ' ..
-             'look <name> | off | own | fade [seconds] | pause | resume | volume <0-100> | interval <s> | status'
+             'look <name> | off | own | fade [seconds] | pause | resume | loop [on|off] | volume <0-100> | ' ..
+             'interval <s> | status'
 
 -- /arenascreen look ...: nothing or "me" = the view of whoever types it, a player id = theirs, off; a name = a look
 local function lookCommand(src, arg)
@@ -476,6 +514,12 @@ RegisterCommand(M.command or 'arenascreen', function(src, args, raw)
     elseif sub == 'resume' or sub == 'play' then ok = pause(false)
     elseif sub == 'volume' and tonumber(args[2]) then ok = setVolume(args[2])
     elseif sub == 'interval' and tonumber(args[2]) then ok = setInterval(args[2])
+    elseif sub == 'loop' then
+        local a = args[2] and args[2]:lower()
+        if a and a ~= 'on' and a ~= 'off' then
+            return MzbReply(src, 'screens', ('/%s loop [on|off] (nothing after it: the other way)'):format(M.command or 'arenascreen'))
+        end
+        ok, err = setLoop(a and a == 'on')
     elseif sub == 'images' then ok, err = playSet(args[2], src)
     elseif sub == 'look' or sub == 'cam' or sub == 'camera' then ok, err = lookCommand(src, args[2])
     elseif sub ~= 'status' then
@@ -497,5 +541,8 @@ exports('ScreenOff', function() return stop() end)
 exports('ScreenOwn', function() return stop(true) end)
 exports('ScreenFade', function(seconds) return fade(seconds) end)
 exports('ScreenPause', function(on) return pause(on ~= false) end)
+-- ScreenLoop(on, seconds): seconds = the video's length, if the script knows it. Without it a looped video starts
+-- again once a page that may say how long it is has played it (the one of whoever put it on, staff's)
+exports('ScreenLoop', function(on, seconds) return setLoop(on ~= false, seconds) end)
 exports('ScreenVolume', function(v) return setVolume(v) end)
 exports('GetScreenMedia', function() return copy(current()) end)

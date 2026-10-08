@@ -62,8 +62,8 @@
           applyYoutube(true);
         },
         // a player that starts by itself before its moment is held again; playing: its length is known now; its
-        // end: the screens go dark rather than show YouTube's end card (the server switches them off: it is told
-        // the length)
+        // end: the screens go dark rather than show YouTube's end card (the server switches them off, or starts a
+        // looped video again: it is told the length)
         onStateChange: (e) => {
           if (e.data === 1 && ytNow() < -0.1) applyYoutube();
           if (e.data === 1) tellLength();
@@ -105,6 +105,15 @@
     $('#yt').classList.add('hidden');
     $('#yt').classList.remove('dark');
     ytWanted = null;
+  }
+  // a looped video starts again (the server bumps media.loops and gives it a new start, a moment ahead): it is not
+  // over any more. Where it is comes with the news - before its start - so it goes back to its beginning and waits
+  // there, dark, as a new video does. Answers whether m is that news
+  function ytAgain(m, pos) {
+    if (!media || !m || (m.loops || 0) === (media.loops || 0)) return false;
+    ytOver = false;
+    if (typeof pos === 'number') { ytPos = pos; ytAt = performance.now(); }
+    return true;
   }
 
   // ---- a fade-out (the desk's Fade out, /arenascreen fade): the picture goes to black over its seconds, and this
@@ -436,6 +445,7 @@
       // only its state and the position are taken, nothing is loaded twice
       if (media && m.media && media.rev === m.media.rev) {
         const pos = m.pos || 0;
+        ytAgain(m.media);                                    // (a looped video that started again meanwhile)
         media = Object.assign({}, media, m.media);
         base = performance.now() - pos * 1000;
         if (media.paused) media.at = pos;
@@ -444,6 +454,7 @@
       } else load(m.media, m.pos || 0, m.feed);
       setFade(m.fade);
     } else if (m.type === 'state' && media) {
+      ytAgain(m.media, m.pos);
       media = Object.assign({}, media, m.media);
       $('#look').classList.toggle('hidden', media.kind !== 'look');
       if (media.kind === 'youtube') applyYoutube();

@@ -1,6 +1,7 @@
 -- mzb_arena - client: the crowd (GlobalState.mzbCrowd, server/crowd.lua).
 --   * the spots of the show that is up come from the build (client/crowd_slots.lua): the bowl's seats, the stage end
---     when the show seats it, the show's floor chairs or standing floor. Each has a key, its place in the fill order.
+--     when the show seats it, the show's floor chairs or standing floor - less the front rows a big-floor show has
+--     folded back and the rows a show keeps closed. Each has a key, its place in the fill order.
 --     You see Config.Crowd.MaxPeds of them (/arenacrowd mine <n> changes it for you): the house's best keys, the
 --     same for everyone, and a share of them in the seats round you (Config.Crowd.NearShare);
 --   * everyone is a local ped (not networked): each player makes their own copy, the same person in the same seat
@@ -109,14 +110,30 @@ local function showHas(show, set)
     return false
 end
 
+-- how deep in the stands a seat is: its distance from the event floor's outline, a rounded rectangle about the
+-- arena's middle (Config.Crowd.FloorEdge) - under a metre for the front row, more with every row behind it. The
+-- bigger floor's shows fold the front rows away and a show can keep rows closed: both go by this
+local AF = Config.ArenaFrame
+local FE = CC.FloorEdge or { halfL = 30.0, halfW = 15.0, r = 8.5 }
+local AC, AS = math.cos(AF.ang), math.sin(AF.ang)
+
+local function depth(x, y)
+    local dx, dy = x - AF.x, y - AF.y
+    local qx = math.abs(dx * AC + dy * AS) - (FE.halfL - FE.r)           -- along the arena, past the corner's centre
+    local qy = math.abs(-dx * AS + dy * AC) - (FE.halfW - FE.r)          -- across it
+    local ox, oy = math.max(qx, 0.0), math.max(qy, 0.0)
+    return math.sqrt(ox * ox + oy * oy) + math.min(math.max(qx, qy), 0.0) - FE.r
+end
+
 -- a spot: { x, y, z, heading, zone, sit x, sit y, sit z, key } or, without a seat, { x, y, z, heading, zone, key };
--- its key, whether it has a seat and a number of its own (the same on every client: who sits there, what they do)
--- are worked out once
+-- its key, whether it has a seat, a number of its own (the same on every client: who sits there, what they do) and,
+-- for a seat, how deep in the stands it is (d, measured at the seat itself) are worked out once
 local function prepare(s)
     if not s.id then
         s.seat = #s >= 9
         s.key = s[#s]
         s.id = math.floor(s[1] * 100.0 + 0.5) * 7919 + math.floor(s[2] * 100.0 + 0.5) * 31 + math.floor(s[3] * 10.0 + 0.5)
+        if s.seat then s.d = depth(s[6], s[7]) end
     end
     return s
 end
@@ -124,14 +141,27 @@ end
 local function buildSlots(show)
     local S = Config.CrowdSlots or {}
     local out = {}
-    for _, s in ipairs(S.bowl or {}) do out[#out + 1] = prepare(s) end
-    -- the stage end: its lower seats are the retractable sections (there when the show seats them), its upper ones
-    -- are behind the end-stage shows' masking
-    local seated, masked = showHas(show, CC.SeatedSet), showHas(show, CC.MaskSet)
+    -- the rows nobody sits in: the lower tier's front rows when the show has them folded back (the bigger floor),
+    -- and the rows the show keeps closed (Config.Crowd.ClosedDepth: the truck show's tarped rows)
+    local frontDepth = CC.FrontDepth or 6.2
+    local folded = showHas(show, CC.FrontStowedSet) and frontDepth or 0.0
+    local closed = tonumber((CC.ClosedDepth or {})[show]) or 0.0
+    local function open(s)
+        local d = s.d or math.huge
+        return d >= closed and (s[5] ~= 'l' or d >= folded)
+    end
+    for _, s in ipairs(S.bowl or {}) do
+        if open(prepare(s)) then out[#out + 1] = s end
+    end
+    -- the stage end: its lower seats are the retractable sections (all there when the show seats them, the rows
+    -- behind the front ones when it has only those out, none when they are stowed), its upper ones are behind the
+    -- end-stage shows' masking
+    local seated, back, masked = showHas(show, CC.SeatedSet), showHas(show, CC.BackSet), showHas(show, CC.MaskSet)
     for _, s in ipairs(S.stage_end or {}) do
+        prepare(s)
         local there
-        if s[5] == 'l' then there = seated else there = not masked end
-        if there then out[#out + 1] = prepare(s) end
+        if s[5] == 'l' then there = seated or (back and (s.d or math.huge) >= frontDepth) else there = not masked end
+        if there and open(s) then out[#out + 1] = s end
     end
     for _, s in ipairs((S.floor or {})[show] or {}) do out[#out + 1] = prepare(s) end
     table.sort(out, function(a, b) return a.key > b.key end)

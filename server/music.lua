@@ -6,7 +6,9 @@
 --                            every player's page has the track loaded by then and none loses its first second),
 --                            paused, at (the position while paused, s), fade ({ at = server ms, dur = s }: fading
 --                            out, stopped when it is down), volume (0-100), rev (bumped on every new track),
---                            by (who started it) }
+--                            by (who started it), loop (at its end it starts again), len (its length in s, once
+--                            the relay or a page playing it has said: a looped track starts again then),
+--                            loops (how many times it has started again) }
 -- The music is heard from the arena's speakers as a sound in the world and in no other way: the players' pages take
 -- the YouTube player's or the audio file's sound into their own sound graph (html/music.js). With
 -- Config.Music.relay.enabled a link is first handed to server/relay.js instead ('loading'), which fetches it and
@@ -14,6 +16,7 @@
 -- Positions run on this server's GetGameTimer() (server/clock.lua), so a late joiner lands mid-track.
 --   /arenamusic <url>                          play a track or stream (a YouTube link works too)
 --   /arenamusic pause | resume | stop | fade [seconds] | volume <0-100> | status
+--   /arenamusic loop [on|off]                  the track starts again at its end (nothing after it: the other way)
 --   /arenamusic mine <0-100>                   your own level (client side, kept with KVP)
 
 local MU = Config.Music or {}
@@ -89,17 +92,20 @@ local function play(input, src, screen, start)
     if not url then return false, 'not a usable link (http/https, at most 500 characters)' end
     local cur = current()
     local id = youtubeId(url)
+    -- (a new track starts with the config's Loop; a video's sound is started again by the screens: server/media.lua)
+    local loop = not screen and MU.loop == true
     if RELAY.enabled ~= true then
         local m = { kind = id and 'youtube' or 'file', id = id, title = id and ('YouTube ' .. id) or titleOf(url),
                     paused = false, at = 0.0, start = start or (GetGameTimer() + lead()),
-                    volume = cur.volume or OFF.volume, rev = (cur.rev or 0) + 1, by = src or 0, screen = screen }
+                    volume = cur.volume or OFF.volume, rev = (cur.rev or 0) + 1, by = src or 0, screen = screen,
+                    loop = loop }
         if not id then m.url = url end
         GlobalState.mzbMusic = m
         return true
     end
     local m = { kind = 'loading', title = id and ('YouTube ' .. id) or titleOf(url), paused = false, at = 0.0,
                 start = GetGameTimer(), volume = cur.volume or OFF.volume, rev = (cur.rev or 0) + 1, by = src or 0,
-                screen = screen }
+                screen = screen, loop = loop }
     GlobalState.mzbMusic = m
     local timeout = tonumber(RELAY.timeout) or 180
     TriggerEvent('mzb_arena:relayFetch', m.rev, id and 'youtube' or 'file', id or url,
@@ -127,6 +133,8 @@ AddEventHandler('mzb_arena:relayDone', function(rev, ok, info)
     cur.kind, cur.live = 'file', info.live == true
     if info.mode == 'direct' then cur.url = tostring(info.url) else cur.relay = tostring(info.name) end
     if type(info.title) == 'string' and #info.title > 0 then cur.title = info.title:sub(1, 80) end
+    local len = tonumber(info.duration)                       -- (the relay knows a YouTube track's length itself)
+    if len and len == len and len >= 1.0 and len <= 43200.0 and not cur.live then cur.len = len end
     local web = GetConvar('web_baseUrl', '')
     if web ~= '' then cur.web = web end
     cur.start, cur.at, cur.paused = GetGameTimer() + lead(), 0.0, false
@@ -163,11 +171,74 @@ local function fade(seconds)
     return true
 end
 
+-- ------------------------------------------------------------------ Loop
+-- A looped track that comes to its end starts again from its beginning: a new start on this server's clock, a
+-- moment ahead as a new track's is (Config.Music.leadIn), so every player's page is back at the beginning and holds
+-- there until they all start together. The track stays the one it was (the same rev: nothing is loaded again).
+-- start: the moment it starts again when that is not ours to pick (a video's sound: the screens say when)
+local function again(start)
+    local cur = copy(current())
+    cur.start, cur.at, cur.paused = start or (GetGameTimer() + lead()), 0.0, false
+    cur.loops = (cur.loops or 0) + 1
+    GlobalState.mzbMusic = cur
+end
+
+-- Loop on / off (nil: the other way). seconds: the track's length, from a script that knows it
+local function setLoop(on, seconds)
+    local cur = copy(current())
+    if cur.kind ~= 'file' and cur.kind ~= 'youtube' and cur.kind ~= 'loading' then return false, 'nothing is playing' end
+    if cur.screen then
+        return false, ('that is the sound of the video on the screens: it is looped there (/%s loop)')
+            :format((Config.Media or {}).command or 'arenascreen')
+    end
+    if cur.live then return false, 'a stream has no end to start again from' end
+    if on == nil then on = not cur.loop end
+    cur.loop = on == true
+    seconds = tonumber(seconds)
+    if seconds and seconds == seconds and seconds >= 1.0 and seconds <= 43200.0 then cur.len = seconds end
+    GlobalState.mzbMusic = cur
+    return true
+end
+
+-- The server does not know how long a track is; the page playing it does (and the relay, for what it fetched). The
+-- first page to say so that may - the one of whoever started the track, or of anyone allowed to run the music - is
+-- believed: a length made up by anyone else could cut a looped track short for the whole house.
+local lenThrottled = MzbThrottle(2000)
+RegisterNetEvent('mzb_arena:musicLength', function(rev, seconds)
+    local src = source
+    if lenThrottled(src) or type(rev) ~= 'number' or type(seconds) ~= 'number' or seconds ~= seconds then return end
+    local cur = current()
+    if not MU.enabled or cur.rev ~= rev or (cur.kind ~= 'file' and cur.kind ~= 'youtube') or cur.len or cur.live then return end
+    if src ~= cur.by and not MzbAllowed(src, MU.access) then return end
+    if seconds < 1.0 or seconds > 43200.0 then return end
+    cur = copy(cur)
+    cur.len = seconds
+    GlobalState.mzbMusic = cur
+end)
+
+-- the end of a looped track (a track that is not looped just ends: it stays what is "playing" until it is stopped,
+-- as before). Not a video's sound: that starts again when its picture does
+CreateThread(function()
+    while true do
+        Wait(500)
+        local cur = current()
+        if cur.loop and cur.len and not cur.screen and not cur.live and (cur.kind == 'file' or cur.kind == 'youtube')
+           and not cur.paused and not cur.fade and MzbTrackPos(cur) >= cur.len + 0.5 then
+            again()
+        end
+    end
+end)
+
 -- the sound of a video on the screens (server/media.lua, Config.Media.sound = 'speakers'): the same video through
--- the speakers, started, stopped, paused and faded with it
+-- the speakers, started, stopped, paused and faded with it - and started again with it when the video is looped
 function MzbMusicForScreen(id, src, mediaRev, start)
     if not MU.enabled then return false end
     return play('https://www.youtube.com/watch?v=' .. id, src, mediaRev, start)
+end
+
+function MzbMusicScreenAgain(mediaRev, start)
+    local cur = current()
+    if cur.screen == mediaRev and (cur.kind == 'file' or cur.kind == 'youtube') then again(start) end
 end
 
 function MzbMusicScreenFade(mediaRev, seconds)
@@ -206,11 +277,16 @@ local function status(src)
     local what = m.kind == 'off' and 'off' or (m.title or '?')
     local how = m.kind == 'off' and '' or (m.relay and ' | served from the relay' or m.kind == 'youtube' and ' | YouTube'
         or ' | read from its own server')
-    MzbReply(src, 'music', ('%s%s | volume %d%% | at %d s%s'):format(what,
-        m.fade and ' (fading out)' or m.paused and ' (paused)' or '', m.volume or 0, math.floor(MzbTrackPos(m)), how))
+    -- Loop: on, off, or the screens' to say (a video's sound); on with no length yet means no page that may say it
+    -- has played the track so far
+    local loop = (m.kind == 'off' or m.live) and '' or m.screen and ' | loop: with the video on the screens'
+        or not m.loop and ' | loop off' or m.len and ' | loop on' or ' | loop on (waiting to hear how long the track is)'
+    MzbReply(src, 'music', ('%s%s | volume %d%% | at %d s%s%s'):format(what,
+        m.fade and ' (fading out)' or m.paused and ' (paused)' or '', m.volume or 0, math.floor(MzbTrackPos(m)), loop, how))
 end
 
-local HELP = '/%s <url> | pause | resume | stop | fade [seconds] | volume <0-100> | status | mine <0-100> (your own level)'
+local HELP = '/%s <url> | pause | resume | stop | loop [on|off] | fade [seconds] | volume <0-100> | status | ' ..
+             'mine <0-100> (your own level)'
 
 local function command(src, args)
     if not MU.enabled then return MzbReply(src, 'music', 'the music player is off (Config.Music.enabled)') end
@@ -224,6 +300,12 @@ local function command(src, args)
     elseif sub == 'resume' then ok = pause(false)
     elseif sub == 'fade' then ok, err = fade(args[2])
     elseif sub == 'volume' and tonumber(args[2]) then ok = setVolume(args[2])
+    elseif sub == 'loop' then
+        local a = args[2] and tostring(args[2]):lower()
+        if a and a ~= 'on' and a ~= 'off' then
+            return MzbReply(src, 'music', ('/%s loop [on|off] (nothing after it: the other way)'):format(MU.command or 'arenamusic'))
+        end
+        ok, err = setLoop(a and a == 'on')
     else ok, err = play(tostring(args[1]), src) end
     if not ok and err then return MzbReply(src, 'music', err) end
     status(src)
@@ -257,6 +339,7 @@ RegisterNetEvent('mzb_arena:music', function(cmd)
     elseif cmd.action == 'resume' then ok = pause(false)
     elseif cmd.action == 'fade' then ok, err = fade(cmd.seconds)
     elseif cmd.action == 'volume' then ok = setVolume(cmd.value)
+    elseif cmd.action == 'loop' then ok, err = setLoop(cmd.on == true)
     end
     if not ok and err then MzbReply(src, 'music', err) end
 end)
@@ -278,5 +361,8 @@ exports('PlayMusic', function(url) return play(url, 0) end)
 exports('StopMusic', function() return stop() end)
 exports('FadeMusic', function(seconds) return fade(seconds) end)
 exports('PauseMusic', function(on) return pause(on ~= false) end)
+-- LoopMusic(on, seconds): seconds = the track's length, if the script knows it. Without it a looped track starts
+-- again once a page that may say how long it is has played it (the starter's, staff's), or the relay has fetched it
+exports('LoopMusic', function(on, seconds) return setLoop(on ~= false, seconds) end)
 exports('MusicVolume', function(v) return setVolume(v) end)
 exports('GetMusic', function() return copy(current()) end)

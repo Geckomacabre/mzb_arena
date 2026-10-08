@@ -40,12 +40,25 @@ exterior with no changes to the outside. The entire building is open:
 | `tennis` | A hard court with its run-off, the net and posts, the umpire's chair, players' chairs, line judges, sponsor boards behind the baselines, about 1,300 floor seats along both sides and at both ends, and the board's tennis score |
 | `mma` | Fight night: a UFC-size octagon (9.1 m, the canvas 1.2 m up, a 1.8 m black chain-link fence, padded posts, two gates with steps and handrails, a printed canvas), the end stage with an LED wall and a walkway, a ring of cageside press and officials' tables with monitors, about 1,450 floor seats in rows out to the floor's edges, a lighting rig with moving heads and four line-array PA hangs over the cage, and the house dimmed |
 | `house` | The empty arena with the house lights up |
+| `monster` | **Monster trucks**, on the bigger floor: clay over the whole floor, a chalked oval lane, a painted jump in the middle (two long ramps and two short ones up to a deck), pylons, tyres, a sponsor wall round the floor, tarps over the first rows left out - and six real cars on the deck to be flattened (see [Cars to crush](#cars-to-crush-ace-commandarena)). Bring your own trucks |
+| `karting` | **Kart circuit: the Grand Prix**, on the bigger floor: 266 m of asphalt with a flyover bridge, kerbs, red and white barriers, tyre stacks, a start gantry and grid, paddock tents, a podium with its backdrop, a timing tower and marshal posts. No karts are part of it: bring your own |
+| `sprint` | **Kart circuit: the Sprint**: 201 m, flat, blue and white barriers, a covered pit lane, the grid on the back straight, a big screen on the infield |
+| `oval` | **Kart circuit: the Oval**: 154 m with banked ends, an outer wall, and the pits on the infield - seven bays under tents, a pit lane, tyre walls at both ends |
+| `skatepark` | **Skate park**, on the bigger floor: a walled park course with bowled corners (a start wall, a vert wall with a wall ride, box jumps, a spine, a pyramid, a stair plaza with a hand rail and hubbas, ledges and rails) and a 4.1 m vert ramp beside it with railed decks and stairs, a judges' tower between the two |
+| `floor` | **The open floor**: the bigger floor with nothing on it and the house lights up, for an event of your own (a car show, a drift night) |
 
 The end-stage shows (wrestling, concert, MMA) mask off the seats behind the stage with black drapes and close the
 vomitories behind them; the LED-wall stages (concert, MMA) are framed by legs and a border on a flown masking truss. The stage end's five lower sections are **telescopic**: for those shows they are stowed into
 riser stacks, and the space becomes a real backstage area behind the masking, reached from the event tunnel. It has
 wardrobe rails, a video village with monitors, catering, work lights and road cases. For the other shows the sections
 are seated as usual.
+
+The lower tier's **front seven rows fold back** on all four sides for the shows that need room (`monster`, the
+three kart circuits, `skatepark`, `floor`): the event floor grows from 60 x 30 m to 70.6 x 40.6 m, the rows stand as
+a stack against row 8's riser with a guard rail along the top, and all four tunnels open straight onto the floor.
+The stage end's telescopic sections then have rows 8 to 20 out. Every other show has the rows out and seated. No
+vehicles are part of any show: the trucks and the karts are yours to bring, and the cars to be crushed are the
+game's own.
 
 All brands are GTA V's own, with the sponsor logos taken from the game's textures (Maze Bank, Sprunk, eCola,
 Pisswasser, Cluckin' Bell, Fame or Shame, Burger Shot). The acts, teams and events are made up ("San Andreas Pro
@@ -63,18 +76,15 @@ Every show from the same seat, the back row of the upper tier.
 | ![MMA](screenshots/nosebleed_mma.jpg)<br>**Fight night** | ![Hockey](screenshots/nosebleed_hockey.jpg)<br>**Hockey** |
 | ![Basketball](screenshots/nosebleed_basketball.jpg)<br>**Basketball** | ![Tennis](screenshots/nosebleed_tennis.jpg)<br>**Tennis** |
 
-## In the works
+### The bigger floor
 
-**Not in this release.** These are previews rendered from the models, not screenshots of the game, and none of it
-is in the files below yet. A bigger event floor - the lower tier's front seven rows fold back on all four sides, as
-the stage end's stands already do for a stage, taking the floor from 60 x 30 m to 70.6 x 40.6 m - and the shows that
-need it. No vehicles are part of any of them: the trucks, the karts and the cars to be crushed are the game's own.
+The front seven rows folded back all round, and what goes on the floor then.
 
 | | |
 |---|---|
-| ![The bigger floor](screenshots/preview_bigfloor.jpg)<br>**The bigger floor** | ![Monster trucks](screenshots/preview_monster.jpg)<br>**Monster trucks** |
-| ![Kart circuit: Grand Prix](screenshots/preview_karting.jpg)<br>**Kart circuit: Grand Prix** (a flyover) | ![Kart circuit: Sprint](screenshots/preview_sprint.jpg)<br>**Kart circuit: Sprint** |
-| ![Kart circuit: Oval](screenshots/preview_oval.jpg)<br>**Kart circuit: Oval** (banked ends) | ![Skate park](screenshots/preview_skatepark.jpg)<br>**Skate park** (park course and vert ramp) |
+| ![The open floor](screenshots/nosebleed_floor.jpg)<br>**The open floor** | ![Monster trucks](screenshots/nosebleed_monster.jpg)<br>**Monster trucks** |
+| ![Kart circuit: Grand Prix](screenshots/nosebleed_karting.jpg)<br>**Kart circuit: Grand Prix** (a flyover) | ![Kart circuit: Sprint](screenshots/nosebleed_sprint.jpg)<br>**Kart circuit: Sprint** |
+| ![Kart circuit: Oval](screenshots/nosebleed_oval.jpg)<br>**Kart circuit: Oval** (banked ends) | ![Skate park](screenshots/nosebleed_skatepark.jpg)<br>**Skate park** (park course and vert ramp) |
 
 ## Requirements
 
@@ -117,12 +127,14 @@ The quick switch, for staff on the spot:
 ```
 /mzb wrestling        switch the show for everyone (late joiners get it too)
 /mzb basketball       ... wrestling concert mma hockey basketball tennis house
+/mzb monster          ... and the bigger floor's: floor monster karting sprint oval skatepark
 /mzb list             the shows, the current one in [brackets]
 /mzb status           the current show and the dock doors
 /mzb dock a open      the loading street's roller doors (a | b | c | all, open | close | toggle)
 ```
 
-`/mzb` also takes the aliases in `Config.ShowAliases` (`/mzb fight` is MMA, `/mzb empty` is the empty house, and so
+`/mzb` also takes the aliases in `Config.ShowAliases` (`/mzb fight` is MMA, `/mzb empty` is the empty house,
+`/mzb open` the open floor, `/mzb trucks` the monster trucks, `/mzb gp` the kart Grand Prix, `/mzb skate` the skate park, and so
 on), suggests the show names in chat as you type, and uses the same permission as `/arena`: one ACE line covers both.
 The long form still works:
 
@@ -170,15 +182,15 @@ script or an ox_target panel can read it.
 
 The arena has its own light show on top of the interior's lighting: coloured spot lights from each show's rig (the
 moving heads, beams and washes of the wrestling, concert and MMA rigs) and from the house lights up in the roof (every
-show, and the only ones for hockey, basketball, tennis and the empty house). Every player in the bowl sees the same
-show at the same moment.
+show, and the only ones for hockey, basketball, tennis, the bigger floor's shows and the empty house). Every player
+in the bowl sees the same show at the same moment.
 
 `/arenalights` opens the desk (or a key: bind "Maze Bank Arena: open the desk" in the game's Key Bindings > FiveM,
 or set `Config.LightDeskKey`). Its head stays put: show lights on / off, the ring lights, blackout, and what is on
 the screens and in the speakers with a **Fade** and an **Off / Stop** beside each. Under it, four tabs (keys `1`-`4`,
 the last one used is remembered):
 
-- **Show**: the presets, the pyro, the crowd - what gets pressed during a show.
+- **Show**: the presets, the pyro, the truck show's cars, the crowd - what gets pressed during a show.
 - **Lights**: the effect, the movement, up to three colours from a palette or a colour picker, the speed in BPM
   (with a tap button), intensity, the aim, follow the music, the house lights (the show's setting, full, dimmed,
   off), the ring lights' colour and level, the followspot.
@@ -239,7 +251,10 @@ how far quiet passages dim it, and how soft a hit still counts (`sensitivity`).
 
 Staff can fill the house: people in the bowl's seats, in the floor chairs of the shows that have them (wrestling, MMA,
 basketball, tennis) and on the concert's standing floor, a row of them on the barricade. The stage end is only seated
-for the shows that seat it: the end-stage shows kill the seats behind their masking, as real ones do.
+for the shows that seat it: the end-stage shows kill the seats behind their masking, as real ones do. The bigger
+floor's shows (floor, monster, karting, sprint, oval, skatepark) have the lower tier's front seven rows folded back all
+round, so nobody sits in them, and the truck show keeps the three rows behind those closed as well, under their
+tarps (`Config.Crowd.ClosedDepth`: how deep in the stands a show's closed rows go, in metres from the floor's edge).
 
 ```
 /arenacrowd on | off | toggle         bring the crowd in / send it home (for everyone)
@@ -349,7 +364,7 @@ The object sits at the centre of the arena floor. There is one model per show:
 | `wrestling` | `mzb_screens_wrestling` |
 | `concert` | `mzb_screens_concert` |
 | `mma` | `mzb_screens_mma` |
-| `hockey`, `basketball`, `tennis`, `house` | `mzb_screens_board` |
+| `hockey`, `basketball`, `tennis`, `house`, and every other show (`floor`, `monster`, `karting`, `sprint`, `oval`, `skatepark`, a show of your own) | `mzb_screens_board` |
 
 **pmms:** add these to `Config.models` in pmms' `config.lua`, then stand in the bowl, open pmms and pick the arena
 screens:
@@ -369,7 +384,7 @@ again after a switch.
 
 The arena can play on its own screens without another resource: a YouTube video, a cycle of pictures or one
 picture, on every screen of the show at once, the same moment for every player (late joiners too). Run it from the
-light desk's **Screens** section (paste a link, play / pause / off, volume, picture sets) or from chat:
+light desk's **Screens** section (paste a link, play / pause / off, loop, volume, picture sets) or from chat:
 
 | Command | What it does |
 |---|---|
@@ -380,6 +395,7 @@ light desk's **Screens** section (paste a link, play / pause / off, volume, pict
 | `/arenascreen look <player id>` | that player's view; `/arenascreen look off` ends a feed |
 | `/arenascreen look <name>` | an LED-wall look drawn in step with the lights: show, pulse, colour, bars, stripes, waves |
 | `/arenascreen pause` / `resume` | |
+| `/arenascreen loop [on\|off]` | **loop** the video that is on: at its end it starts again (nothing after it: the other way) |
 | `/arenascreen off` | the screens go dark |
 | `/arenascreen own` | the show's own graphics again (nothing of ours on the screens) |
 | `/arenascreen fade [seconds]` | fade to black (3 s unless said), then off; a video's sound from the speakers fades with it |
@@ -398,6 +414,15 @@ is how the arena starts. `Config.Media.offBlack = false` makes Off the show's ow
 (**Fade out**), or over `lightsFade` seconds (2) when the video is switched off or comes to its end. A video that
 has ended is switched off - the screens go to Off instead of sitting on its last frame. Pictures, looks and camera
 feeds leave the lights alone.
+
+**Loop** (the desk's **LOOP** beside Play, `/arenascreen loop [on|off]`): a looped video that comes to its end starts
+again from its beginning, for every player together and after the same lead-in as a new video (the screens are dark
+for that moment), its sound from the speakers in step with it. Nothing that goes with a video's end happens between
+two rounds: the screens stay on and the show lights stay as they are. Take Loop off and the round that is running is
+the last; switch the video off or fade it out and the lights go with it as ever. A new video starts with
+`Config.Media.loop` (off). Only a video is looped: a picture cycle goes round anyway, and a look or a camera feed
+has no end. The server learns how long the video is from the screens' page of whoever put it on (or of staff near
+the arena); until one of them has played it, `/arenascreen status` says the loop is waiting for that.
 
 **A video's sound comes from the arena's speakers**, through the music player (below): the same video plays there
 for its sound, started at the same moment, and the two pause, fade and stop together.
@@ -448,7 +473,8 @@ screens - a script that registers the `mzb_screens` render target takes them fro
 screens then stay dark, and a picture cycle or a look still works.
 
 Exports (server): `SetScreenMedia(urlOrListOfPictureUrls)`, `ScreenImageSet(name)`, `ScreenCamera(playerId)`,
-`ScreenOff()`, `ScreenPause(on)`, `ScreenVolume(0-100)`, `GetScreenMedia()`. Client: `IsScreenMediaOn()`.
+`ScreenOff()`, `ScreenPause(on)`, `ScreenLoop(on, seconds)` (seconds: the video's length, if your script knows it,
+so no page has to say it), `ScreenVolume(0-100)`, `GetScreenMedia()`. Client: `IsScreenMediaOn()`.
 
 ## Music player (ACE `command.arena`)
 
@@ -460,6 +486,7 @@ xsound). Paste a link in the desk's **Music** section or use chat; every player 
 |---|---|
 | `/arenamusic <url>` | play a YouTube link, or a direct audio file or stream (mp3, ogg, opus, wav, flac, an icecast stream) |
 | `/arenamusic pause` / `resume` / `stop` | |
+| `/arenamusic loop [on\|off]` | **loop** the track that is playing: at its end it starts again (nothing after it: the other way) |
 | `/arenamusic fade [seconds]` | fade out (3 s unless said), then stop |
 | `/arenamusic volume <0-100>` | the level for everyone |
 | `/arenamusic status` | what is playing, and what your own game is doing with it (anyone may ask) |
@@ -494,10 +521,18 @@ stop the page reaching the YouTube player. It then needs [yt-dlp](https://github
 program by itself, this line in `server.cfg` above the one that starts the arena:
 `add_unsafe_child_process_permission "mzb_arena"`. `Config.Music.relay` has its limits (size, length, time).
 
+**Loop** (the desk's **LOOP** beside Play, `/arenamusic loop [on|off]`): a looped track that comes to its end starts
+again from its beginning, for every player together, after the same lead-in as a new track (about three seconds of
+quiet between two rounds). A new track starts with `Config.Music.loop` (off); a stream has no end to start again from, and the
+sound of a video on the screens is looped with its picture (`/arenascreen loop`). The server learns how long the
+track is from the page of whoever started it (or of staff near the arena), or from its own fetcher; until then
+`/arenamusic status` says the loop is waiting for that.
+
 `/arenamusic status` ends with a line about your own game, for checking it in the building:
 `here: in the world from 4 speakers (bowl), reverb on`.
 
-Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `MusicVolume(0-100)`, `GetMusic()`.
+Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `LoopMusic(on, seconds)` (seconds: the track's
+length, if your script knows it, so no page has to say it), `MusicVolume(0-100)`, `GetMusic()`.
 
 ## Footsteps and reverb
 
@@ -565,6 +600,29 @@ the units' places per show, the effects (asset, name, scale: the sizes are first
 cues, which are lists of steps you can rewrite or add to. A bout fires `entrance` at its walk-out and `finale` at its
 end (`Config.Fights.pyro`, `false` for none). Exports (server): `Pyro(cue, { size, colour })`, `PyroCues()`.
 
+## Cars to crush (ACE `command.arena`)
+
+The truck show comes with six real cars, side by side on the deck between the jump's two lips: the game's own
+vehicles (`Config.ShowCars`: a model per spot picked at random from a list of everyday cars), made by the server, so
+every player sees the same cars in the same state, and locked, because they are there to be driven over. They are
+put down a few seconds after `monster` comes up, once a player is in or at the building, and taken away when
+another show does or the resource stops.
+
+| Command | What it does |
+|---|---|
+| `/arenacars reset` | take them away and put six fresh ones down (after the trucks have flattened them) |
+| `/arenacars clear` | take them away; they come back with `reset`, or the next time the show comes up |
+| `/arenacars` | how many are down |
+
+The desk has the same two buttons in a **Cars** section on its Show tab, there only while the show that is up has
+cars. `Config.ShowCars[show]` is `{ models, spots, locked }` (`spots` are `vector4(x, y, z, heading)`, z about half
+a metre over the surface the car stands on: it is where the car's middle goes, and the car settles from there), with
+`range` (how near a player must be before the cars are made, 80 m from the arena's middle) and `delay` (seconds
+after the show comes up, 4) if you want other values; give another show an entry to stand cars on its floor too,
+or set `Config.ShowCars = false` for none. `Config.CarsAccess` is who may reset and clear them (the light desk's
+ACE unless set). Exports (server): `ResetCars()`, `ClearCars()`, `GetCars()` (their entity handles); the state is
+`GlobalState.mzbCars` (`{ show, n }`). Needs OneSync, as the fights' NPCs do.
+
 ## Props of your own (`Config.ShowProps`)
 
 Vanilla props put down for a show without CodeWalker: `Config.ShowProps[show]` is a list of
@@ -584,7 +642,11 @@ Take a line out of the list to remove a prop, or move it.
 
 - `Config.DefaultShow`: the show the server starts with.
 - `Config.Shows`: which entity sets each show turns on. You can remove a show, or make your own mix from the sets
-  listed there.
+  listed there. Since 1.2.0 the lower tier's front seven rows are a set of their own: a show names
+  `mzb_set_low_front_seated`, or `mzb_set_low_front_stowed` (with `mzb_set_low_nw_back`) for the bigger floor. A
+  show that names neither (one you made before, a config you kept) is given the seated rows by itself, so it
+  stands as it did. What the scripts look up per show (the screens' model, the light rig, the
+  speakers, the screens' artwork) comes from the empty house for a show that has no entry of its own.
 - `Config.ShutterSeconds`: how long the roller doors take to open or close.
 - `Config.DockButtons`: the **E** prompt at each roller door (`false` = staff commands only).
 - `Config.DockAccess`: who may use it: `false` for everyone, or an ACE such as `'command.arena'` for staff only.
@@ -610,7 +672,9 @@ Take a line out of the list to remove a prop, or move it.
 - `Config.CrowdCommand` / `Config.CrowdAccess`: the crowd's command and who may bring it in (an ACE, or `false` for
   everyone).
 - `Config.Crowd`: how many people a player sees, the share that fills the seats near them, the ped models, whether
-  they collide. `Config.CrowdMoods` / `Config.CrowdAnims`: what the crowd does in each mood.
+  they collide; `FrontStowedSet`, `BackSet`, `FrontDepth` and `ClosedDepth`: the rows nobody sits in when the front
+  rows are folded back, and the rows a show keeps closed. `Config.CrowdMoods` / `Config.CrowdAnims`: what the crowd
+  does in each mood.
 - `Config.CrowdRoles` / `Config.CrowdStaffEnabled`: the staff and the press (their peds, what they do, their cameras).
 - `Config.Litter`: the litter (how much, how near, the props).
 - `Config.Fights`: the bouts (rounds, times, the knockout line, the count-out, who may challenge, the NPC fighters'
@@ -618,6 +682,9 @@ Take a line out of the list to remove a prop, or move it.
 - `Config.RampLights`: the wrestling ramp's lights. `Config.ShowProps`: props of your own per show.
 - `Config.Pyro`: the pyro's units per show, effects, cues and sizes.
 - `Config.LightFollow`: the lights following the music.
+- `Config.Music.loop` / `Config.Media.loop`: whether a new track / a new video starts looped.
+- `Config.ShowCars` / `Config.CarsCommand` / `Config.CarsAccess`: the real cars a show has on its floor (the truck
+  show's), their command and who may run it.
 
 ## Notes
 
@@ -627,6 +694,42 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.2.0**: a bigger floor and six shows on it (monster trucks, three kart circuits, a skate park, the open
+  floor), cars for the trucks to crush, a loop for the music and the screens.
+  - **The bigger floor**: the lower tier's front seven rows fold back on all four sides, as the stage end's stands
+    already do for a stage. The event floor grows from 60 x 30 m to 70.6 x 40.6 m; the rows stand as a stack
+    against row 8's riser with a guard rail along the top, and all four tunnels open straight onto the floor.
+    Every show there was before keeps the rows out.
+  - **Monster trucks** (`monster`): clay over the whole floor, a chalked oval lane, a painted jump in the middle
+    with two long ramps and two short ones up to a deck, pylons, tyres, a sponsor wall, tarps over the first rows
+    left out.
+  - **Three kart circuits**: the Grand Prix (`karting`, 266 m, a flyover bridge), the Sprint (`sprint`, 201 m) and
+    the Oval (`oval`, 154 m, banked ends, the pits on the infield), each with kerbs, barriers, a start gantry and
+    grid, paddock bays, a podium and a timing tower.
+  - **Skate park** (`skatepark`): a walled park course with bowled corners and a 4.1 m vert ramp beside it.
+  - No vehicles are part of any of them: the trucks and the karts are yours to bring.
+  - **Loop** for the music and for a video on the screens (the desk's LOOP beside each Play, `/arenamusic loop`,
+    `/arenascreen loop`, the `LoopMusic` and `ScreenLoop` exports): at its end the track or the video starts again
+    from its beginning, for every player together and after the same lead-in as a new one. A looped video's sound
+    from the speakers starts again in step with it, and between two rounds the screens stay on and the show lights
+    stay as they are (the lights still go out with a video that is switched off, faded out, or ends with Loop off).
+    `Config.Music.loop` and `Config.Media.loop` are what a new track / video starts with (off).
+  - **Six shows on the scripts' side**: `floor` (the open floor: the big floor with nothing on it, for an event of
+    your own), `monster`, `karting`, `sprint`, `oval`, `skatepark` (`/mzb open`, `/mzb trucks`,
+    `/mzb gp`, `/mzb skate` and more in `Config.ShowAliases`; names and icons for the ox_lib menu). They have no
+    stage, ring, floor chairs, fights or pyro, and what the scripts look up per show - the screens' model, the light
+    rig, the speakers, the screens' artwork and picture set - they take from the empty house: the centre-hung board
+    and the roof's house lights. A show of your own gets the same.
+  - **The front rows are a set of their own**: every show names `mzb_set_low_front_seated`, or
+    `mzb_set_low_front_stowed` and `mzb_set_low_nw_back` for the bigger floor. A show that names neither - one you
+    added to `Config.Shows` before, a config you kept - is given the seated rows by itself, so it stands as it did.
+  - **The crowd keeps out of the folded rows**: nobody sits in the lower tier's front seven rows while a show has
+    them folded back, the stage end's telescopic sections fill from row 8, and the truck show's three tarped rows
+    stay empty too (`Config.Crowd.ClosedDepth`). The litter follows.
+  - **Real cars for the truck show**: six of the game's own vehicles on the deck between the jump's lips, made by
+    the server and locked, there while `monster` is up; `/arenacars reset` (the desk's FRESH CARS) puts six fresh
+    ones down after the trucks have flattened them, `/arenacars clear` takes them away (`Config.ShowCars`; the
+    `ResetCars` / `ClearCars` exports).
 - **1.1.3**: music only from the speakers (and louder), pyro, a camera feed on the screens, the desk in tabs.
   - **The music player plays in the world and nowhere else**: every speaker of the show is a source of its own
     (the concert's subs and backline and the control room's monitors too), with the arena's reverb and an echo on

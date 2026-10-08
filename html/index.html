@@ -60,6 +60,13 @@
       </div>
       <div id="pyro-cues" title="Fire a cue: everyone in the arena sees it (/arenapyro)"></div>
     </section>
+    <section id="cars" class="ext hidden">
+      <h2>Cars <small id="cars-now">none down</small></h2>
+      <div class="row">
+        <button class="big" id="cars-reset" title="Take the show's cars away and put fresh ones down, for everyone (/arenacars reset)">FRESH CARS</button>
+        <button class="big danger" id="cars-clear" title="Take the show's cars away (/arenacars clear)">CLEAR CARS</button>
+      </div>
+    </section>
     <section id="crowd-sec">
       <h2>Crowd <small>you see up to <b id="crowd-mine-val">140</b> people</small></h2>
       <div class="row">
@@ -195,6 +202,7 @@
       <div class="urlrow">
         <input type="text" id="scr-url" maxlength="4000" placeholder="YouTube link, or picture URL(s)" spellcheck="false">
         <button class="mini" id="scr-play">PLAY</button>
+        <button class="mini" id="scr-loop" disabled title="Loop the video that is on: at its end it starts again for everyone, instead of the screens going off (/arenascreen loop)">LOOP</button>
       </div>
       <div class="seg">
         <button id="scr-pause">Pause</button>
@@ -215,6 +223,7 @@
       <div class="urlrow">
         <input type="text" id="mus-url" maxlength="500" placeholder="Audio file, stream or YouTube link" spellcheck="false">
         <button class="mini" id="mus-play">PLAY</button>
+        <button class="mini" id="mus-loop" disabled title="Loop the track that is playing: at its end it starts again for everyone (/arenamusic loop)">LOOP</button>
       </div>
       <div class="seg">
         <button id="mus-pause">Pause</button>
@@ -280,6 +289,7 @@
 <script src="crowd.js"></script>
 <script src="fights.js"></script>
 <script src="pyro.js"></script>
+<script src="cars.js"></script>
 <script src="fold.js"></script>
 <script src="tabs.js"></script>
 </body>

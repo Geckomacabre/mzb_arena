@@ -60,8 +60,10 @@ AddStateBagChangeHandler('mzbMusic', 'global', function(_, _, value)
     local before = S
     S = value or { kind = 'off' }
     if loaded and S.rev == (before and before.rev) then
-        needSync = true                                                       -- pause / resume / volume
-        if S.fade and not (before and before.fade) then                       -- a fade-out starts now, not at the next check
+        needSync = true                                                       -- pause / resume / volume / loop
+        -- a fade-out starts now, not at the next check; so does a looped track that starts again (the page goes
+        -- back to its beginning and holds there until the new start)
+        if (S.fade and not (before and before.fade)) or S.loops ~= (before and before.loops) then
             SendNUIMessage({ type = 'music', action = 'sync', music = S, pos = MzbTrackPos(S, true), fade = MzbFadeLeft(S) })
         end
     end
@@ -89,10 +91,11 @@ CreateThread(function()
 end)
 
 -- the speakers of the show that is up and the ones every show has: { x, y, z (from the arena's middle), gain,
--- ref (0 = Config.Music.refDistance), local (1 = in a room of its own, sent only while you are in that room) }
+-- ref (0 = Config.Music.refDistance), local (1 = in a room of its own, sent only while you are in that room) }.
+-- A show without speakers of its own (the big-floor shows) plays from the empty house's: the centre-hung board
 local function speakersFor(show, room)
     local all, o, out = MU.speakers or MU.hangs or {}, Config.ArenaFrame, {}
-    for _, list in ipairs({ all[show] or {}, all.all or {} }) do
+    for _, list in ipairs({ MzbShowEntry(all, show) or {}, all.all or {} }) do
         for _, sp in ipairs(list) do
             local p, gain, own, ref = sp, 1.0, nil, 0.0
             if type(sp) == 'table' and sp[1] ~= nil then p, gain, own, ref = sp[1], sp[2] or 1.0, sp.room, sp.ref or 0.0 end
@@ -137,6 +140,21 @@ end)
 RegisterNUICallback('musicState', function(data, cb)
     cb('ok')
     if type(data) == 'table' and data.rev == S.rev then pageState = data end
+end)
+
+-- a track's length, as the page learns it: the server needs it to start a looped track again at its end
+-- (server/music.lua believes whoever started the track, or staff). The one who started it says so at once, the
+-- others only if nobody has after a moment
+RegisterNUICallback('musicLength', function(data, cb)
+    cb('ok')
+    local rev, len = type(data) == 'table' and data.rev, type(data) == 'table' and tonumber(data.len)
+    if not len or rev ~= S.rev or (S.kind ~= 'file' and S.kind ~= 'youtube') or S.len then return end
+    if S.by == GetPlayerServerId(PlayerId()) then return TriggerServerEvent('mzb_arena:musicLength', rev, len) end
+    SetTimeout(1500 + math.random(0, 2500), function()
+        if S.rev == rev and (S.kind == 'file' or S.kind == 'youtube') and not S.len then
+            TriggerServerEvent('mzb_arena:musicLength', rev, len)
+        end
+    end)
 end)
 
 -- ------------------------------------------------------------------ errors from the page: once per track
@@ -200,7 +218,7 @@ end, false)
 CreateThread(function()
     Wait(1000)
     TriggerEvent('chat:addSuggestion', '/' .. (MU.command or 'arenamusic'), 'Maze Bank Arena: the music player',
-        { { name = 'what', help = 'url | pause | resume | stop | fade [seconds] | volume <0-100> | status (staff) | mine <0-100> (your own level)' } })
+        { { name = 'what', help = 'url | pause | resume | stop | loop [on|off] | fade [seconds] | volume <0-100> | status (staff) | mine <0-100> (your own level)' } })
 end)
 
 AddEventHandler('onResourceStop', function(res)

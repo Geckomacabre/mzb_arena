@@ -294,12 +294,13 @@ end
 -- the show's rig: the build's fixtures (Config.LightRig), the owner's own (Config.LightRigExtra) and the moving heads
 -- on the stage's trusses (Config.StageLights: baked into the stage and always on until 1.1.2; one the rig has
 -- already - the build's pick, an owner's fixture hung in the same place - is not doubled), in group order (the
--- roof's house lights last, so they are the ones Config.LightMaxFixtures leaves out)
+-- roof's house lights last, so they are the ones Config.LightMaxFixtures leaves out). A show the build has no rig
+-- for (the big-floor shows) has the empty house's - the roof's house lights - and its aim (MzbShowEntry)
 local rigs = {}
 local function rigFor(show)
     if rigs[show] then return rigs[show] end
     local all = {}
-    for _, f in ipairs((Config.LightRig or {})[show] or {}) do all[#all + 1] = f end
+    for _, f in ipairs(MzbShowEntry(Config.LightRig, show) or {}) do all[#all + 1] = f end
     for _, f in ipairs((Config.LightRigExtra or {})[show] or {}) do all[#all + 1] = f end
     for _, s in ipairs((Config.StageLights or {})[show] or {}) do
         local have = false
@@ -354,7 +355,7 @@ CreateThread(function()
         if drawHere and L and (L.on or L.ring or Config.RampLightIdle) then
             local show = GlobalState.mzbShow or Config.DefaultShow
             local rig = rigFor(show)
-            local focus = (Config.LightFocus or {})[show]
+            local focus = MzbShowEntry(Config.LightFocus, show)
             if focus and #rig > 0 then
                 local t = GetNetworkTime() / 1000.0
                 BPM, COLORS = L.bpm or 120, L.colors or WHITE
@@ -463,8 +464,9 @@ local function openDesk()
     table.sort(colours, function(a, b) return a.name < b.name end)
     SetNuiFocus(true, true)
     local show = GlobalState.mzbShow or Config.DefaultShow
-    local hasStage, hasRing = (Config.LightFocus or {})[show] and (Config.LightFocus or {})[show].stage ~= nil, false
-    for _, f in ipairs((Config.LightRig or {})[show] or {}) do
+    local focus = MzbShowEntry(Config.LightFocus, show)
+    local hasStage, hasRing = focus ~= nil and focus.stage ~= nil, false
+    for _, f in ipairs(MzbShowEntry(Config.LightRig, show) or {}) do
         if f[7] == (Config.RingLightGroup or 2) then hasRing = true end
     end
     if #((Config.RingLights or {})[show] or {}) > 0 then hasRing = true end
