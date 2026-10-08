@@ -627,7 +627,7 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
-- **Next**: music only from the speakers.
+- **1.1.3**: music only from the speakers (and louder), pyro, a camera feed on the screens, the desk in tabs.
   - **The music player plays in the world and nowhere else**: every speaker of the show is a source of its own
     (the concert's subs and backline and the control room's monitors too), with the arena's reverb and an echo on
     top, through the walls outside the bowl. The plain "level only" playback is gone: the YouTube player's sound
