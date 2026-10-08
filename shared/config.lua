@@ -24,24 +24,47 @@ Config.DockCooldown = 2.0         -- s between two presses on one door
 -- (the build's ar_site.SHOWS says the same - keep them in step)
 -- mzb_set_low_nw_seated / _stowed: the stage end's telescopic lower sections - seated, or stowed into stacks with a
 -- backstage area (wardrobe, video village, catering, road cases) behind the masking for the end-stage shows
+-- mzb_set_low_front_seated / _stowed: the lower tier's front seven rows are a set of their own (since 1.2.0) - seated
+-- in every show there was before, or folded back all round for the shows that need the bigger floor (70.6 x 40.6 m
+-- instead of 60 x 30 m). With them folded, mzb_set_low_nw_back is the stage end's telescopic sections with only
+-- rows 8 to 20 out. A show that names neither of the two front sets (a show of your own from before 1.2.0) is given
+-- the seated rows by the scripts, so it keeps rows 1 to 7.
 Config.Shows = {
-    house     = { 'mzb_set_house_lights', 'mzb_set_low_nw_seated' },     -- the empty arena, house lights up
+    house     = { 'mzb_set_house_lights', 'mzb_set_low_nw_seated',
+                  'mzb_set_low_front_seated' },                          -- the empty arena, house lights up
     wrestling = { 'mzb_set_wwe_ring', 'mzb_set_wwe_stage', 'mzb_set_wwe_floor', 'mzb_set_wwe_rig',
                   'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
-                  'mzb_set_low_nw_stowed' },                             -- the ring show, the house dimmed
+                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated' }, -- the ring show, the house dimmed
     concert   = { 'mzb_set_nw_deck', 'mzb_set_con_stage', 'mzb_set_con_rig', 'mzb_set_con_floor',
                   'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
-                  'mzb_set_low_nw_stowed' },                             -- end-stage concert, standing floor
+                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated' }, -- end-stage concert, standing floor
     hockey    = { 'mzb_set_hockey', 'mzb_set_hockey_board', 'mzb_set_house_lights',
-                  'mzb_set_low_nw_seated' },                             -- the ice rink, boards and glass
+                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated' }, -- the ice rink, boards and glass
     basketball = { 'mzb_set_basketball', 'mzb_set_basketball_board', 'mzb_set_house_lights',
-                  'mzb_set_low_nw_seated' },                             -- the hardwood court, courtside seats
+                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated' }, -- the hardwood court, courtside seats
     tennis    = { 'mzb_set_tennis', 'mzb_set_tennis_board', 'mzb_set_house_lights',
-                  'mzb_set_low_nw_seated' },                             -- the hard court, the umpire's chair
+                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated' }, -- the hard court, the umpire's chair
     mma       = { 'mzb_set_nw_deck', 'mzb_set_mma_stage', 'mzb_set_mma_cage', 'mzb_set_mma_floor',
                   'mzb_set_mma_rig', 'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
-                  'mzb_set_low_nw_stowed' },                             -- fight night: the cage, end stage
+                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated' }, -- fight night: the cage, end stage
+    -- the bigger floor's shows (the front rows folded back all round; no stage, no ring, no floor chairs). floor is
+    -- the big floor with nothing on it and the house lights up: for an event of your own (a car show, a drift night)
+    floor     = { 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- the open floor
+    monster   = { 'mzb_set_monster', 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- the monster truck show: clay floor, the painted jump
+    karting   = { 'mzb_set_karting', 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- kart circuit: the Grand Prix, with a flyover
+    sprint    = { 'mzb_set_sprint', 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- kart circuit: the Sprint
+    oval      = { 'mzb_set_oval', 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- kart circuit: the Oval, banked ends
+    skatepark = { 'mzb_set_skate_park', 'mzb_set_skate_vert', 'mzb_set_skate_dress', 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- the skate park: park course and vert ramp
 }
+-- What the scripts look up per show - the screens' model, the light rig and its aim, the speakers, the screens'
+-- artwork - a show without an entry of its own takes from the empty house: the centre-hung board and the roof's
+-- house lights (client/interior.lua: MzbShowEntry). The big-floor shows rely on that, and so can a show of yours.
 Config.DefaultShow = 'wrestling'
 
 -- who may run the arena commands (ACE: add_ace group.admin command.arena allow)
@@ -59,6 +82,10 @@ Config.ShowAliases = {
     hoops = 'basketball', bball = 'basketball',
     gig = 'concert', band = 'concert', music = 'concert',
     empty = 'house', off = 'house', clear = 'house',
+    bigfloor = 'floor', open = 'floor', openfloor = 'floor',
+    monsterjam = 'monster', trucks = 'monster',
+    kart = 'karting', karts = 'karting', gp = 'karting',
+    skate = 'skatepark',
 }
 
 -- seconds between two show switches (a switch reloads the interior's sets for everyone inside)
@@ -76,7 +103,10 @@ Config.OxLib = 'auto'
 Config.ShowLabels = {
     house = { 'Empty house', 'building' }, wrestling = { 'Wrestling', 'hand-fist' }, concert = { 'Concert', 'music' },
     mma = { 'MMA', 'shield-halved' }, hockey = { 'Hockey', 'hockey-puck' }, basketball = { 'Basketball', 'basketball' },
-    tennis = { 'Tennis', 'table-tennis-paddle-ball' },
+    tennis = { 'Tennis', 'table-tennis-paddle-ball' }, floor = { 'Open floor', 'expand' },
+    monster = { 'Monster trucks', 'truck-monster' }, karting = { 'Karting: Grand Prix', 'flag-checkered' },
+    sprint = { 'Karting: Sprint', 'stopwatch' }, oval = { 'Karting: Oval', 'rotate' },
+    skatepark = { 'Skate park', 'person-skating' },
 }
 
 -- ------------------------------------------------------------------ the light desk (client/lights.lua, server/lights.lua)
@@ -190,8 +220,8 @@ Config.ClockResync = 60          -- s between two clock checks (a check is three
 -- A YouTube video, a cycle of pictures or one picture on every video screen of the show, drawn by a hidden browser
 -- (html/screen.html) onto the screens' render target. While nothing of ours is on, the render target is left alone,
 -- so pmms or a TV script can use the same screens; when ours is on it wins. Run it from the desk's Screens section or
--- with /arenascreen <youtube url | picture url(s) | images [set] | look [player id] | off | pause | resume | volume n |
--- status>.
+-- with /arenascreen <youtube url | picture url(s) | images [set] | look [player id] | off | pause | resume |
+-- loop [on|off] | volume n | status>.
 Config.Media = {
     enabled = true,              -- false: no built-in screen player at all (leave the screens to another script)
     command = 'arenascreen',
@@ -208,10 +238,16 @@ Config.Media = {
     -- a new video starts this many seconds after the Play: every player's game has it loaded by then, so it starts
     -- at its start for all of them together (0: at once - the first second or so is lost while it loads)
     leadIn = 2.5,
+    -- Loop: a video that comes to its end starts again from its beginning, for every player together (after the
+    -- same lead-in; its sound from the speakers with it), instead of being switched off. This is what a new video
+    -- starts with; the desk's Loop and /arenascreen loop [on|off] change it for the one that is on. Pictures go
+    -- round anyway, and a look or a camera feed has no end
+    loop = false,
     fade = 3.0,                  -- s a fade-out takes (the desk's Fade out; /arenascreen fade [seconds])
     -- a video that stops takes the show lights out with it: faded out with the picture (Fade out), or over
     -- lightsFade seconds when it is switched off or comes to its end (0 = cut). A video that has ended is switched
-    -- off: the screens go to Off instead of sitting on its last frame. false: the lights are left as they are
+    -- off: the screens go to Off instead of sitting on its last frame (a looped one starts again: the screens stay
+    -- on and the lights as they are). false: the lights are left as they are
     lightsOut = true,
     lightsFade = 2.0,
     -- Off (the desk's button, /arenascreen off, a blackout) makes the screens dark: a black picture over the show's
@@ -231,7 +267,8 @@ Config.Media = {
     pageUrl = nil,
     -- picture sets (/arenascreen images [name], the desk's set buttons): files of this resource under html/img/ or
     -- https URLs, shown in this order, Config.Media.interval seconds each. /arenascreen images with no name plays the
-    -- show's own set, else 'arena'. The pictures are the arena's own graphics (the titantron, the board, the murals).
+    -- show's own set, else 'arena' (the big-floor shows have no pictures of their own yet: they get the arena's).
+    -- The pictures are the arena's own graphics (the titantron, the board, the murals).
     imageSets = {
         arena = { 'img/arena_welcome.jpg', 'img/arena_coming_up.jpg', 'img/arena_sprunk.jpg', 'img/arena_fame.jpg',
                   'img/arena_ecola.jpg' },
@@ -249,6 +286,8 @@ Config.Media = {
     -- show a look or nothing (a video or pictures are never cut off).
     looks = { 'show', 'pulse', 'colour', 'bars', 'stripes', 'waves' },
     presetLooks = true,
+    -- a look's artwork and title per show; a show that is not named here (the big-floor shows: there is no artwork
+    -- for them yet) gets the house's
     backdrops = { wrestling = 'img/sapw_tron.jpg', concert = 'img/sirens_poster.jpg', mma = 'img/safc_wall.jpg',
                   hockey = 'img/hockey_live.jpg', basketball = 'img/basketball_live.jpg', tennis = 'img/tennis_live.jpg',
                   house = 'img/arena_welcome.jpg' },
@@ -288,8 +327,8 @@ Config.Media = {
 -- on the server. (Should a game update stop the page reaching the YouTube player: relay.enabled below has the server
 -- fetch the audio instead, which needs yt-dlp and Deno on the server machine and, on newer server builds, the line
 -- add_unsafe_child_process_permission "mzb_arena"  in server.cfg.)
--- Run it from the desk's Music section or /arenamusic <url | pause | resume | stop | volume n | status>; every player
--- sets their own level with /arenamusic mine <0-100> (kept between sessions).
+-- Run it from the desk's Music section or /arenamusic <url | pause | resume | stop | loop [on|off] | volume n |
+-- status>; every player sets their own level with /arenamusic mine <0-100> (kept between sessions).
 Config.Music = {
     enabled = true,
     command = 'arenamusic',
@@ -306,6 +345,10 @@ Config.Music = {
     -- a new track starts this many seconds after the Play: every player's game has it loaded by then, so nobody
     -- loses its first second (0: at once)
     leadIn = 2.5,
+    -- Loop: a track that comes to its end starts again from its beginning, for every player together (after the
+    -- same lead-in). This is what a new track starts with; the desk's Loop and /arenamusic loop [on|off] change it
+    -- for the one that is playing. A stream has no end to start again from
+    loop = false,
     fade = 3.0,                  -- s a fade-out takes (the desk's Fade out; /arenamusic fade [seconds])
     refDistance = 12.0,          -- m from a speaker at which its level starts to fall
     rolloff = 0.7,               -- how fast it falls past that (1 = halved at twice the distance; less = gentler)
@@ -339,7 +382,9 @@ Config.Music = {
     },
     -- the speakers per show (world positions from the arena's build; move them if you move the rig). A speaker is a
     -- vector3, or { vector3, gain } for a quieter one; { vector3, gain, room = '<room>', ref = m } is a speaker in a
-    -- room of its own: heard only in that room, as it is (no walls, no arena reverb)
+    -- room of its own: heard only in that room, as it is (no walls, no arena reverb). A show that is not listed
+    -- (the big-floor shows: floor, monster, karting, sprint, oval, skatepark) plays from the house's: the
+    -- centre-hung board
     speakers = {
         wrestling = { vector3(-335.059, -1969.540, 30.75), vector3(-323.370, -1979.349, 30.75),      -- the line arrays
                       vector3(-313.561, -1967.660, 30.75), vector3(-325.250, -1957.851, 30.75) },    -- under the ring truss
@@ -490,6 +535,18 @@ Config.Crowd = {
     -- seats are behind the drapes with MaskSet
     SeatedSet = 'mzb_set_low_nw_seated',
     MaskSet = 'mzb_set_mask_nw',
+    -- ... and the bigger floor's: with FrontStowedSet the lower tier's front rows are folded back all round (nobody
+    -- sits there), with BackSet the stage end's retractable sections have only the rows behind those out
+    FrontStowedSet = 'mzb_set_low_front_stowed',
+    BackSet = 'mzb_set_low_nw_back',
+    -- which rows those are: a seat's depth is how far it is from the event floor's outline (FloorEdge: a rounded
+    -- rectangle about the arena's middle - half its length, half its width, its corners' radius, m), and the front
+    -- rows are the seats less than FrontDepth deep: rows 1 to 7 (row 7 is 5.8 m in, row 8 6.65 m)
+    FloorEdge = { halfL = 30.0, halfW = 15.0, r = 8.5 },
+    FrontDepth = 6.2,
+    -- rows a show keeps closed: no crowd in a seat less than this deep (m). The truck show has tarps over rows 8
+    -- to 10 (row 10 is 8.35 m in, row 11 9.2 m). A show that is not named here closes none
+    ClosedDepth = { monster = 8.75 },
     -- a show's own mix instead of Models, e.g. ShowModels = { hockey = { 'a_m_y_stwhi_01', 'a_m_m_hillbilly_01' } }
     ShowModels = {},
     -- an arena crowd: a mix of everyone (repeats = more of them)
@@ -852,6 +909,34 @@ Config.ShowProps = {
 Config.StowedProps = {
     { 'mzb_bb_hoop_stowed', -292.050, -1964.301, 19.556, 230.0, room = 'east_store', unless = 'basketball' },
     { 'mzb_bb_hoop_stowed', -290.282, -1962.195, 19.556, 230.0, room = 'east_store', unless = 'basketball' },
+}
+
+-- ------------------------------------------------------------------ cars on the floor (server/cars.lua)
+-- Real cars for a show to wreck: the game's own vehicles, made by the server (so every player sees the same cars in
+-- the same state) - out of the box the truck show's six, side by side on the deck between the jump's two lips. They
+-- come with their show and go with it. Staff put fresh ones down after the trucks have flattened them with
+-- /arenacars reset and take them away with /arenacars clear, or with the Cars buttons on the desk's Show tab.
+--   models  a model per spot is picked at random (no two the same while the list is long enough)
+--   spots   where they stand: vector4(x, y, z, heading). z is where the car's middle goes, about half a metre over
+--           the surface it stands on: a car is made just over the floor and settles onto it (made any lower, its
+--           wheels would be in the floor). The truck show's deck is at 20.75
+--   locked  their doors are locked: they are there to be driven over, not driven off
+--   type    what the models are, for the server that makes them: 'automobile' unless said ('bike', 'trailer' ...)
+--   range   m from the arena's middle: the cars are put down once a player is this close (80 unless said) - see
+--           server/cars.lua for why not before
+--   delay   s between the show coming up and its cars (4 unless said): the players' games set the jump up first
+-- Config.ShowCars = false, or no entry for a show: no cars.
+Config.CarsCommand = 'arenacars'
+Config.CarsAccess = nil                -- who may reset and clear them: an ACE, false = anyone, nil = the same as the
+                                       -- lights (Config.LightAccess)
+Config.ShowCars = {
+    monster = {
+        models = { 'emperor2', 'tornado3', 'voodoo2', 'emperor', 'ingot', 'regina', 'asea', 'premier', 'stanier', 'primo' },
+        spots = { vector4(-328.715, -1964.904, 21.250, 320.0), vector4(-326.953, -1966.382, 21.250, 140.0),
+                  vector4(-325.191, -1967.861, 21.250, 320.0), vector4(-323.429, -1969.339, 21.250, 140.0),
+                  vector4(-321.667, -1970.818, 21.250, 320.0), vector4(-319.905, -1972.296, 21.250, 140.0) },
+        locked = true,
+    },
 }
 
 -- ------------------------------------------------------------------ litter (client/litter.lua)

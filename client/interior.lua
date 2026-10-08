@@ -35,6 +35,19 @@ function MzbInterior()
 end
 
 -- ------------------------------------------------------------------ the show (interior entity sets)
+-- Since 1.2.0 the lower tier's front seven rows are a set of their own: seated, or folded back for the bigger floor.
+-- A show that names neither - a config kept from before 1.2.0, a show of the owner's own - is given the seated rows
+-- here, in Config.Shows itself: it keeps rows 1 to 7 and the padded wall, instead of a tier that starts at row 8
+-- over an open wall. This is the first client script, so everything after it (the sets below, the crowd's seats)
+-- reads the completed lists; the server does the same to its own copy (server/main.lua).
+for _, sets in pairs(Config.Shows) do
+    local front = false
+    for _, s in ipairs(sets) do
+        if s == 'mzb_set_low_front_seated' or s == 'mzb_set_low_front_stowed' then front = true end
+    end
+    if not front then sets[#sets + 1] = 'mzb_set_low_front_seated' end
+end
+
 local managed = {}                 -- every set a show or the house lights name
 for _, sets in pairs(Config.Shows) do
     for _, s in ipairs(sets) do managed[s] = true end
@@ -140,6 +153,17 @@ CreateThread(function()
         Wait(1000)
     end
 end)
+
+-- What a per-show table has for a show, or what it has for the empty house: the screens' model, the light rig and
+-- its aim, the speakers and the screens' artwork are looked up through this. A show such a table does not name -
+-- the big-floor shows (floor, monster, karting, sprint, oval, skatepark), a show of the owner's own - is then
+-- screened, lit and heard as the empty house is: the centre-hung board and the roof's house lights.
+function MzbShowEntry(t, show)
+    if type(t) ~= 'table' then return nil end
+    local v = t[show]
+    if v == nil then v = t.house end
+    return v
+end
 
 -- (client/main.lua's /arenainfo) the interiors as the game has them and the show's sets on the arena's
 function MzbShowStatus()

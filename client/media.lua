@@ -116,11 +116,12 @@ local function level()
     return math.floor(v * 100 + 0.5) / 100
 end
 
--- a look needs the light desk's state and the show (its artwork, its title): sent with the item and when they change
+-- a look needs the light desk's state and the show (its artwork, its title): sent with the item and when they change.
+-- A show without artwork of its own (the big-floor shows) has the empty house's, and its title
 local function lookInfo()
     local show = GlobalState.mzbShow or Config.DefaultShow
     return { type = 'lights', lights = GlobalState.mzbLights or Config.LightDefault, now = GetNetworkTime(), show = show,
-             backdrop = (M.backdrops or {})[show], logo = (M.logos or {})[show], title = (M.titles or {})[show] }
+             backdrop = MzbShowEntry(M.backdrops, show), logo = (M.logos or {})[show], title = MzbShowEntry(M.titles, show) }
 end
 
 -- hand the browser the item and where it should be now (on the server's clock: client/listener.lua)
@@ -145,10 +146,12 @@ local needSync = false
 AddStateBagChangeHandler('mzbMedia', 'global', function(_, _, value)
     local before = S
     S = value or { kind = 'off' }
-    -- a new item is loaded by the thread below (it sees the new rev); pause / resume / interval go to the browser
-    -- now, and the position is checked again
+    -- a new item is loaded by the thread below (it sees the new rev); pause / resume / interval / loop go to the
+    -- browser now, and the position is checked again. A looped video that starts again (S.loops) comes with where
+    -- it is - before its new start - so the page goes back to its beginning and holds there, dark, until then
     if dui and on() and S.rev == (before and before.rev) then
-        post({ type = 'state', media = S, fade = MzbFadeLeft(S) })
+        local again = S.kind == 'youtube' and S.loops ~= (before and before.loops)
+        post({ type = 'state', media = S, pos = again and MzbTrackPos(S, true) or nil, fade = MzbFadeLeft(S) })
         needSync = true
     end
     SendNUIMessage({ type = 'media', media = S })                -- the desk's Screens section (html/media.js)
@@ -236,7 +239,7 @@ end)
 CreateThread(function()
     while true do
         local show = GlobalState.mzbShow or Config.DefaultShow
-        local model = Config.Screens.models[show]
+        local model = MzbShowEntry(Config.Screens.models, show)        -- (the empty house's board, for a show without one)
         local black = METHOD == 'rendertarget' and not dui and model and dark()
         if METHOD == 'rendertarget' and model and MzbListener and MzbListener.inArena and ((dui and txn) or black) then
             if not IsNamedRendertargetRegistered(RT) then
@@ -404,7 +407,7 @@ end)
 CreateThread(function()
     Wait(1000)
     TriggerEvent('chat:addSuggestion', '/' .. (M.command or 'arenascreen'), 'Maze Bank Arena: media on the video screens (staff)',
-        { { name = 'what', help = 'youtube url | picture url(s) | images [set] | look (your view, live) | look <player id> | look off | look <name> | off (dark) | own (the show\'s graphics) | fade [seconds] | pause | resume | volume <0-100> | interval <s> | status' } })
+        { { name = 'what', help = 'youtube url | picture url(s) | images [set] | look (your view, live) | look <player id> | look off | look <name> | off (dark) | own (the show\'s graphics) | fade [seconds] | pause | resume | loop [on|off] (a video) | volume <0-100> | interval <s> | status' } })
 end)
 
 AddEventHandler('onResourceStop', function(res)

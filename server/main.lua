@@ -10,6 +10,17 @@
 -- With ox_lib running (Config.OxLib): /arena or /mzb alone opens its menu on the player's screen, and the answers are
 -- its notifications. The menu's picks come back as mzb_arena:menuPick and are checked here like the typed commands.
 
+-- A show that names neither of the front rows' sets (a config kept from before 1.2.0, a show of the owner's own) is
+-- given the seated rows, as the clients give it (client/interior.lua): the two sides know the same sets per show
+-- (the HideSets export below goes by them).
+for _, sets in pairs(Config.Shows) do
+    local front = false
+    for _, s in ipairs(sets) do
+        if s == 'mzb_set_low_front_seated' or s == 'mzb_set_low_front_stowed' then front = true end
+    end
+    if not front then sets[#sets + 1] = 'mzb_set_low_front_seated' end
+end
+
 -- is ox_lib there to draw the menu and the notifications? (optional: without it, chat)
 local function oxOn()
     return Config.OxLib and GetResourceState('ox_lib') == 'started'

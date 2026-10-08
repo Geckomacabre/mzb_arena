@@ -114,6 +114,8 @@ section.folded > h2 { margin-bottom: 0; }
   font-weight: 700; }
 #pyro-cues .seg { flex-wrap: wrap; margin-top: 0; }
 #pyro-cues .seg button { flex: 1 0 22%; font-size: 12px; padding: 9px 3px; }
+/* a show's cars (cars.js): fresh ones, or none */
+#cars .big { flex: 1; }
 .urlrow { display: flex; gap: 6px; }
 .urlrow input, .ext select { flex: 1; min-width: 0; font: inherit; font-size: 12px; color: var(--text); background: var(--panel);
   border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; user-select: text; }

@@ -461,7 +461,8 @@ end)
 -- and the centre-hung board's four faces - all on the one render target Config.Screens.renderTarget: a media script
 -- plays on it and every screen shows the same picture from one source. The faces are clear until something plays, so
 -- the show's own graphics show through. Spawned at the arena's centre (a local object a script can find by model),
--- swapped when the show changes. Build: arena_build/ar_screens.py.
+-- swapped when the show changes. Build: arena_build/ar_screens.py. A show the build has no model for has the empty
+-- house's: the centre-hung board (MzbShowEntry, client/interior.lua).
 local screen = nil                 -- { e, model }
 
 local function deleteScreens()
@@ -472,7 +473,7 @@ end
 CreateThread(function()
     while true do
         local show = GlobalState.mzbShow or Config.DefaultShow
-        local want = Config.Screens.models[show]
+        local want = MzbShowEntry(Config.Screens.models, show)
         local id, ready = MzbInterior()
         local near = #(GetEntityCoords(PlayerPedId()) - Config.Screens.origin) < 250.0
         if want and near and ready then
