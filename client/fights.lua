@@ -243,7 +243,7 @@ CreateThread(function()
     local shown = false
     while true do
         local ped = PlayerPedId()
-        local id = GetInteriorAtCoords(Config.InteriorProbe.x, Config.InteriorProbe.y, Config.InteriorProbe.z)
+        local id = MzbInterior()
         here = id ~= 0 and GetInteriorFromEntity(ped) == id
         local on = FC.hud ~= false and here and (F.state ~= 'idle' or CARD[1] ~= nil)
         if on then

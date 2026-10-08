@@ -1,7 +1,8 @@
 -- mzb_arena - client: props put down by script while you are in the arena, local objects, frozen:
 --   * Config.ConcourseProps (from the build, client/crowd_slots.lua): every show - the SE lobby's pop-up merch stands;
 --   * Config.ShowProps[show] (the owner's own): vanilla props for a show without CodeWalker - a camera crane, a green
---     screen, anything. Another show takes them away.
+--     screen, anything. Another show takes them away;
+--   * Config.StowedProps: what stands in the store rooms while its show is NOT up (the basket units, folded down).
 -- A prop's room = the interior room it is forced into (room = 'concourse'; default Config.Crowd.Room, the bowl).
 
 local defaultRoom = Config.Crowd and Config.Crowd.Room or nil
@@ -12,6 +13,17 @@ local function clear()
         if DoesEntityExist(o) then DeleteEntity(o) end
     end
     made, madeFor = {}, nil
+end
+
+-- is `show` the one (or one of the ones) a stowed prop is out on the floor for?
+local function inUse(unless, show)
+    if type(unless) == 'table' then
+        for _, s in ipairs(unless) do
+            if s == show then return true end
+        end
+        return false
+    end
+    return unless == show
 end
 
 local function put(p, interior)
@@ -40,12 +52,15 @@ end
 CreateThread(function()
     while true do
         local show = GlobalState.mzbShow or Config.DefaultShow
-        local id = GetInteriorAtCoords(Config.InteriorProbe.x, Config.InteriorProbe.y, Config.InteriorProbe.z)
-        local here = id ~= 0 and IsInteriorReady(id) and GetInteriorFromEntity(PlayerPedId()) == id
+        local id, ready = MzbInterior()
+        local here = ready and GetInteriorFromEntity(PlayerPedId()) == id
         if here and madeFor ~= show then
             clear()
             for _, p in ipairs(Config.ConcourseProps or {}) do put(p, id) end
             for _, p in ipairs((Config.ShowProps or {})[show] or {}) do put(p, id) end
+            for _, p in ipairs(Config.StowedProps or {}) do
+                if not inUse(p.unless, show) then put(p, id) end
+            end
             madeFor = show
         elseif not here and madeFor and #(GetEntityCoords(PlayerPedId()) - Config.InteriorProbe) > 160.0 then
             clear()

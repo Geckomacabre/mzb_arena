@@ -14,8 +14,7 @@ local roomName = {}
 for _, r in ipairs(Config.Rooms or {}) do roomName[GetHashKey(r)] = r end
 
 local function arenaId()
-    local p = Config.InteriorProbe
-    return GetInteriorAtCoords(p.x, p.y, p.z)
+    return (MzbInterior())
 end
 
 CreateThread(function()
@@ -104,9 +103,20 @@ end
 
 function MzbClockReady() return offset ~= nil end
 
--- a position (s) on a track / video kept on the server's clock: { start = server ms at position 0, paused, at }
-function MzbTrackPos(s)
+-- a position (s) on a track / video kept on the server's clock: { start = server ms at position 0, paused, at }.
+-- early: below 0 while its start is still to come (a new track's lead-in: the pages load it and hold it till then)
+function MzbTrackPos(s, early)
     if type(s) ~= 'table' then return 0.0 end
     if s.paused then return tonumber(s.at) or 0.0 end
-    return math.max(0.0, (MzbServerNow() - (tonumber(s.start) or 0)) / 1000.0)
+    local pos = (MzbServerNow() - (tonumber(s.start) or 0)) / 1000.0
+    if pos < 0.0 and not early then return 0.0 end
+    return pos
+end
+
+-- a fade-out in progress ({ at = server ms, dur = s }): how much of it is left and how long it is, for the pages
+function MzbFadeLeft(s)
+    local f = type(s) == 'table' and s.fade
+    if type(f) ~= 'table' then return nil end
+    local dur = tonumber(f.dur) or 3.0
+    return { left = math.max(0.0, dur - (MzbServerNow() - (tonumber(f.at) or 0)) / 1000.0), dur = dur }
 end

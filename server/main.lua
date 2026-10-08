@@ -208,3 +208,18 @@ end)
 exports('GetShow', function() return GlobalState.mzbShow end)
 exports('GetShows', function() return showNames() end)
 exports('SetDock', function(which, action) return setDock(which, action) end)
+
+-- A resource that brings a ring, a stage or a floor of its own has ours left out while its own stands there:
+-- HideSets({ 'mzb_set_wwe_ring', 'mzb_set_wwe_stage' }), and HideSets({}) to have them back. Names of entity sets
+-- (Config.Shows); whatever show is up, a set named here is not switched on.
+exports('HideSets', function(list)
+    local known, out = {}, {}
+    for _, sets in pairs(Config.Shows) do
+        for _, s in ipairs(sets) do known[s] = true end
+    end
+    for _, s in ipairs(type(list) == 'table' and list or {}) do
+        if type(s) == 'string' and known[s] and #out < 32 then out[#out + 1] = s end
+    end
+    GlobalState.mzbHideSets = out
+    return #out
+end)

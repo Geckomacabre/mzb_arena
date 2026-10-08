@@ -7,7 +7,7 @@
   try { folded = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (_) { folded = {}; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(folded)); } catch (_) {} };
 
-  document.querySelectorAll('#desk > section').forEach((sec) => {
+  document.querySelectorAll('#desk section').forEach((sec) => {
     const h = sec.querySelector(':scope > h2');
     if (!h) return;
     // the title's own words (not the live text beside it) name the section between sessions

@@ -1,12 +1,5 @@
--- mzb_arena - client: the interior's show (entity sets), the loading dock's roller shutters, the vanilla clean-up
-local interior = 0
-
-local function arenaInterior()
-    if interior == 0 or not IsValidInterior(interior) then
-        interior = GetInteriorAtCoords(Config.InteriorProbe.x, Config.InteriorProbe.y, Config.InteriorProbe.z)
-    end
-    return interior
-end
+-- mzb_arena - client: the loading dock's roller shutters, the curtains, the stall doors, the screens, the vanilla
+-- clean-up (the show's entity sets and MzbInterior, the arena's interior: client/interior.lua)
 
 -- ------------------------------------------------------------------ vanilla clean-up
 -- Rockstar's Fame or Shame lobby (bob74_ipl requests it) stands where our concourse is; the resource streams empty
@@ -23,49 +16,8 @@ CreateThread(function()
     end
 end)
 
--- ------------------------------------------------------------------ shows (interior entity sets)
-local managed = {}
-for _, sets in pairs(Config.Shows) do
-    for _, s in ipairs(sets) do managed[s] = true end
-end
-for _, s in pairs(Config.HouseSets or {}) do managed[s] = true end
-
-local function applyShow(name)
-    local sets = Config.Shows[name]
-    if not sets then return end
-    local id = arenaInterior()
-    if id == 0 then return end
-    local on = {}
-    for _, s in ipairs(sets) do on[s] = true end
-    -- the light desk's house buttons (client/lights.lua): the show's own house light set, or full / dimmed / off
-    local house = (GlobalState.mzbLights or {}).house or 'show'
-    local hs = Config.HouseSets or {}
-    if house ~= 'show' then
-        for _, s in pairs(hs) do on[s] = nil end
-        if hs[house] then on[hs[house]] = true end
-    end
-    for s in pairs(managed) do
-        if on[s] then
-            if not IsInteriorEntitySetActive(id, s) then ActivateInteriorEntitySet(id, s) end
-        elseif IsInteriorEntitySetActive(id, s) then
-            DeactivateInteriorEntitySet(id, s)
-        end
-    end
-    RefreshInterior(id)
-end
-
-AddStateBagChangeHandler('mzbShow', 'global', function(_, _, value)
-    Wait(0)
-    applyShow(value)
-end)
-
--- (client/lights.lua: the desk's house setting changed)
-function MzbReapplyShow()
-    Wait(0)
-    applyShow(GlobalState.mzbShow or Config.DefaultShow)
-end
-
--- chat suggestions for the commands (the chat resource shows them as you type)
+-- ------------------------------------------------------------------ the commands' chat suggestions
+-- (the chat resource shows them as you type)
 CreateThread(function()
     Wait(1000)
     local names = {}
@@ -83,22 +35,6 @@ AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     if Config.QuickCommand then TriggerEvent('chat:removeSuggestion', '/' .. Config.QuickCommand) end
     TriggerEvent('chat:removeSuggestion', '/' .. Config.Command)
-end)
-
--- the interior streams in and out: re-apply the show whenever it (re)appears
-CreateThread(function()
-    local last = 0
-    while true do
-        local id = GetInteriorAtCoords(Config.InteriorProbe.x, Config.InteriorProbe.y, Config.InteriorProbe.z)
-        if id ~= 0 and IsInteriorReady(id) and id ~= last then
-            interior = id
-            last = id
-            applyShow(GlobalState.mzbShow or Config.DefaultShow)
-        elseif id == 0 then
-            last = 0
-        end
-        Wait(2000)
-    end
 end)
 
 -- ------------------------------------------------------------------ the dock's roller shutters
@@ -268,8 +204,8 @@ local function curtainPiece(model, p, id, heading)
 end
 
 local function spawnCurtains()
-    local id = arenaInterior()
-    if id == 0 or not IsInteriorReady(id) then return false end
+    local id, ready = MzbInterior()
+    if not ready then return false end
     for name, c in pairs(Config.Curtains) do
         if not curtains[name] then
             local ax = curtainAxes(c)
@@ -473,9 +409,9 @@ end
 -- spawn / despawn by distance (twice a second)
 CreateThread(function()
     while true do
-        local id = arenaInterior()
+        local id, ready = MzbInterior()
         local p = GetEntityCoords(PlayerPedId())
-        if id ~= 0 and IsInteriorReady(id) then
+        if ready then
             for i, d in ipairs(Config.StallDoors) do
                 local dist = #(p - vector3(d.x, d.y, d.z))
                 if dist < 45.0 and not stalls[i] then
@@ -537,9 +473,9 @@ CreateThread(function()
     while true do
         local show = GlobalState.mzbShow or Config.DefaultShow
         local want = Config.Screens.models[show]
-        local id = arenaInterior()
+        local id, ready = MzbInterior()
         local near = #(GetEntityCoords(PlayerPedId()) - Config.Screens.origin) < 250.0
-        if want and near and id ~= 0 and IsInteriorReady(id) then
+        if want and near and ready then
             if not screen or screen.model ~= want then
                 deleteScreens()
                 local h = loadModel(want)
@@ -571,11 +507,11 @@ end)
 
 -- ------------------------------------------------------------------ dev: /arenainfo (where you are, which room)
 -- Prints to chat and F8: the world position, the arena's own (u, v, height over the event floor), the interior and
--- the room the game has you in (by name) - send it with a screenshot when something looks or feels wrong.
+-- the room the game has you in (by name), the show and how many of its sets are on - send it with a screenshot when
+-- something looks or feels wrong.
 RegisterCommand('arenainfo', function()
     local ped = PlayerPedId()
     local p = GetEntityCoords(ped)
-    local id = GetInteriorFromEntity(ped)
     local key = GetRoomKeyFromEntity(ped)
     local name = (key == 0) and 'outside' or ('key ' .. key)
     for _, r in ipairs(Config.Rooms or {}) do
@@ -585,9 +521,8 @@ RegisterCommand('arenainfo', function()
     local dx, dy = p.x - f.x, p.y - f.y
     local c, s = math.cos(f.ang), math.sin(f.ang)
     local u, v = dx * c + dy * s, -dx * s + dy * c
-    local msg = ('pos %.2f %.2f %.2f (heading %.0f) | arena u %.2f v %.2f h %.2f | interior %d (arena %d, ready %s) | room %s | show %s')
-        :format(p.x, p.y, p.z, GetEntityHeading(ped), u, v, p.z - f.z, id, arenaInterior(),
-            tostring(IsInteriorReady(arenaInterior())), name, tostring(GlobalState.mzbShow))
+    local msg = ('pos %.2f %.2f %.2f (heading %.0f) | arena u %.2f v %.2f h %.2f | room %s | %s')
+        :format(p.x, p.y, p.z, GetEntityHeading(ped), u, v, p.z - f.z, name, MzbShowStatus())
     print('[mzb_arena] ' .. msg)
     TriggerEvent('chat:addMessage', { args = { 'arena', msg } })
 end, false)

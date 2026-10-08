@@ -110,8 +110,8 @@ CreateThread(function()
         local me = GetEntityCoords(ped)
         local id = 0
         if level ~= 'clean' then
-            id = GetInteriorAtCoords(Config.InteriorProbe.x, Config.InteriorProbe.y, Config.InteriorProbe.z)
-            local ready = id ~= 0 and IsInteriorReady(id)
+            local ready
+            id, ready = MzbInterior()
             if ready and GetInteriorFromEntity(ped) == id then
                 present = true
             elseif not ready or #(me - Config.InteriorProbe) > (Config.Crowd.DespawnDistance or 160.0) then

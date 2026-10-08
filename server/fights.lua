@@ -121,6 +121,8 @@ local function cue(part)
     if p and MzbLightPreset then MzbLightPreset(p) end
     local m = FC.moods and FC.moods[part]
     if m and MzbCrowdMood then MzbCrowdMood(m) end
+    local y = FC.pyro and FC.pyro[part]
+    if y and MzbPyro then MzbPyro(y) end
 end
 
 local function follow(f)

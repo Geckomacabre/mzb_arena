@@ -9,214 +9,255 @@
 </head>
 <body>
 <div id="desk" class="hidden" role="dialog" aria-label="Arena light desk">
-  <header>
-    <div class="brand">
-      <span class="dot" id="live-dot"></span>
-      <div>
-        <h1>LIGHT DESK</h1>
-        <p>Maze Bank Arena &middot; <span id="show-name">wrestling</span></p>
+  <div id="deskhead">
+    <header>
+      <div class="brand">
+        <span class="dot" id="live-dot"></span>
+        <div>
+          <h1>LIGHT DESK</h1>
+          <p>Maze Bank Arena &middot; <span id="show-name">wrestling</span></p>
+        </div>
+      </div>
+      <button class="close" id="close" title="Close (Esc)">&times;</button>
+    </header>
+    <section class="row top">
+      <button class="big toggle" id="power">SHOW LIGHTS <b id="power-state">OFF</b></button>
+      <button class="big toggle" id="ring" title="The washes over the ring / cage / stage, white, on their own aim">RING LIGHTS <b id="ring-state">OFF</b></button>
+      <button class="big danger" data-preset="blackout">BLACKOUT</button>
+    </section>
+    <div id="nowbar">
+      <div class="now" id="q-scr" title="The screens: what is on, and the way out">
+        <b>SCREENS</b><span id="q-scr-now">off</span>
+        <button class="mini" id="q-scr-fade">Fade</button><button class="mini" id="q-scr-off">Off</button>
+      </div>
+      <div class="now" id="q-mus" title="The music: what is on, and the way out">
+        <b>MUSIC</b><span id="q-mus-now">off</span>
+        <button class="mini" id="q-mus-fade">Fade</button><button class="mini" id="q-mus-stop">Stop</button>
       </div>
     </div>
-    <button class="close" id="close" title="Close (Esc)">&times;</button>
-  </header>
+    <nav id="tabs">
+      <button data-tab="show" title="The looks, the pyro, the crowd (key 1)">Show</button>
+      <button data-tab="lights" title="The rig: effect, movement, colours, aim, the house, the followspot (key 2)">Lights</button>
+      <button data-tab="media" title="The screens and the music (key 3)">Screens &amp; music</button>
+      <button data-tab="fights" title="The fight card (key 4)">Fights</button>
+    </nav>
+  </div>
 
-  <section class="row top">
-    <button class="big toggle" id="power">SHOW LIGHTS <b id="power-state">OFF</b></button>
-    <button class="big toggle" id="ring" title="The washes over the ring / cage / stage, white, on their own aim">RING LIGHTS <b id="ring-state">OFF</b></button>
-    <button class="big danger" data-preset="blackout">BLACKOUT</button>
-  </section>
+  <div class="pane" data-pane="show">
+    <section>
+      <h2>Presets</h2>
+      <div class="grid presets" id="presets"></div>
+    </section>
+    <section id="pyro" class="ext hidden">
+      <h2>Pyro <small id="pyro-now"></small></h2>
+      <div class="row pyro-opts">
+        <div class="seg" id="pyro-size" title="How big the next cue goes off">
+          <button data-size="small">Small</button>
+          <button data-size="normal" class="active">Normal</button>
+          <button data-size="big">Big</button>
+        </div>
+        <div class="swatches" id="pyro-colour" title="The colour of the next cue, where its effect takes one (sparks, comets, bursts, smoke)"></div>
+      </div>
+      <div id="pyro-cues" title="Fire a cue: everyone in the arena sees it (/arenapyro)"></div>
+    </section>
+    <section id="crowd-sec">
+      <h2>Crowd <small>you see up to <b id="crowd-mine-val">140</b> people</small></h2>
+      <div class="row">
+        <button class="big toggle" id="crowd" title="Bring the crowd in / send it home (for everyone)">CROWD <b id="crowd-state">OUT</b></button>
+        <div class="seg" id="crowd-moods"></div>
+      </div>
+      <div class="seg" id="crowd-litter" title="What the crowd leaves in the rows and on the floor (for everyone)">
+        <button data-litter="clean">Clean</button>
+        <button data-litter="some">Some litter</button>
+        <button data-litter="trashed">Trashed</button>
+      </div>
+      <button class="mini toggle" id="crowd-staff" title="The staff and the press who come in with the crowd: security, photographers, camera crews, officials (for everyone)">STAFF &amp; PRESS <b id="crowd-staff-state">ON</b></button>
+      <input type="range" id="crowd-mine" min="0" max="220" step="10" value="140"
+             title="How many crowd peds you see: yours alone, saved on your PC">
+    </section>
+  </div>
 
-  <section class="row ringrow" title="The ring / cage / stage lights">
-    <label class="custom" title="One colour for all the ring lights"><input type="color" id="ring-color" value="#fff6ec"> ring colour</label>
-    <button class="mini" id="ring-own" title="Each ring light in its own colour again">own colours</button>
-    <div class="slider inline"><h2>Ring level <b id="ring-level-val">100</b>%</h2>
-      <input type="range" id="ring-level" min="0" max="100" step="1" value="100"></div>
-  </section>
+  <div class="pane" data-pane="lights">
+    <section>
+      <h2>Effect</h2>
+      <div class="grid modes" id="modes">
+        <button data-mode="static"><i>&#9679;</i>Static</button>
+        <button data-mode="chase"><i>&#10148;</i>Chase</button>
+        <button data-mode="strobe"><i>&#9889;</i>Strobe</button>
+        <button data-mode="pulse"><i>&#9678;</i>Pulse</button>
+        <button data-mode="rainbow"><i>&#9728;</i>Rainbow</button>
+        <button data-mode="fade"><i>&#9680;</i>Fade</button>
+        <button data-mode="wave"><i>&#8767;</i>Wave</button>
+        <button data-mode="flash"><i>&#10041;</i>Flash</button>
+        <button data-mode="alternate"><i>&#8693;</i>Alternate</button>
+        <button data-mode="bounce"><i>&#8596;</i>Bounce</button>
+        <button data-mode="twinkle"><i>&#10022;</i>Twinkle</button>
+        <button data-mode="random"><i>&#9670;</i>Random</button>
+        <button data-mode="lightning"><i>&#9735;</i>Lightning</button>
+        <button data-mode="fire"><i>&#9832;</i>Fire</button>
+        <button data-mode="police"><i>&#9650;</i>Police</button>
+      </div>
+    </section>
+    <section>
+      <h2>Movement</h2>
+      <div class="seg" id="moves">
+        <button data-move="none">Still</button>
+        <button data-move="sweep">Sweep</button>
+        <button data-move="ballyhoo">Ballyhoo</button>
+        <button data-move="fan">Fan</button>
+        <button data-move="nod">Nod</button>
+        <button data-move="cross">Cross</button>
+      </div>
+    </section>
+    <section>
+      <h2>Colours <small>pick a slot, then a colour</small></h2>
+      <div class="slots" id="slots">
+        <button class="slot" data-slot="0"><span></span>A</button>
+        <button class="slot" data-slot="1"><span></span>B</button>
+        <button class="slot" data-slot="2"><span></span>C</button>
+        <label class="custom" title="Any colour for the active slot">
+          <input type="color" id="picker" value="#ffffff"> custom
+        </label>
+        <button class="mini" id="clear-slot" title="Empty slots B / C">&minus; slot</button>
+      </div>
+      <div class="palette" id="palette"></div>
+    </section>
+    <section class="row sliders">
+      <div class="slider">
+        <h2>Speed <b id="bpm-val">120</b> bpm</h2>
+        <input type="range" id="bpm" min="30" max="240" step="1" value="120">
+        <button class="mini wide" id="tap">TAP</button>
+      </div>
+      <div class="slider">
+        <h2>Intensity <b id="int-val">80</b>%</h2>
+        <input type="range" id="intensity" min="0" max="100" step="1" value="80">
+      </div>
+    </section>
+    <section>
+      <h2>Aim <small>one or more: the fixtures take turns</small></h2>
+      <div class="seg" id="focus">
+        <button data-focus="floor">Floor</button>
+        <button data-focus="stage">Stage</button>
+        <button data-focus="crowd">Crowd</button>
+      </div>
+    </section>
+    <section id="follow-sec">
+      <h2>Follow the music <small id="follow-now"></small></h2>
+      <div class="seg" id="follow" title="The effects run on the beat of what is playing and / or in the colours of its video, instead of Speed and the colour slots">
+        <button data-follow="off">Off</button>
+        <button data-follow="both">Colour + tempo</button>
+        <button data-follow="tempo">Tempo</button>
+        <button data-follow="colour">Colour</button>
+      </div>
+    </section>
+    <section>
+      <h2>House lights</h2>
+      <div class="seg" id="house">
+        <button data-house="show">Show</button>
+        <button data-house="full">Full</button>
+        <button data-house="dim">Dim</button>
+        <button data-house="off">Off</button>
+      </div>
+    </section>
+    <section class="row ringrow" title="The ring / cage / stage lights">
+      <label class="custom" title="One colour for all the ring lights"><input type="color" id="ring-color" value="#fff6ec"> ring colour</label>
+      <button class="mini" id="ring-own" title="Each ring light in its own colour again">own colours</button>
+      <div class="slider inline"><h2>Ring level <b id="ring-level-val">100</b>%</h2>
+        <input type="range" id="ring-level" min="0" max="100" step="1" value="100"></div>
+    </section>
+    <section id="spot" class="ext">
+      <h2>Followspot <small id="spot-now">off</small></h2>
+      <div class="row">
+        <button class="big toggle" id="spot-power">FOLLOWSPOT <b id="spot-state">OFF</b></button>
+      </div>
+      <div class="urlrow" style="margin-top:6px">
+        <select id="spot-target" title="Follow a player in the arena"><option value="">Follow a player...</option></select>
+        <button class="mini" id="spot-look" title="Follow whoever is under your crosshair">LOOKED AT</button>
+        <button class="mini" id="spot-free" title="Aim by hand with your camera (closes the desk; the key releases it)">FREE AIM</button>
+      </div>
+      <div class="row sliders">
+        <div class="slider inline">
+          <h2>Size <b id="spot-size-val">5</b></h2>
+          <input type="range" id="spot-size" min="2" max="15" step="0.5" value="5">
+        </div>
+        <div class="slider inline">
+          <h2>Intensity <b id="spot-int-val">100</b>%</h2>
+          <input type="range" id="spot-int" min="0" max="100" step="1" value="100">
+        </div>
+        <label class="custom" title="The spot's colour"><input type="color" id="spot-color" value="#fff8eb"></label>
+      </div>
+    </section>
+  </div>
 
-  <section>
-    <h2>House lights</h2>
-    <div class="seg" id="house">
-      <button data-house="show">Show</button>
-      <button data-house="full">Full</button>
-      <button data-house="dim">Dim</button>
-      <button data-house="off">Off</button>
-    </div>
-  </section>
-
-  <section id="crowd-sec">
-    <h2>Crowd <small>you see up to <b id="crowd-mine-val">140</b> people</small></h2>
-    <div class="row">
-      <button class="big toggle" id="crowd" title="Bring the crowd in / send it home (for everyone)">CROWD <b id="crowd-state">OUT</b></button>
-      <div class="seg" id="crowd-moods"></div>
-    </div>
-    <div class="seg" id="crowd-litter" title="What the crowd leaves in the rows and on the floor (for everyone)">
-      <button data-litter="clean">Clean</button>
-      <button data-litter="some">Some litter</button>
-      <button data-litter="trashed">Trashed</button>
-    </div>
-    <button class="mini toggle" id="crowd-staff" title="The staff and the press who come in with the crowd: security, photographers, camera crews, officials (for everyone)">STAFF &amp; PRESS <b id="crowd-staff-state">ON</b></button>
-    <input type="range" id="crowd-mine" min="0" max="220" step="10" value="140"
-           title="How many crowd peds you see: yours alone, saved on your PC">
-  </section>
-
-  <section>
-    <h2>Effect</h2>
-    <div class="grid modes" id="modes">
-      <button data-mode="static"><i>&#9679;</i>Static</button>
-      <button data-mode="chase"><i>&#10148;</i>Chase</button>
-      <button data-mode="strobe"><i>&#9889;</i>Strobe</button>
-      <button data-mode="pulse"><i>&#9678;</i>Pulse</button>
-      <button data-mode="rainbow"><i>&#9728;</i>Rainbow</button>
-      <button data-mode="fade"><i>&#9680;</i>Fade</button>
-      <button data-mode="wave"><i>&#8767;</i>Wave</button>
-      <button data-mode="flash"><i>&#10041;</i>Flash</button>
-      <button data-mode="alternate"><i>&#8693;</i>Alternate</button>
-      <button data-mode="bounce"><i>&#8596;</i>Bounce</button>
-      <button data-mode="twinkle"><i>&#10022;</i>Twinkle</button>
-      <button data-mode="random"><i>&#9670;</i>Random</button>
-      <button data-mode="lightning"><i>&#9735;</i>Lightning</button>
-      <button data-mode="fire"><i>&#9832;</i>Fire</button>
-      <button data-mode="police"><i>&#9650;</i>Police</button>
-    </div>
-  </section>
-
-  <section>
-    <h2>Movement</h2>
-    <div class="seg" id="moves">
-      <button data-move="none">Still</button>
-      <button data-move="sweep">Sweep</button>
-      <button data-move="ballyhoo">Ballyhoo</button>
-      <button data-move="fan">Fan</button>
-      <button data-move="nod">Nod</button>
-      <button data-move="cross">Cross</button>
-    </div>
-  </section>
-
-  <section>
-    <h2>Colours <small>pick a slot, then a colour</small></h2>
-    <div class="slots" id="slots">
-      <button class="slot" data-slot="0"><span></span>A</button>
-      <button class="slot" data-slot="1"><span></span>B</button>
-      <button class="slot" data-slot="2"><span></span>C</button>
-      <label class="custom" title="Any colour for the active slot">
-        <input type="color" id="picker" value="#ffffff"> custom
-      </label>
-      <button class="mini" id="clear-slot" title="Empty slots B / C">&minus; slot</button>
-    </div>
-    <div class="palette" id="palette"></div>
-  </section>
-
-  <section class="row sliders">
-    <div class="slider">
-      <h2>Speed <b id="bpm-val">120</b> bpm</h2>
-      <input type="range" id="bpm" min="30" max="240" step="1" value="120">
-      <button class="mini wide" id="tap">TAP</button>
-    </div>
-    <div class="slider">
-      <h2>Intensity <b id="int-val">80</b>%</h2>
-      <input type="range" id="intensity" min="0" max="100" step="1" value="80">
-    </div>
-  </section>
-
-  <section>
-    <h2>Aim <small>one or more: the fixtures take turns</small></h2>
-    <div class="seg" id="focus">
-      <button data-focus="floor">Floor</button>
-      <button data-focus="stage">Stage</button>
-      <button data-focus="crowd">Crowd</button>
-    </div>
-  </section>
-
-  <section>
-    <h2>Presets</h2>
-    <div class="grid presets" id="presets"></div>
-  </section>
-
-  <section id="screens" class="ext">
-    <h2>Screens <small id="scr-now">off</small></h2>
-    <div class="urlrow">
-      <input type="text" id="scr-url" maxlength="4000" placeholder="YouTube link, or picture URL(s)" spellcheck="false">
-      <button class="mini" id="scr-play">PLAY</button>
-    </div>
-    <div class="seg">
-      <button id="scr-pause">Pause</button>
-      <button id="scr-stop">Off</button>
-    </div>
-    <div class="seg sets" id="scr-looks" title="Looks drawn in step with the light desk"></div>
-    <div class="seg sets" id="scr-sets" title="The arena's picture sets"></div>
-    <div class="slider inline">
-      <h2>Volume <b id="scr-vol-val">60</b>%</h2>
-      <input type="range" id="scr-vol" min="0" max="100" step="1" value="60">
-    </div>
-  </section>
-
-  <section id="music" class="ext">
-    <h2>Music <small id="mus-now">off</small></h2>
-    <div class="urlrow">
-      <input type="text" id="mus-url" maxlength="500" placeholder="Audio file, stream or YouTube link" spellcheck="false">
-      <button class="mini" id="mus-play">PLAY</button>
-    </div>
-    <div class="seg">
-      <button id="mus-pause">Pause</button>
-      <button id="mus-stop">Stop</button>
-    </div>
-    <div class="row sliders">
+  <div class="pane" data-pane="media">
+    <section id="screens" class="ext">
+      <h2>Screens <small id="scr-now">off</small></h2>
+      <div class="urlrow">
+        <input type="text" id="scr-url" maxlength="4000" placeholder="YouTube link, or picture URL(s)" spellcheck="false">
+        <button class="mini" id="scr-play">PLAY</button>
+      </div>
+      <div class="seg">
+        <button id="scr-pause">Pause</button>
+        <button id="scr-fade" title="Fade the picture to black (and a video's sound with it), then off">Fade out</button>
+        <button id="scr-stop" title="Off: the screens go dark">Off</button>
+        <button id="scr-own" title="The show's own graphics on the screens (nothing of ours: another media script can have them)">Own graphics</button>
+        <button id="scr-cam" title="Your own view of the game, live on the screens: you are the camera (/arenascreen look; another player's view: /arenascreen look <id>). Off ends it">My camera</button>
+      </div>
+      <div class="seg sets" id="scr-looks" title="Looks drawn in step with the light desk"></div>
+      <div class="seg sets" id="scr-sets" title="The arena's picture sets"></div>
       <div class="slider inline">
-        <h2>Volume <b id="mus-vol-val">70</b>%</h2>
-        <input type="range" id="mus-vol" min="0" max="100" step="1" value="70">
+        <h2>Volume <b id="scr-vol-val">60</b>%</h2>
+        <input type="range" id="scr-vol" min="0" max="100" step="1" value="60">
       </div>
-      <div class="slider inline" title="Your own level, for you only (/arenamusic mine)">
-        <h2>Mine <b id="mus-mine-val">100</b>%</h2>
-        <input type="range" id="mus-mine" min="0" max="100" step="1" value="100">
+    </section>
+    <section id="music" class="ext">
+      <h2>Music <small id="mus-now">off</small></h2>
+      <div class="urlrow">
+        <input type="text" id="mus-url" maxlength="500" placeholder="Audio file, stream or YouTube link" spellcheck="false">
+        <button class="mini" id="mus-play">PLAY</button>
       </div>
-    </div>
-  </section>
+      <div class="seg">
+        <button id="mus-pause">Pause</button>
+        <button id="mus-fade" title="Fade the music out, then stop">Fade out</button>
+        <button id="mus-stop">Stop</button>
+      </div>
+      <div class="row sliders">
+        <div class="slider inline">
+          <h2>Volume <b id="mus-vol-val">70</b>%</h2>
+          <input type="range" id="mus-vol" min="0" max="100" step="1" value="70">
+        </div>
+        <div class="slider inline" title="Your own level, for you only (/arenamusic mine)">
+          <h2>Mine <b id="mus-mine-val">100</b>%</h2>
+          <input type="range" id="mus-mine" min="0" max="100" step="1" value="100">
+        </div>
+      </div>
+    </section>
+  </div>
 
-  <section id="spot" class="ext">
-    <h2>Followspot <small id="spot-now">off</small></h2>
-    <div class="row">
-      <button class="big toggle" id="spot-power">FOLLOWSPOT <b id="spot-state">OFF</b></button>
-    </div>
-    <div class="urlrow" style="margin-top:6px">
-      <select id="spot-target" title="Follow a player in the arena"><option value="">Follow a player...</option></select>
-      <button class="mini" id="spot-look" title="Follow whoever is under your crosshair">LOOKED AT</button>
-      <button class="mini" id="spot-free" title="Aim by hand with your camera (closes the desk; the key releases it)">FREE AIM</button>
-    </div>
-    <div class="row sliders">
-      <div class="slider inline">
-        <h2>Size <b id="spot-size-val">5</b></h2>
-        <input type="range" id="spot-size" min="2" max="15" step="0.5" value="5">
+  <div class="pane" data-pane="fights">
+    <section id="fights" class="ext">
+      <h2>Fights <small id="fight-now">no bout on</small></h2>
+      <div class="urlrow fight-pick">
+        <select id="fight-red" title="The red corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
+        <span class="vs">vs</span>
+        <select id="fight-blue" title="The blue corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
       </div>
-      <div class="slider inline">
-        <h2>Intensity <b id="spot-int-val">100</b>%</h2>
-        <input type="range" id="spot-int" min="0" max="100" step="1" value="100">
+      <div class="seg" id="fight-when" title="When the bout goes on: next on the card, or at a time">
+        <button data-in="0" class="active">Next</button>
+        <button data-in="1">In 1 min</button>
+        <button data-in="5">In 5 min</button>
+        <button data-in="15">In 15 min</button>
       </div>
-      <label class="custom" title="The spot's colour"><input type="color" id="spot-color" value="#fff8eb"></label>
-    </div>
-  </section>
+      <div class="row" style="margin-top:6px">
+        <button class="big" id="fight-add">ADD BOUT</button>
+        <button class="big danger" id="fight-stop" disabled>STOP BOUT</button>
+      </div>
+      <ol id="fight-card"></ol>
+      <button class="mini" id="fight-clear" disabled>Clear the card</button>
+    </section>
+  </div>
 
-  <section id="fights" class="ext">
-    <h2>Fights <small id="fight-now">no bout on</small></h2>
-    <div class="urlrow fight-pick">
-      <select id="fight-red" title="The red corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
-      <span class="vs">vs</span>
-      <select id="fight-blue" title="The blue corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
-    </div>
-    <div class="seg" id="fight-when" title="When the bout goes on: next on the card, or at a time">
-      <button data-in="0" class="active">Next</button>
-      <button data-in="1">In 1 min</button>
-      <button data-in="5">In 5 min</button>
-      <button data-in="15">In 15 min</button>
-    </div>
-    <div class="row" style="margin-top:6px">
-      <button class="big" id="fight-add">ADD BOUT</button>
-      <button class="big danger" id="fight-stop" disabled>STOP BOUT</button>
-    </div>
-    <ol id="fight-card"></ol>
-    <button class="mini" id="fight-clear" disabled>Clear the card</button>
-  </section>
-
-  <footer>Everyone in the bowl sees the same show &middot; <kbd>Esc</kbd> closes</footer>
+  <footer>Everyone in the bowl sees the same show &middot; <kbd>1</kbd>-<kbd>4</kbd> the tabs &middot; <kbd>Esc</kbd> closes</footer>
 </div>
 <!-- the fight bar (html/fights.js): everyone in the arena sees it while a bout is on, the desk open or not -->
 <div id="fight-hud" class="hidden">
@@ -228,14 +269,18 @@
   <div id="fh-banner" class="hidden"></div>
   <div id="fh-next" class="hidden"></div>
 </div>
-<!-- the music player's YouTube player (html/music.js): heard, never seen -->
-<div id="music-yt" style="position:absolute;left:-400px;top:0;width:200px;height:200px;overflow:hidden"><div id="music-yt-player"></div></div>
+<!-- the camera's tally (html/feed.js): the player whose view is live on the screens sees it; it is not in the picture -->
+<div id="feed-tally" class="hidden"><i></i><b>ON AIR</b><span id="feed-tally-info"></span><small id="feed-tally-hint"></small></div>
 <script src="app.js"></script>
 <script src="media.js"></script>
+<script src="feed.js"></script>
 <script src="music.js"></script>
+<script src="follow.js"></script>
 <script src="spot.js"></script>
 <script src="crowd.js"></script>
 <script src="fights.js"></script>
+<script src="pyro.js"></script>
 <script src="fold.js"></script>
+<script src="tabs.js"></script>
 </body>
 </html>

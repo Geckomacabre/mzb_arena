@@ -60,6 +60,7 @@
     $('#bpm').value = state.bpm; $('#bpm-val').textContent = state.bpm;
     const pct = Math.round((state.intensity || 0) * 100);
     $('#intensity').value = pct; $('#int-val').textContent = pct;
+    $$('#follow button').forEach((b) => b.classList.toggle('active', b.dataset.follow === (state.follow || 'off')));
   }
 
   function setColour(c) {
@@ -107,6 +108,10 @@
     $('#int-val').textContent = e.target.value;
     throttled('intensity', { intensity: e.target.value / 100 });
   };
+  // follow the music: the tempo and / or the colours of what is playing (html/follow.js finds them); the show lights
+  // come on with it
+  $$('#follow button').forEach((b) => (b.onclick = () =>
+    post('lights', b.dataset.follow === 'off' ? { follow: 'off' } : { follow: b.dataset.follow, on: true })));
   // tap tempo: the average of the last taps (reset after 2 s without one)
   let taps = [];
   $('#tap').onclick = () => {
@@ -145,6 +150,7 @@
       $('[data-mode="strobe"]').title = m.maxStrobe === 0 ? 'Strobe is off on this server (pulses instead)' : '';
       $('[data-focus="stage"]').disabled = m.hasStage === false;
       $('[data-focus="stage"]').title = m.hasStage === false ? 'This show has no stage' : '';
+      $('#follow-sec').classList.toggle('hidden', m.follow === false);
       $('#ring').disabled = m.hasRing === false;
       $('#ring').title = m.hasRing === false ? 'This show has no ring / cage / stage lights'
         : 'The ring / cage / stage lights: on, off, a colour, a level (below)';

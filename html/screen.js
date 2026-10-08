@@ -27,52 +27,107 @@
     s.src = 'https://www.youtube.com/iframe_api';
     document.head.appendChild(s);
   }
-  // where the video should be now: the position we were given plus the time since
-  let ytPos = 0, ytAt = 0;
+  // where the video should be now: the position we were given plus the time since. A new video is given a moment
+  // before its start (Config.Media.leadIn: the position is below 0 until then): it is loaded, kept dark and held at
+  // its start, and started when the moment comes, so its first second is not lost to the loading
+  let ytPos = 0, ytAt = 0, ytTimer = null;
   const ytNow = () => ytPos + (media && media.paused ? 0 : (performance.now() - ytAt) / 1000);
+  const ytFrom = () => Math.max(0, Math.floor(ytNow()));
 
   function startYoutube(id, pos) {
     ytPos = pos; ytAt = performance.now();
+    ytOver = false;
     if (!ytApi) { ytWanted = { id, pos }; loadApi(); return; }
     ytWanted = null;
     $('#yt').classList.remove('hidden');
+    $('#yt').classList.toggle('dark', ytNow() < 0);
     if (yt && !ytReady) { ytWanted = { id, pos }; return; }   // the player is still being made: it takes this one when ready
     if (yt && ytReady) {
-      yt.loadVideoById({ videoId: id, startSeconds: Math.floor(ytNow()) });
+      yt.loadVideoById({ videoId: id, startSeconds: ytFrom() });
       applyYoutube();
       return;
     }
     yt = new YT.Player('yt-player', {
       width: '100%', height: '100%', videoId: id,
       playerVars: { autoplay: 1, controls: 0, disablekb: 1, fs: 0, rel: 0, playsinline: 1, iv_load_policy: 3,
-                    modestbranding: 1, start: Math.floor(pos) },
+                    modestbranding: 1, start: Math.max(0, Math.floor(pos)) },
       events: {
         onReady: () => {
           ytReady = true;
           if (ytWanted) {                                        // another video was asked for while this one was made
             const w = ytWanted;
             ytWanted = null;
-            yt.loadVideoById({ videoId: w.id, startSeconds: Math.floor(ytNow()) });
+            yt.loadVideoById({ videoId: w.id, startSeconds: ytFrom() });
           }
           applyYoutube(true);
+        },
+        // a player that starts by itself before its moment is held again; playing: its length is known now; its
+        // end: the screens go dark rather than show YouTube's end card (the server switches them off: it is told
+        // the length)
+        onStateChange: (e) => {
+          if (e.data === 1 && ytNow() < -0.1) applyYoutube();
+          if (e.data === 1) tellLength();
+          if (e.data === 0 && ytNow() > 1) { ytOver = true; $('#yt').classList.add('dark'); }
         },
         // a dead or blocked video: the screens go black rather than show YouTube's error card
         onError: (e) => { $('#yt').classList.add('hidden'); report('YouTube will not play it here (error ' + (e && e.data) + ')'); },
       },
     });
   }
+  let ytOver = false, lengthTold = null;
+  function tellLength() {
+    const len = yt && yt.getDuration ? +yt.getDuration() : 0;
+    if (!media || !(len >= 1) || lengthTold === media.rev) return;
+    lengthTold = media.rev;
+    fetch(`https://${res}/screenLength`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rev: media.rev, len }) }).catch(() => {});
+  }
   function applyYoutube(seek) {
-    if (!yt || !ytReady) return;
-    yt.setVolume(Math.round(volume * 100));
-    if (volume > 0) yt.unMute(); else yt.mute();
+    if (!yt || !ytReady || ytOver) return;
+    clearTimeout(ytTimer);
     const want = ytNow();
+    if (want < 0) {                                              // not yet: loaded, dark and waiting at its start
+      $('#yt').classList.add('dark');
+      yt.mute();
+      if ((yt.getCurrentTime() || 0) > 0.05) yt.seekTo(0, true);
+      yt.pauseVideo();
+      if (!media.paused) ytTimer = setTimeout(() => applyYoutube(), -want * 1000);
+      return;
+    }
+    $('#yt').classList.remove('dark');
+    applyVolume();
     if (seek || Math.abs((yt.getCurrentTime() || 0) - want) > 1.0) yt.seekTo(want, true);
     if (media.paused) yt.pauseVideo(); else yt.playVideo();
   }
   function stopYoutube() {
+    clearTimeout(ytTimer);
     if (yt && ytReady) yt.stopVideo();
     $('#yt').classList.add('hidden');
+    $('#yt').classList.remove('dark');
     ytWanted = null;
+  }
+
+  // ---- a fade-out (the desk's Fade out, /arenascreen fade): the picture goes to black over its seconds, and this
+  // page's own sound with it where it has one; the server turns the screens off when it is there
+  let fadeEnd = 0, fadeMs = 0, fadeTimer = null;
+  const fadeLevel = () => (fadeMs ? Math.max(0, Math.min(1, (fadeEnd - performance.now()) / fadeMs)) : 1);
+  function applyVolume() {
+    if (!yt || !ytReady) return;
+    const v = ytNow() < 0 ? 0 : volume * fadeLevel() * fadeLevel();
+    yt.setVolume(Math.round(v * 100));
+    if (v > 0) yt.unMute(); else yt.mute();
+  }
+  // (stepped by a timer, not a CSS transition: it runs the same whether or not anything is painting the page)
+  function fadeStep() {
+    $('#fade').style.opacity = fadeMs ? 1 - fadeLevel() : 0;
+    applyVolume();
+    if (fadeTimer && performance.now() >= fadeEnd) { clearInterval(fadeTimer); fadeTimer = null; }
+  }
+  function setFade(f) {
+    clearInterval(fadeTimer); fadeTimer = null;
+    if (!f || !(f.dur > 0)) fadeMs = 0;
+    else { fadeMs = f.dur * 1000; fadeEnd = performance.now() + Math.max(0, f.left) * 1000; fadeTimer = setInterval(fadeStep, 33); }
+    fadeStep();
   }
 
   // ---- pictures: a cross-fade between two <img>, the one to show worked out from the position
@@ -262,6 +317,98 @@
   }
   requestAnimationFrame(lookFrame);
 
+  // ---- a camera feed (kind 'feed'): another player's view of the game, sent by that player's own page
+  // (html/feed.js) straight to this one - WebRTC, the server only passes the handshake on. This page asks the camera
+  // for its picture, answers its offer and shows what comes; it asks again when the connection fails or goes. While
+  // there is no picture for a while (the camera is not up, the feed is full, the two PCs cannot reach each other)
+  // the screens show the show's artwork.
+  const fv = $('#feed');
+  let pc = null, feedOn = false, feedCfg = null, feedTimer = null, waitTimer = null, pendingIce = [];
+  const feedPost = (msg) => {
+    if (media) fetch(`https://${res}/feedSignal`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rev: media.rev, role: 'view', msg }) }).catch(() => {});
+  };
+  function feedStandby(ms) {
+    clearTimeout(waitTimer);
+    waitTimer = setTimeout(() => {
+      if (!feedOn || !fv.classList.contains('hidden') || !info.backdrop) return;
+      $('#feed-wait').src = info.backdrop;
+      $('#feed-wait').classList.add('on');
+    }, ms);
+  }
+  function feedClose() {
+    if (pc) {
+      pc.ontrack = pc.onicecandidate = pc.onconnectionstatechange = null;
+      try { pc.close(); } catch (_) {}
+    }
+    pc = null; pendingIce = [];
+    fv.srcObject = null;
+    fv.classList.add('hidden');
+  }
+  // ask the camera (again) in ms, unless the picture is coming by then
+  function feedAsk(ms) {
+    clearTimeout(feedTimer);
+    feedTimer = setTimeout(() => {
+      if (!feedOn || (pc && pc.connectionState === 'connected')) return;
+      feedClose();
+      feedPost({ t: 'want' });
+      feedAsk(6000);
+    }, ms);
+  }
+  fv.addEventListener('playing', () => { clearTimeout(waitTimer); $('#feed-wait').classList.remove('on'); });
+  function feedStart(cfg) {
+    feedStop();
+    feedOn = true; feedCfg = cfg || {};
+    feedStandby(6000);
+    feedAsk(0);
+  }
+  function feedStop() {
+    clearTimeout(feedTimer); clearTimeout(waitTimer);
+    feedOn = false;
+    feedClose();
+    $('#feed-wait').classList.remove('on');
+  }
+  async function feedSignal(msg) {
+    if (!feedOn || !msg) return;
+    if (msg.t === 'offer' && typeof msg.sdp === 'string') {
+      feedClose();
+      let mine;
+      try {
+        mine = pc = new RTCPeerConnection({ iceServers: Array.isArray(feedCfg.ice) ? feedCfg.ice : [], iceTransportPolicy: feedCfg.relayOnly ? 'relay' : 'all' });
+      } catch (err) { report('the camera feed cannot be received here: ' + (err && err.message)); return; }
+      mine.ontrack = (e) => {
+        fv.srcObject = (e.streams && e.streams[0]) || new MediaStream([e.track]);
+        fv.classList.remove('hidden');
+        const p = fv.play();
+        if (p && p.catch) p.catch(() => {});
+      };
+      mine.onicecandidate = (e) => { if (e.candidate) feedPost({ t: 'ice', c: e.candidate.toJSON() }); };
+      mine.onconnectionstatechange = () => {
+        if (pc !== mine) return;
+        const s = mine.connectionState;
+        if (s === 'connected') clearTimeout(feedTimer);
+        else if (s === 'failed' || s === 'closed') { feedStandby(3000); feedAsk(2000); }
+        else if (s === 'disconnected') feedAsk(5000);
+      };
+      feedAsk(15000);                                    // not connected by then: from the start
+      try {
+        await mine.setRemoteDescription({ type: 'offer', sdp: msg.sdp });
+        if (pc !== mine) return;
+        pendingIce.splice(0).forEach((c) => mine.addIceCandidate(c).catch(() => {}));
+        await mine.setLocalDescription(await mine.createAnswer());
+        if (pc !== mine) return;
+        feedPost({ t: 'answer', sdp: mine.localDescription.sdp });
+      } catch (err) { if (pc === mine) feedAsk(3000); }
+    } else if (msg.t === 'ice' && msg.c) {
+      if (pc && pc.remoteDescription && pc.remoteDescription.type) pc.addIceCandidate(msg.c).catch(() => {});
+      else pendingIce.push(msg.c);
+    } else if (msg.t === 'bye') {                        // the camera let go of this connection
+      feedClose(); feedStandby(3000); feedAsk(3000);
+    } else if (msg.t === 'full') {                       // the feed has all the watchers it takes
+      feedClose(); feedStandby(0); feedAsk(20000);
+    }
+  }
+
   function setInfo(m) {
     if (m.lights) L = m.lights;
     if (typeof m.now === 'number') { netAt = m.now; perfAt = performance.now(); }
@@ -270,10 +417,11 @@
     info.title = m.title || 'MAZE BANK ARENA';
   }
 
-  function load(m, pos) {
+  function load(m, pos, feed) {
     media = m;
     base = performance.now() - pos * 1000;
     $('#look').classList.toggle('hidden', m.kind !== 'look');
+    if (m.kind === 'feed') feedStart(feed); else feedStop();
     if (m.kind === 'youtube') { clearPics(); startYoutube(m.id, pos); }
     else if (m.kind === 'images' || m.kind === 'image') { stopYoutube(); shown = -1; }
     else { stopYoutube(); clearPics(); }
@@ -293,11 +441,13 @@
         if (media.paused) media.at = pos;
         $('#look').classList.toggle('hidden', media.kind !== 'look');
         if (media.kind === 'youtube') { ytPos = pos; ytAt = performance.now(); applyYoutube(); }
-      } else load(m.media, m.pos || 0);
+      } else load(m.media, m.pos || 0, m.feed);
+      setFade(m.fade);
     } else if (m.type === 'state' && media) {
       media = Object.assign({}, media, m.media);
       $('#look').classList.toggle('hidden', media.kind !== 'look');
       if (media.kind === 'youtube') applyYoutube();
+      setFade(m.fade);
     } else if (m.type === 'sync' && media) {
       media.paused = !!m.paused;
       base = performance.now() - m.pos * 1000;
@@ -305,9 +455,11 @@
       if (media.kind === 'youtube') { ytPos = m.pos; ytAt = performance.now(); applyYoutube(); }
     } else if (m.type === 'lights') {
       setInfo(m);
+    } else if (m.type === 'feed') {
+      feedSignal(m.msg);
     } else if (m.type === 'volume') {
       volume = Math.max(0, Math.min(1, +m.volume || 0));
-      if (yt && ytReady) { yt.setVolume(Math.round(volume * 100)); if (volume > 0) yt.unMute(); else yt.mute(); }
+      applyVolume();
     }
   });
 
