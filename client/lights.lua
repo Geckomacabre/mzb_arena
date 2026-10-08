@@ -7,11 +7,74 @@
 local L = GlobalState.mzbLights or Config.LightDefault
 local deskOpen = false
 
+-- a fade-out (L.fade = { at, dur }: /arenalights fade, a video that stops - server/lights.lua): the show lights go
+-- down over its seconds from the moment this client hears of it; the server switches them off when it is over
+local fadeAt, fadeFrom = nil, nil
+local function seeFade()
+    local f = L and L.fade
+    if type(f) ~= 'table' then
+        fadeAt, fadeFrom = nil, nil
+    elseif fadeAt ~= f.at then
+        fadeAt, fadeFrom = f.at, GetGameTimer()
+    end
+end
+seeFade()
+
 AddStateBagChangeHandler('mzbLights', 'global', function(_, _, value)
     local before = (L and L.house) or 'show'
     L = value or Config.LightDefault
+    seeFade()
     if deskOpen then SendNUIMessage({ type = 'state', state = L }) end
-    if (L.house or 'show') ~= before and MzbReapplyShow then MzbReapplyShow() end   -- client/main.lua
+    if (L.house or 'show') ~= before and MzbReapplyShow then MzbReapplyShow() end   -- client/interior.lua
+end)
+
+-- ------------------------------------------------------------------ following the music (L.follow)
+-- The page listens to the track this player's own game is playing and looks at its picture (html/follow.js); what it
+-- finds comes here ten times a second and at every hit of the kick drum: the beat count, the tempo, the level and the
+-- picture's main colours. The effects then run on that beat and in those colours instead of the desk's Speed and
+-- colour slots - each player's lights with what that player hears. Nothing heard for 1.5 s: the desk's own again.
+local FW = Config.LightFollow or {}
+local heard = { at = -100000, beat = 0.0, bpm = 120.0, kickAt = -100000, level = 1.0, colors = nil, colorsAt = -100000 }
+local shownBeat, asked = 0.0, nil
+local COLORS, BPM = nil, 120                                -- what look() draws with this frame
+local WHITE = { { 255, 255, 255 } }
+
+-- is the tempo followed, are the colours?
+local function following()
+    local f = (FW.enabled ~= false and L and L.follow) or 'off'
+    return f == 'both' or f == 'tempo', f == 'both' or f == 'colour'
+end
+
+RegisterNUICallback('lightsFollow', function(data, cb)
+    cb('ok')
+    if type(data) ~= 'table' then return end
+    local now = GetGameTimer()
+    local beat, bpm = tonumber(data.beat), tonumber(data.bpm)
+    if beat and bpm and beat == beat and bpm >= 30.0 and bpm <= 300.0 then
+        heard.beat, heard.bpm, heard.at = beat, bpm, now
+        if data.kick == true then heard.kickAt = now end
+        heard.level = math.max(0.0, math.min(1.0, tonumber(data.level) or 1.0))
+    end
+    local cs = nil
+    if type(data.colors) == 'table' then
+        cs = {}
+        for i = 1, math.min(3, #data.colors) do
+            local c = data.colors[i]
+            local r, g, b = type(c) == 'table' and tonumber(c[1]), type(c) == 'table' and tonumber(c[2]), type(c) == 'table' and tonumber(c[3])
+            if r and g and b then
+                cs[#cs + 1] = { math.floor(math.max(0, math.min(255, r))), math.floor(math.max(0, math.min(255, g))),
+                                math.floor(math.max(0, math.min(255, b))) }
+            end
+        end
+        if #cs == 0 then cs = nil end
+    end
+    heard.colors, heard.colorsAt = cs, now
+end)
+
+-- the page is (again) there: it is told again what to follow
+RegisterNUICallback('followReady', function(_, cb)
+    cb('ok')
+    asked = nil
 end)
 
 -- ------------------------------------------------------------------ where the player is
@@ -22,8 +85,17 @@ for name in pairs(Config.LightRooms or {}) do roomKeys[GetHashKey(name)] = true 
 CreateThread(function()
     while true do
         local ped = PlayerPedId()
-        local id = GetInteriorAtCoords(Config.InteriorProbe.x, Config.InteriorProbe.y, Config.InteriorProbe.z)
+        local id = MzbInterior()
         drawHere = id ~= 0 and GetInteriorFromEntity(ped) == id and roomKeys[GetRoomKeyFromEntity(ped)] == true
+        -- the page listens for the lights only while this player has lights to see
+        local tempo, colour = following()
+        local want = drawHere and L and L.on == true and (tempo or colour)
+        local key = want and ((tempo and 't' or '') .. (colour and 'c' or '') .. (L.bpm or 120)) or 'off'
+        if key ~= asked then
+            asked = key
+            SendNUIMessage({ type = 'follow', on = want == true, tempo = tempo, colour = colour, bpm = L.bpm or 120,
+                             config = { minBpm = FW.minBpm or 80, colours = FW.colours or 3, sensitivity = FW.sensitivity or 1.0 } })
+        end
         Wait(600)
     end
 end)
@@ -48,7 +120,7 @@ local function frac(x) return x - math.floor(x) end
 
 -- the colour and level (0..1) of fixture i of n at time t
 local function look(i, n, t, beat)
-    local cs = L.colors or { { 255, 255, 255 } }
+    local cs = COLORS or L.colors or WHITE
     local c = cs[((i - 1) % #cs) + 1]
     local mode = L.mode or 'static'
     if mode == 'static' or mode == 'sweep' or mode == 'ballyhoo' then
@@ -58,7 +130,7 @@ local function look(i, n, t, beat)
         local cc = cs[(step % #cs) + 1]
         return cc[1], cc[2], cc[3], ((i + step) % 4 == 0) and 1.0 or 0.0
     elseif mode == 'strobe' then
-        local hz = math.min((L.bpm or 120) / 60.0 * 2.0, Config.LightMaxStrobeHz or 8.0)
+        local hz = math.min(BPM / 60.0 * 2.0, Config.LightMaxStrobeHz or 8.0)
         if hz <= 0.0 then
             local lvl = 0.5 + 0.5 * math.cos(beat * math.pi * 2.0)
             return c[1], c[2], c[3], lvl * lvl
@@ -219,14 +291,26 @@ local function spot(f, tx, ty, tz, r, g, b, bright, cone, glow)
     end
 end
 
--- the show's rig: the build's fixtures (Config.LightRig) and the owner's own (Config.LightRigExtra), in group order
--- (the roof's house lights last, so they are the ones Config.LightMaxFixtures leaves out)
+-- the show's rig: the build's fixtures (Config.LightRig), the owner's own (Config.LightRigExtra) and the moving heads
+-- on the stage's trusses (Config.StageLights: baked into the stage and always on until 1.1.2; one the rig has
+-- already - the build's pick, an owner's fixture hung in the same place - is not doubled), in group order (the
+-- roof's house lights last, so they are the ones Config.LightMaxFixtures leaves out)
 local rigs = {}
 local function rigFor(show)
     if rigs[show] then return rigs[show] end
     local all = {}
     for _, f in ipairs((Config.LightRig or {})[show] or {}) do all[#all + 1] = f end
     for _, f in ipairs((Config.LightRigExtra or {})[show] or {}) do all[#all + 1] = f end
+    for _, s in ipairs((Config.StageLights or {})[show] or {}) do
+        local have = false
+        for _, f in ipairs(all) do
+            if math.abs(f[1] - s[1]) < 0.3 and math.abs(f[2] - s[2]) < 0.3 and math.abs(f[3] - s[3]) < 0.3 then
+                have = true
+                break
+            end
+        end
+        if not have then all[#all + 1] = { s[1], s[2], s[3], s[4], s[5], s[6], 1 } end
+    end
     local order = {}
     for i, f in ipairs(all) do order[i] = { f = f, k = (f[7] == 3 and 5 or f[7]) * 10000 + i } end
     table.sort(order, function(a, b) return a.k < b.k end)
@@ -273,7 +357,22 @@ CreateThread(function()
             local focus = (Config.LightFocus or {})[show]
             if focus and #rig > 0 then
                 local t = GetNetworkTime() / 1000.0
-                local beat = t * (L.bpm or 120) / 60.0
+                BPM, COLORS = L.bpm or 120, L.colors or WHITE
+                local beat, punch = t * BPM / 60.0, 1.0
+                -- following the music: its beat count (run on from the last one heard; it never steps back, a
+                -- correction holds it for a moment instead), its tempo, a dip between the hits and in quiet passages,
+                -- and the picture's colours
+                local now = GetGameTimer()
+                local tempo, colour = following()
+                if tempo and now - heard.at < 1500 then
+                    BPM = heard.bpm
+                    local b = heard.beat + (now - heard.at) * heard.bpm / 60000.0
+                    if b < shownBeat and shownBeat - b < 0.5 then b = shownBeat end
+                    shownBeat, beat = b, b
+                    local P, D = FW.punch or 0.35, FW.dynamics or 0.25
+                    punch = (1.0 - P + P * math.exp(-(now - heard.kickAt) / 1000.0 * 5.0)) * (1.0 - D + D * heard.level)
+                end
+                if colour and heard.colors and now - heard.colorsAt < 1500 then COLORS = heard.colors end
                 local cone = Config.LightCone or { 9.0, 20.0, 14.0 }
                 -- the ring lights, show or no show: the rig's own lights (Config.RingLights: they were baked into the
                 -- rig and always on; now in the colours the build gave them, or the desk's ring colour, at its level),
@@ -284,11 +383,14 @@ CreateThread(function()
                     local rc = L.ringColor
                     local scale = (Config.RingLightScale or 5.0) * (L.ringLevel or 1.0)
                     if scale > 0.01 then
-                        for _, f in ipairs(own) do
-                            local r, g, b = f[7], f[8], f[9]
-                            if rc then r, g, b = rc[1], rc[2], rc[3] end
-                            DrawSpotLight(f[1], f[2], f[3], f[4], f[5], f[6], r, g, b, f[11] + 4.0, f[10] * scale, 0.0,
-                                f[12], Config.LightFalloff or 1.0)
+                        -- (and with them the glow off the video wall onto the stage: Config.StageGlow)
+                        for _, list in ipairs({ own, (Config.StageGlow or {})[show] or {} }) do
+                            for _, f in ipairs(list) do
+                                local r, g, b = f[7], f[8], f[9]
+                                if rc then r, g, b = rc[1], rc[2], rc[3] end
+                                DrawSpotLight(f[1], f[2], f[3], f[4], f[5], f[6], r, g, b, f[11] + 4.0, f[10] * scale, 0.0,
+                                    f[12], Config.LightFalloff or 1.0)
+                            end
                         end
                     end
                 elseif ringGroup then
@@ -307,7 +409,11 @@ CreateThread(function()
                         if f[7] ~= ringGroup then fixtures[#fixtures + 1] = f end
                     end
                     local n = math.min(#fixtures, Config.LightMaxFixtures or 32)
-                    local bright = (Config.LightBrightness or 12.0) * (L.intensity or 0.8)
+                    local level = (L.intensity or 0.8) * punch
+                    if L.fade and fadeFrom then
+                        level = level * math.max(0.0, 1.0 - (now - fadeFrom) / ((tonumber(L.fade.dur) or 2.0) * 1000.0))
+                    end
+                    local bright = (Config.LightBrightness or 12.0) * level
                     local fl, mv = foci(), movement()
                     for i = 1, n do
                         local f = fixtures[i]
@@ -317,7 +423,7 @@ CreateThread(function()
                             if fo == 'stage' and not focus.stage then fo = 'floor' end
                             local tx, ty, tz = aim(i, n, f, t, beat, focus, fo, mv)
                             spot(f, tx, ty, tz, r, g, b, bright * lvl, cone[f[7]] or (f[7] == 4 and Config.LightConeFloor) or 12.0,
-                                4.0 * lvl * (L.intensity or 0.8))
+                                4.0 * lvl * level)
                         end
                     end
                     -- the ramp lights: their place along the ramp is their place in the effect (both sides together)
@@ -325,7 +431,7 @@ CreateThread(function()
                     if rn > 0 then
                         for _, f in ipairs(ramp) do
                             local r, g, b, lvl = look(f[7], rn, t, beat)
-                            if lvl > 0.01 then drawRamp(f, r, g, b, lvl, L.intensity or 0.8) end
+                            if lvl > 0.01 then drawRamp(f, r, g, b, lvl, level) end
                         end
                     end
                 elseif Config.RampLightIdle then
@@ -363,7 +469,8 @@ local function openDesk()
     end
     if #((Config.RingLights or {})[show] or {}) > 0 then hasRing = true end
     SendNUIMessage({ type = 'open', state = L, presets = presets, colours = colours, show = show,
-                     maxStrobe = Config.LightMaxStrobeHz, hasStage = hasStage, hasRing = hasRing })
+                     maxStrobe = Config.LightMaxStrobeHz, hasStage = hasStage, hasRing = hasRing,
+                     follow = FW.enabled ~= false and (Config.Music or {}).enabled == true })
 end
 
 local function closeDesk()
@@ -389,6 +496,13 @@ RegisterNUICallback('close', function(_, cb)
     cb('ok')
 end)
 
+-- a key for the desk: bound in the game's settings (Key Bindings > FiveM), or to Config.LightDeskKey for players who
+-- have not picked one. The same as typing the command (the server checks who may open it)
+RegisterCommand('arenadesk', function()
+    if deskOpen then closeDesk() else ExecuteCommand(Config.LightCommand) end
+end, false)
+RegisterKeyMapping('arenadesk', 'Maze Bank Arena: open the desk', 'keyboard', Config.LightDeskKey or '')
+
 AddEventHandler('onResourceStop', function(res)
     if res == GetCurrentResourceName() and deskOpen then SetNuiFocus(false, false) end
 end)
@@ -396,5 +510,5 @@ end)
 CreateThread(function()
     Wait(1000)
     TriggerEvent('chat:addSuggestion', '/' .. Config.LightCommand, 'Maze Bank Arena: the light desk (staff)',
-        { { name = 'sub', help = 'none = open the desk | on | off | blackout | mode | move | color | bpm | intensity | focus | ring | house | preset | status' } })
+        { { name = 'sub', help = 'none = open the desk | on | off | fade [s] | blackout | mode | move | color | bpm | intensity | focus | ring | house | follow | preset | status' } })
 end)

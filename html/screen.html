@@ -7,10 +7,13 @@
 <!-- the video screens' picture (client/media.lua draws this page onto the screens' render target) -->
 <style>
   html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-  #yt, #yt iframe, .pic, #look { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #yt, #yt iframe, .pic, #look, #feed { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #feed { object-fit: cover; background: #000; }      /* a camera feed: the camera's view, filling the screens */
   .pic { object-fit: contain; opacity: 0; transition: opacity 0.6s; background: #000; }
   .pic.on { opacity: 1; }
   .hidden { display: none; }
+  .dark { opacity: 0; }                 /* a video loaded and waiting for its start */
+  #fade { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; }   /* a fade-out */
 </style>
 </head>
 <body>
@@ -18,6 +21,9 @@
 <img class="pic" id="pic-a" alt="">
 <img class="pic" id="pic-b" alt="">
 <canvas id="look" class="hidden" width="1280" height="720"></canvas>
+<img class="pic" id="feed-wait" alt="">
+<video id="feed" class="hidden" autoplay muted playsinline></video>
+<div id="fade"></div>
 <script src="screen.js"></script>
 </body>
 </html>

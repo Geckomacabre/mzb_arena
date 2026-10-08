@@ -13,8 +13,8 @@ html, body { margin: 0; background: transparent; font-family: "Segoe UI", Roboto
   user-select: none; }
 .hidden { display: none !important; }
 
-#desk { position: absolute; right: 2.2vw; top: 50%; transform: translateY(-50%); width: 460px; max-height: 94vh;
-  overflow-y: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px 12px;
+#desk { position: absolute; right: 2.2vw; top: 50%; transform: translateY(-50%); width: 500px; max-height: 94vh;
+  overflow-y: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 0 18px 12px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6); }
 #desk::-webkit-scrollbar { width: 6px; }
 #desk::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
@@ -101,6 +101,19 @@ section.folded > h2 { margin-bottom: 0; }
 /* the desk's extra sections (screens, music, followspot) */
 .ext { border-top: 1px solid var(--line); padding-top: 10px; }
 .ext .seg { margin-top: 6px; }
+/* the pyro (pyro.js): what the next cue goes off with, then the cues in their groups */
+.pyro-opts { align-items: center; margin-top: 6px; }
+.pyro-opts .seg { flex: 0 0 44%; margin-top: 0; }
+.pyro-opts .seg button { font-size: 12px; padding: 7px 3px; }
+.swatches { flex: 1; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
+.swatches button { width: 20px; height: 20px; padding: 0; border-radius: 5px; font-size: 10px; color: var(--muted);
+  border-color: rgba(255, 255, 255, 0.18); }
+.swatches button:first-child { width: auto; padding: 0 6px; }
+.swatches button.active { box-shadow: 0 0 0 2px var(--text); border-color: var(--text); color: var(--text); }
+#pyro-cues h3 { margin: 10px 0 5px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  font-weight: 700; }
+#pyro-cues .seg { flex-wrap: wrap; margin-top: 0; }
+#pyro-cues .seg button { flex: 1 0 22%; font-size: 12px; padding: 9px 3px; }
 .urlrow { display: flex; gap: 6px; }
 .urlrow input, .ext select { flex: 1; min-width: 0; font: inherit; font-size: 12px; color: var(--text); background: var(--panel);
   border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; user-select: text; }
@@ -110,3 +123,41 @@ section.folded > h2 { margin-bottom: 0; }
 .sets:empty { display: none; }
 #scr-now, #mus-now { text-transform: none; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   display: inline-block; vertical-align: bottom; }
+
+/* the head stays put while a tab scrolls: the title, the three big buttons, what is on with its way out, the tabs */
+#deskhead { position: sticky; top: 0; z-index: 5; margin: 0 -18px; padding: 16px 18px 0; background: #0e0f14;
+  border-bottom: 1px solid var(--line); border-radius: 14px 14px 0 0; }
+#deskhead header { margin-bottom: 10px; }
+#deskhead section { margin: 0; }
+#nowbar { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; }
+.now { display: flex; align-items: center; gap: 6px; min-width: 0; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 8px; padding: 5px 6px 5px 9px; }
+.now b { font-size: 10px; letter-spacing: 0.12em; color: var(--muted); }
+.now span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.now span.err { color: var(--warn); }
+.now .mini { padding: 4px 8px; }
+#tabs { display: flex; gap: 4px; margin-top: 10px; }
+#tabs button { flex: 1; padding: 9px 4px 8px; font-size: 12px; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); background: transparent; border-radius: 8px 8px 0 0;
+  border-bottom-color: transparent; white-space: nowrap; }
+#tabs button:hover { color: var(--text); }
+#tabs button.active { color: var(--text); background: var(--panel); border-color: var(--line);
+  border-bottom-color: transparent; box-shadow: inset 0 -2px 0 var(--accent); }
+.pane > section:first-child { margin-top: 12px; }
+.pane > section.ext:first-child { border-top: none; padding-top: 0; }
+
+/* follow the music (follow.js): the picture's colours beside what is being followed */
+#follow-now { text-transform: none; }
+#follow-now i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-left: 5px; vertical-align: -1px;
+  border: 1px solid rgba(255, 255, 255, 0.25); }
+
+/* the camera's tally: this player's view is live on the arena's screens (html/feed.js) */
+#feed-tally { position: absolute; top: 1.6vh; left: 50%; transform: translateX(-50%); display: flex; align-items: center;
+  gap: 8px; padding: 5px 12px; background: rgba(12, 13, 17, 0.82); border: 1px solid var(--accent); border-radius: 999px;
+  font-size: 13px; pointer-events: none; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8); white-space: nowrap; }
+#feed-tally i { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+#feed-tally b { letter-spacing: 0.08em; }
+#feed-tally span { color: var(--text); }
+#feed-tally small { color: var(--muted); }
+#feed-tally.bad { border-color: var(--warn); }
+#feed-tally.bad i { background: var(--warn); box-shadow: none; }

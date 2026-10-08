@@ -86,8 +86,10 @@ Config.ShowLabels = {
 -- switch them between the show's setting, full, dimmed and off. A look is a colour effect (mode) and a movement (move)
 -- picked independently, one or more aims (floor, stage, crowd: the fixtures take turns), and the ring lights.
 Config.LightCommand = 'arenalights'
+Config.LightDeskKey = ''               -- a key that opens the desk (e.g. 'F6'); '' = none until a player binds one in
+                                       -- the game's settings (Key Bindings > FiveM > "Maze Bank Arena: open the desk")
 Config.LightAccess = 'command.arena'   -- who may run the lights: an ACE (default: the arena's staff ACE), false = anyone
-Config.LightMaxFixtures = 40           -- spot lights drawn per frame at most (the show rigs have 24 to 36, up to 46 with
+Config.LightMaxFixtures = 40           -- spot lights drawn per frame at most (the show rigs have 24 to 38, up to 48 with
                                        -- Config.LightRigExtra; the roof's house lights are the ones left out)
 Config.LightLensGlow = true            -- a small glow at each fixture's lens, so the rig itself flashes
 Config.LightBrightness = 12.0          -- DrawSpotLight brightness at full intensity
@@ -99,11 +101,29 @@ Config.LightMaxStrobeHz = 8.0          -- flashes per second at most in strobe m
 -- the rooms the show is drawn in (players elsewhere in the building don't pay for it)
 Config.LightRooms = { bowl = true, concourse = true, tunnel = true, backstage = true }
 Config.LightDefault = { on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120,
-                        intensity = 0.8, focus = 'floor', ring = true, ringLevel = 1.0, house = 'show', ringv = 2 }
+                        intensity = 0.8, focus = 'floor', ring = true, ringLevel = 1.0, house = 'show', ringv = 2,
+                        follow = 'off' }
+-- the lights follow the music (the desk's "Follow the music", /arenalights follow <off|on|tempo|colour>). Each
+-- player's own game listens to the track it is playing (html/follow.js, on the music player's sound: the kick drum's
+-- hits make the beat) and looks at the picture of the video it comes from (a YouTube track, or the screens' video
+-- while its sound comes from the speakers) for its two or three main colours. tempo: the effects run on the music's
+-- beat instead of the Speed slider; colour: the colour slots are the picture's colours. Where there is nothing to
+-- follow - no track, a pause, a file without a picture - the desk's own speed and colours stay.
+Config.LightFollow = {
+    enabled = true,
+    punch = 0.35,                -- 0..1: how far the rig dips between two hits (0: only the effect shows the beat)
+    dynamics = 0.25,             -- 0..1: how far a quiet passage dims the rig
+    colours = 3,                 -- colour slots taken from the picture at most (1-3)
+    minBpm = 80,                 -- the tempo found is kept in minBpm .. twice that (a 70 bpm song runs at 140)
+    sensitivity = 1.0,           -- over 1: softer hits count as the beat too; under 1: only the hard ones
+}
 -- the ring lights (the desk's RING LIGHTS button and its colour / level, /arenalights ring ...): the wrestling ring's,
 -- the MMA cage's and the concert stage's own lights (Config.RingLights, shared/rig_lights.lua: until 1.1.0 they were
 -- baked into the rigs and always on), on by default, in the colours the build gave them or one colour from the desk,
 -- whether the show lights are on or not. A show without them uses its rig's washes (group 2) on their own aim.
+-- The glow off the video wall onto the stage goes with them (Config.StageGlow, shared/stage_lights.lua). The moving
+-- heads on the wrestling stage's trusses (Config.StageLights, the same file) are show lights: both were baked into
+-- the stage until 1.1.2, always on in red, white and blue.
 -- RingLightScale: a baked light's intensity times this is the script's brightness.
 Config.RingLightScale = 5.0
 Config.RingLightGroup = 2
@@ -117,7 +137,8 @@ Config.LightColors = {
 }
 -- one-touch looks (the desk's preset buttons, /arenalights preset <name>); nil fields keep what is set. mood = the
 -- crowd's mood that goes with the look (Config.CrowdMoods; Config.CrowdPresetMoods = false: looks leave the crowd be);
--- screen = the video screens' look with it (Config.Media.looks; only while the screens show a look or nothing)
+-- screen = the video screens' look with it (Config.Media.looks, or 'off' = dark, 'own' = the show's own graphics;
+-- only while the screens show a look or nothing)
 Config.LightPresets = {
     walkin    = { label = 'Walk-in',   on = true,  mode = 'pulse', move = 'none',    colors = { { 20, 60, 255 }, { 140, 30, 255 } }, bpm = 50,  focus = 'crowd', house = 'dim', mood = 'doors', screen = 'show' },
     entrance  = { label = 'Entrance',  on = true,  mode = 'sweep', move = 'none',    colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 128, focus = 'stage', house = 'off', mood = 'peak', screen = 'pulse' },
@@ -131,8 +152,8 @@ Config.LightPresets = {
     inferno   = { label = 'Inferno',   on = true,  mode = 'fire',     move = 'nod', bpm = 70, focus = { 'stage', 'crowd' }, house = 'off', screen = 'waves' },
     hype      = { label = 'Hype',      on = true,  mode = 'flash',    move = 'fan', colors = { { 255, 255, 255 }, { 255, 170, 0 } }, bpm = 128, focus = { 'floor', 'crowd' }, house = 'off', mood = 'peak', screen = 'bars' },
     houseup   = { label = 'House up',  on = false, house = 'full', mood = 'cheer' },
-    blackout  = { label = 'Blackout',  on = false, ring = false, house = 'off' },
-    reset     = { label = 'Reset',     on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120, intensity = 0.8, focus = 'floor', ring = false, house = 'show' },
+    blackout  = { label = 'Blackout',  on = false, ring = false, house = 'off', screen = 'off' },
+    reset     = { label = 'Reset',     on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120, intensity = 0.8, focus = 'floor', ring = false, house = 'show', follow = 'off', screen = 'own' },
 }
 Config.LightPresetOrder = { 'walkin', 'entrance', 'goal', 'concert', 'party', 'fight', 'police', 'tv', 'storm', 'inferno',
                             'hype', 'houseup', 'blackout', 'reset' }
@@ -153,10 +174,10 @@ Config.Ice = {
 }
 
 -- ------------------------------------------------------------------ where a listener is (client/listener.lua)
--- The screens' video sound and the music player both play in a browser, which has no idea where you stand. So the
--- client works it out: the room the game has you in, sorted into the bowl, the rooms next to it, the rest of the
--- building and outside. The two players turn their level, filter and echo from that. A room not named here counts as
--- "building" while you are inside the arena's interior.
+-- The music plays in a browser, which has no idea where you stand. So the client works it out: the room the game has
+-- you in, sorted into the bowl, the rooms next to it, the rest of the building and outside. The music player takes
+-- the walls' filter and its level through them from that (the speakers themselves it places from the camera). A room
+-- not named here counts as "building" while you are inside the arena's interior.
 Config.Listener = {
     near = { concourse = true, tunnel = true, backstage = true, stair_nw = true, stair_se = true,
              ring_north = true, ring_east = true, ring_south = true },   -- open onto the bowl: heard through the gaps
@@ -169,21 +190,40 @@ Config.ClockResync = 60          -- s between two clock checks (a check is three
 -- A YouTube video, a cycle of pictures or one picture on every video screen of the show, drawn by a hidden browser
 -- (html/screen.html) onto the screens' render target. While nothing of ours is on, the render target is left alone,
 -- so pmms or a TV script can use the same screens; when ours is on it wins. Run it from the desk's Screens section or
--- with /arenascreen <youtube url | picture url(s) | images [set] | off | pause | resume | volume n | status>.
+-- with /arenascreen <youtube url | picture url(s) | images [set] | look [player id] | off | pause | resume | volume n |
+-- status>.
 Config.Media = {
     enabled = true,              -- false: no built-in screen player at all (leave the screens to another script)
     command = 'arenascreen',
     access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
     width = 1280, height = 720,  -- the browser's size in pixels (the picture is stretched over every screen)
     range = 160.0,               -- m from the arena's middle: the browser exists only this close, and goes further out
-    volume = 0.6,                -- the video's loudness at 100% on the desk, in the bowl (the sound is not positional)
-    defaultVolume = 60,          -- the desk's volume a new video starts at (0-100)
+    -- a video's sound: 'speakers' = from the arena's speakers, through the music player (Config.Music: the same
+    -- video plays there for its sound, started at the same moment; its level is the music's); 'screen' = the
+    -- browser's own sound, which is not placed in the room (the same in both ears
+    -- wherever you stand; the two settings below are its level); 'off' = videos are silent
+    sound = 'speakers',
+    volume = 0.6,                -- 'screen' only: the video's loudness at 100% on the desk, in the bowl
+    defaultVolume = 60,          -- 'screen' only: the desk's volume a new video starts at (0-100)
+    -- a new video starts this many seconds after the Play: every player's game has it loaded by then, so it starts
+    -- at its start for all of them together (0: at once - the first second or so is lost while it loads)
+    leadIn = 2.5,
+    fade = 3.0,                  -- s a fade-out takes (the desk's Fade out; /arenascreen fade [seconds])
+    -- a video that stops takes the show lights out with it: faded out with the picture (Fade out), or over
+    -- lightsFade seconds when it is switched off or comes to its end (0 = cut). A video that has ended is switched
+    -- off: the screens go to Off instead of sitting on its last frame. false: the lights are left as they are
+    lightsOut = true,
+    lightsFade = 2.0,
+    -- Off (the desk's button, /arenascreen off, a blackout) makes the screens dark: a black picture over the show's
+    -- own graphics. "Own graphics" (/arenascreen own) lets go of them again, as the arena starts. false: Off is the
+    -- show's own graphics, as before 1.2 (set this if another media script should get the screens at Off)
+    offBlack = true,
     interval = 8,                -- s per picture in a cycle (the desk / command can change it: 2-120)
     resync = 30,                 -- s between two position checks of a running video (a late or drifting one seeks)
     maxImages = 24,              -- pictures in one cycle at most
     -- how the picture gets onto the screens: 'replace' swaps the screens' texture (replaceTxd / replaceTex) for the
     -- browser's while ours is on, as the Vinewood Bowl's LED wall does; 'rendertarget' draws onto the named render
-    -- target every frame, as pmms does. Back to the show's own graphics when ours is off, either way.
+    -- target every frame, as pmms does. Back to the show's own graphics when ours lets go, either way.
     method = 'replace',
     replaceTxd = 'mzb_tx_show', replaceTex = 'script_rt_mzb_screens',
     -- the browser's page. https://cfx-nui-<resource>/... gives it a web origin, which YouTube needs before it plays
@@ -215,49 +255,111 @@ Config.Media = {
     logos = { wrestling = 'img/sapw_neon.jpg' },   -- the logo over a look (its black is see-through); else the title
     titles = { wrestling = 'SAPW', concert = 'SIRENS OF SAN ANDREAS', mma = 'SAFC', hockey = 'DUST DEVILS',
                basketball = 'LOS SANTOS PANIC', tennis = 'MAZE BANK OPEN', house = 'MAZE BANK ARENA' },
+    -- a camera feed: a player's own view of the game, live on the screens (/arenascreen look = yours, /arenascreen
+    -- look <player id> = theirs, the desk's "My camera"; /arenascreen look off, which the player whose view it is may
+    -- always type). The camera's game sends its picture (the game's own: no chat, no phone, no menus) straight to
+    -- every player near the arena, PC to PC (WebRTC, as the phones' video calls do), so the server carries none of
+    -- it - and so the camera's PC and each watcher's learn each other's IP address, as in any peer-to-peer call.
+    -- With a TURN server in ice and relayOnly = true the picture goes through that server and they do not.
+    feed = {
+        enabled = true,
+        others = true,           -- staff may put another player's view on (that player is told and can take it off)
+        width = 640,             -- the picture's width in pixels (its height follows the camera's screen)
+        fps = 24,
+        bitrate = 700,           -- kbit/s to each watcher at most (the camera's upload is this times the watchers)
+        maxViewers = 16,         -- players who get the picture at most; the others see the show's artwork
+        hideHud = true,          -- the camera's own radar and HUD are hidden while it is live (they are in the picture)
+        flip = false,            -- true if the picture comes out upside down on your game build
+        -- how the two PCs find each other: a STUN server (it only tells a PC its own public address). Add a TURN
+        -- server ({ urls = 'turn:host:3478', username = '...', credential = '...' }) for players whose routers will
+        -- not let them connect directly
+        ice = { { urls = 'stun:stun.l.google.com:19302' } },
+        relayOnly = false,       -- true: only through the TURN server(s) in ice - no player learns another's address
+    },
 }
 
 -- ------------------------------------------------------------------ the music player (client/music.lua, server/music.lua)
--- Music off the light desk, heard from the show's PA: the sound plays in this resource's own page (html/music.js),
--- which turns its level down with the distance to the nearest PA hang, pans it to where the hang is, and gives it the
--- room's sound - full and echoing in the bowl, muffled next door, faint elsewhere in the building, nothing outside.
--- Direct links to audio files and streams (mp3, ogg, m4a, icecast ...) or YouTube links. The filter and the echo need
--- the audio's server to allow it (CORS); YouTube and streams that don't get the level and nothing more.
+-- Music off the light desk, heard from the arena's speakers and in no other way: every speaker of the show that is up
+-- is a source in the world (html/music.js, Web Audio). You hear each one from where it hangs - nearer is louder, left
+-- is left, behind is behind - through the walls from the rooms next to the bowl, with the arena's reverb and the slap
+-- off its far end. Nothing is ever played "flat": the page takes the YouTube player's sound (or the audio file's)
+-- into its own sound graph, and a track whose sound it cannot take in stays silent and is reported.
+-- Links: YouTube, and direct audio files and streams (mp3, ogg, opus, wav, flac, icecast ...). Nothing else is needed
+-- on the server. (Should a game update stop the page reaching the YouTube player: relay.enabled below has the server
+-- fetch the audio instead, which needs yt-dlp and Deno on the server machine and, on newer server builds, the line
+-- add_unsafe_child_process_permission "mzb_arena"  in server.cfg.)
 -- Run it from the desk's Music section or /arenamusic <url | pause | resume | stop | volume n | status>; every player
 -- sets their own level with /arenamusic mine <0-100> (kept between sessions).
 Config.Music = {
     enabled = true,
     command = 'arenamusic',
     access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
-    volume = 0.8,                -- the loudness at 100% on the desk, next to a PA hang
+    volume = 0.8,                -- the loudness at 100% on the desk, next to a speaker
+    -- how many times louder the whole of it is turned up after the speakers, the walls, the reverb and the echo (so
+    -- their balance stays as it is): 1 = as before the setting, 2 = twice the level (+6 dB), 3 = +9.5 dB. A limiter
+    -- behind it holds the loudest peaks, so a hot track gets denser instead of crackling. The screens' video sound
+    -- goes the same way (Config.Media.sound = 'speakers')
+    boost = 2.0,
     defaultVolume = 70,          -- the desk's volume (0-100) when the resource starts
     range = 200.0,               -- m from the arena's middle: the audio is loaded only this close
     resync = 30,                 -- s between two position checks (a drifting player seeks back)
-    -- in the bowl the track comes out of every hang below as a sound in 3D (Web Audio; not YouTube, and not an audio
-    -- server that refuses CORS: those get the level only, by the distance to the nearest hang)
-    refDistance = 12.0,          -- m from a hang at which its level starts to fall
+    -- a new track starts this many seconds after the Play: every player's game has it loaded by then, so nobody
+    -- loses its first second (0: at once)
+    leadIn = 2.5,
+    fade = 3.0,                  -- s a fade-out takes (the desk's Fade out; /arenamusic fade [seconds])
+    refDistance = 12.0,          -- m from a speaker at which its level starts to fall
     rolloff = 0.7,               -- how fast it falls past that (1 = halved at twice the distance; less = gentler)
     panning = 'HRTF',            -- 'HRTF' (left / right / behind, best on headphones) or 'equalpower' (left / right)
-    minGain = 0.25,              -- the level-only players: never below this in the bowl (its far end)
-    pan = 0.6,                   -- the level-only players: how far the sound pans to the hangs (0 = not at all)
-    reverbSeconds = 2.4,         -- the length of the arena's echo
-    -- the room's sound per Config.Listener zone: a low-pass filter (Hz) and how much echo is mixed in (0-1)
+    -- the arena's sound on top of the speakers: a reverb (its length, the gap before it starts) and one echo off the
+    -- far end (its delay, how much of it comes round again, its level). echo = false: the reverb only
+    reverbSeconds = 3.0,
+    preDelay = 0.035,
+    echo = { delay = 0.21, feedback = 0.3, level = 0.2 },
+    farWet = 0.8,                -- how much more reverb you get far from every speaker (0 = the same everywhere)
+    -- per Config.Listener zone: the walls' low-pass filter (Hz) and how much reverb is mixed in (0-1)
     rooms = {
-        bowl = { lowpass = 20000, wet = 0.16 },
-        near = { lowpass = 1100, wet = 0.18 },
-        building = { lowpass = 420, wet = 0.10 },
+        bowl = { lowpass = 20000, wet = 0.34 },
+        near = { lowpass = 1100, wet = 0.3 },
+        building = { lowpass = 420, wet = 0.2 },
     },
-    -- the PA hangs per show (world positions from the arena's build; move them if you move the rig)
-    hangs = {
-        wrestling = { vector3(-335.059, -1969.540, 30.75), vector3(-323.370, -1979.349, 30.75),
-                      vector3(-313.561, -1967.660, 30.75), vector3(-325.250, -1957.851, 30.75) },  -- the ring truss
+    -- the server's fetcher (server/relay.js), off unless enabled: the server fetches every track itself (YouTube with
+    -- yt-dlp) and hands it to the players from its own HTTP port
+    relay = {
+        enabled = false,
+        ytdlp = nil,             -- the full path of yt-dlp if it is not in <resource>/bin or on the PATH
+        deno = nil,              -- the full path of Deno if it is not in <resource>/bin or on the PATH
+        ytdlpArgs = nil,         -- more arguments for it, e.g. { '--cookies', 'C:/yt/cookies.txt' }
+        maxMB = 100,             -- the biggest file it fetches
+        maxMinutes = 90,         -- the longest YouTube video
+        timeout = 180,           -- s to fetch a track before giving up
+        allowLan = false,        -- true: links into this server's own network (192.168.x.x, localhost) are fetched too
+        keepHours = 24,          -- fetched tracks stay in the cache this long (the system's temp folder, or this
+                                 -- resource's music_cache folder on a server that lets it write nowhere else)
+        cacheMB = 600,           -- ... and the cache stays under this size
+    },
+    -- the speakers per show (world positions from the arena's build; move them if you move the rig). A speaker is a
+    -- vector3, or { vector3, gain } for a quieter one; { vector3, gain, room = '<room>', ref = m } is a speaker in a
+    -- room of its own: heard only in that room, as it is (no walls, no arena reverb)
+    speakers = {
+        wrestling = { vector3(-335.059, -1969.540, 30.75), vector3(-323.370, -1979.349, 30.75),      -- the line arrays
+                      vector3(-313.561, -1967.660, 30.75), vector3(-325.250, -1957.851, 30.75) },    -- under the ring truss
         mma = { vector3(-335.059, -1969.540, 28.75), vector3(-323.370, -1979.349, 28.75),
                 vector3(-313.561, -1967.660, 28.75), vector3(-325.250, -1957.851, 28.75) },
-        concert = { vector3(-347.541, -1966.338, 29.70), vector3(-330.572, -1946.115, 29.70) },     -- either side of the stage
-        hockey = { vector3(-324.310, -1968.600, 33.0) },                                             -- the centre-hung board
+        concert = { vector3(-347.541, -1966.338, 29.70), vector3(-330.572, -1946.115, 29.70),         -- the PA hangs
+                    { vector3(-345.294, -1962.415, 19.88), 0.3 }, { vector3(-343.044, -1959.734, 19.88), 0.3 },   -- the subs
+                    { vector3(-340.794, -1957.053, 19.88), 0.3 }, { vector3(-338.544, -1954.372, 19.88), 0.3 },   -- under the
+                    { vector3(-336.295, -1951.690, 19.88), 0.3 }, { vector3(-334.045, -1949.009, 19.88), 0.3 },   -- stage's lip
+                    { vector3(-347.811, -1955.381, 21.95), 0.2 }, { vector3(-341.525, -1947.889, 21.75), 0.2 },   -- the band's
+                    { vector3(-338.650, -1945.863, 21.45), 0.2 } },                                               -- backline
+        hockey = { vector3(-324.310, -1968.600, 33.0) },                                              -- the centre-hung board
         basketball = { vector3(-324.310, -1968.600, 33.0) },
         tennis = { vector3(-324.310, -1968.600, 33.0) },
         house = { vector3(-324.310, -1968.600, 33.0) },
+        -- every show: the production control room's monitors
+        all = { { vector3(-299.419, -2023.022, 20.78), 0.5, room = 'admin', ref = 2.5 },
+                { vector3(-288.786, -2031.944, 20.78), 0.5, room = 'admin', ref = 2.5 },
+                { vector3(-289.700, -2024.663, 21.22), 0.5, room = 'admin', ref = 2.5 },
+                { vector3(-286.214, -2027.588, 21.22), 0.5, room = 'admin', ref = 2.5 } },
     },
 }
 
@@ -519,6 +621,7 @@ Config.Fights = {
     followspot = true,           -- a followspot that is on follows the player fighters (Config.FollowSpot)
     presets = { intro = 'entrance', round = 'fight', over = 'goal' },   -- light presets (Config.LightPresets); false: none
     moods = { intro = 'peak', round = 'show', over = 'cheer' },          -- the crowd's (Config.CrowdMoods); false: none
+    pyro = { intro = 'entrance', over = 'finale' },                      -- pyro cues (Config.Pyro.cues); false: none
     sounds = { bell = { 'CHECKPOINT_PERFECT', 'HUD_MINI_GAME_SOUNDSET' }, ko = { 'Bed', 'WastedSounds' } },
     anims = {
         warmup = { 'anim@mp_player_intcelebrationmale@shadow_boxing', 'shadow_boxing' },
@@ -538,29 +641,217 @@ Config.Fights = {
     },
 }
 
+-- ------------------------------------------------------------------ pyro (client/pyro.lua, server/pyro.lua)
+-- The pyro of the shows with a stage (wrestling, concert, MMA), fired from the desk's Pyro section or
+-- /arenapyro <cue | list> [small | big] [colour]: flames, sparks, comets and smoke from the stage's lip, sparks and
+-- flames down the ramp and on the ring posts (the cage's posts), fireworks, a waterfall and a rain of sparks from
+-- overhead, confetti and money over the ring. Every player in the arena sees a cue at the same moment; it is the
+-- game's own particle effects (no damage, no fire). A cue is a list of steps:
+--   { units = '<a group below>', fx = '<an effect below>', at = s after the cue starts, stagger = s between one unit
+--     and the next, pick = { the units to use, in that order } / reverse = true (the listed order backwards),
+--     scale = times the effect's own, loop = s (instead of the effect's), down = true (pointing down) }
+-- A cue a show has no units for is not offered for that show. label / group = its button on the desk.
+-- An effect: its particle asset and name (checked against the game's files), its scale, loop = s (a looped effect:
+-- started, then stopped after that long), up = m above the unit, light = { r, g, b } (a flash while it goes off),
+-- tint = true (it takes the colour picked on the desk), sound = { name, set } (a game sound played from where it
+-- goes off; none by default). The sizes are first guesses: change them here.
+Config.Pyro = {
+    enabled = true,
+    command = 'arenapyro',
+    access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
+    cooldown = 1.5,              -- s between two cues
+    range = 180.0,               -- m from the arena's middle: only players this close run a cue
+    sizes = { small = 0.6, normal = 1.0, big = 1.5 },    -- the desk's Small / Normal / Big: times every effect's scale
+    units = {
+        wrestling = {
+            flames = { vector3(-342.169, -1956.747, 22.00), vector3(-339.084, -1953.070, 22.00) },   -- the flame units either side of the ramp's head
+            mortars = { vector3(-347.339, -1963.375, 21.41), vector3(-333.455, -1946.828, 21.41),
+                        vector3(-345.796, -1961.536, 21.41), vector3(-334.998, -1948.667, 21.41),
+                        vector3(-344.254, -1959.698, 21.41), vector3(-336.540, -1950.505, 21.41),
+                        vector3(-342.711, -1957.859, 21.41), vector3(-338.083, -1952.344, 21.41) },   -- the mortars along the stage's lip, from the outside in
+            ramp = { vector3(-340.441, -1956.866, 21.01), vector3(-338.667, -1954.751, 21.01),
+                     vector3(-339.139, -1957.958, 20.75), vector3(-337.365, -1955.844, 20.75),
+                     vector3(-337.837, -1959.051, 20.49), vector3(-336.063, -1956.937, 20.49),
+                     vector3(-336.535, -1960.144, 20.24), vector3(-334.760, -1958.030, 20.24),
+                     vector3(-335.232, -1961.237, 19.98), vector3(-333.458, -1959.122, 19.98),
+                     vector3(-333.930, -1962.329, 19.72), vector3(-332.156, -1960.215, 19.72) },   -- the ramp's two edges, from the stage down to the floor
+            posts = { vector3(-328.621, -1968.977, 22.28), vector3(-324.687, -1964.289, 22.28),
+                      vector3(-323.933, -1972.911, 22.28), vector3(-319.999, -1968.223, 22.28) },   -- the ring posts' tops
+            over = { vector3(-346.429, -1959.178, 28.55), vector3(-341.929, -1953.816, 28.55),
+                     vector3(-337.430, -1948.454, 28.55) },   -- three points over the stage
+            truss = { vector3(-347.714, -1960.710, 28.55), vector3(-345.786, -1958.412, 28.55),
+                      vector3(-343.857, -1956.114, 28.55), vector3(-341.929, -1953.816, 28.55),
+                      vector3(-340.001, -1951.518, 28.55), vector3(-338.072, -1949.220, 28.55),
+                      vector3(-336.144, -1946.921, 28.55) },   -- a line across over the stage's front
+            above = { vector3(-328.536, -1968.970, 28.55), vector3(-324.680, -1964.374, 28.55),
+                      vector3(-323.940, -1972.826, 28.55), vector3(-320.084, -1968.230, 28.55),
+                      vector3(-324.310, -1968.600, 28.55) },   -- over the ring
+            confetti = { vector3(-328.536, -1968.970, 28.55), vector3(-324.680, -1964.374, 28.55),
+                         vector3(-323.940, -1972.826, 28.55), vector3(-320.084, -1968.230, 28.55),
+                         vector3(-344.637, -1959.376, 26.05), vector3(-336.923, -1950.184, 26.05) },
+        },
+        concert = {
+            flames = { vector3(-346.412, -1961.803, 21.15), vector3(-334.842, -1948.014, 21.15),
+                       vector3(-342.555, -1957.207, 21.15), vector3(-338.698, -1952.610, 21.15) },   -- along the stage's lip, in front of the band
+            mortars = { vector3(-347.339, -1963.375, 21.15), vector3(-333.455, -1946.828, 21.15),
+                        vector3(-345.796, -1961.536, 21.15), vector3(-334.998, -1948.667, 21.15),
+                        vector3(-344.254, -1959.698, 21.15), vector3(-336.540, -1950.505, 21.15),
+                        vector3(-342.711, -1957.859, 21.15), vector3(-338.083, -1952.344, 21.15) },
+            over = { vector3(-345.922, -1960.908, 31.90), vector3(-340.780, -1954.780, 31.90),
+                     vector3(-335.638, -1948.652, 31.90) },   -- under the roof's front truss
+            truss = { vector3(-346.565, -1961.674, 31.90), vector3(-344.637, -1959.376, 31.90),
+                      vector3(-342.708, -1957.078, 31.90), vector3(-340.780, -1954.780, 31.90),
+                      vector3(-338.852, -1952.482, 31.90), vector3(-336.923, -1950.184, 31.90),
+                      vector3(-334.995, -1947.886, 31.90) },
+            above = { vector3(-336.716, -1964.717, 30.00), vector3(-330.289, -1957.056, 30.00),
+                      vector3(-330.588, -1969.859, 30.00), vector3(-324.160, -1962.199, 30.00),
+                      vector3(-330.438, -1963.458, 30.00) },   -- over the standing floor
+            confetti = { vector3(-336.716, -1964.717, 30.00), vector3(-330.289, -1957.056, 30.00),
+                         vector3(-330.588, -1969.859, 30.00), vector3(-324.160, -1962.199, 30.00),
+                         vector3(-344.637, -1959.376, 31.50), vector3(-336.923, -1950.184, 31.50) },
+        },
+        mma = {
+            flames = { vector3(-343.198, -1957.973, 21.15), vector3(-338.056, -1951.844, 21.15) },   -- either side of the walkway's head
+            mortars = { vector3(-347.339, -1963.375, 21.15), vector3(-333.455, -1946.828, 21.15),
+                        vector3(-345.796, -1961.536, 21.15), vector3(-334.998, -1948.667, 21.15),
+                        vector3(-344.254, -1959.698, 21.15), vector3(-336.540, -1950.505, 21.15),
+                        vector3(-342.711, -1957.859, 21.15), vector3(-338.083, -1952.344, 21.15) },
+            ramp = { vector3(-339.414, -1957.819, 19.60), vector3(-337.550, -1955.598, 19.60),
+                     vector3(-337.805, -1959.169, 19.60), vector3(-335.941, -1956.948, 19.60),
+                     vector3(-336.196, -1960.519, 19.60), vector3(-334.332, -1958.297, 19.60),
+                     vector3(-334.588, -1961.869, 19.60), vector3(-332.724, -1959.647, 19.60),
+                     vector3(-332.979, -1963.219, 19.60), vector3(-331.115, -1960.997, 19.60),
+                     vector3(-331.370, -1964.568, 19.60), vector3(-329.506, -1962.347, 19.60) },   -- the walkway's two edges, from the stage to the cage
+            posts = { vector3(-319.513, -1970.113, 22.70), vector3(-319.848, -1966.277, 22.70),
+                      vector3(-322.797, -1963.803, 22.70), vector3(-326.633, -1964.138, 22.70),
+                      vector3(-329.107, -1967.087, 22.70), vector3(-328.772, -1970.923, 22.70),
+                      vector3(-325.823, -1973.397, 22.70), vector3(-321.987, -1973.062, 22.70) },   -- the cage's posts
+            over = { vector3(-346.429, -1959.178, 28.55), vector3(-341.929, -1953.816, 28.55),
+                     vector3(-337.430, -1948.454, 28.55) },
+            truss = { vector3(-347.714, -1960.710, 28.55), vector3(-345.786, -1958.412, 28.55),
+                      vector3(-343.857, -1956.114, 28.55), vector3(-341.929, -1953.816, 28.55),
+                      vector3(-340.001, -1951.518, 28.55), vector3(-338.072, -1949.220, 28.55),
+                      vector3(-336.144, -1946.921, 28.55) },
+            above = { vector3(-328.536, -1968.970, 28.55), vector3(-324.680, -1964.374, 28.55),
+                      vector3(-323.940, -1972.826, 28.55), vector3(-320.084, -1968.230, 28.55),
+                      vector3(-324.310, -1968.600, 28.55) },   -- over the cage
+            confetti = { vector3(-328.536, -1968.970, 28.55), vector3(-324.680, -1964.374, 28.55),
+                         vector3(-323.940, -1972.826, 28.55), vector3(-320.084, -1968.230, 28.55),
+                         vector3(-344.637, -1959.376, 26.05), vector3(-336.923, -1950.184, 26.05) },
+        },
+    },
+    effects = {
+        flame    = { asset = 'scr_xs_pits', name = 'scr_xs_fire_pit', scale = 0.5, loop = 1.4, light = { 255, 140, 40 } },
+        longburn = { asset = 'scr_xs_pits', name = 'scr_xs_fire_pit_long', scale = 0.5, loop = 3.0, light = { 255, 140, 40 } },
+        blue     = { asset = 'scr_xs_pits', name = 'scr_xs_sf_pit', scale = 0.5, loop = 1.4, light = { 90, 170, 255 } },
+        gerb     = { asset = 'scr_indep_fireworks', name = 'scr_indep_firework_fountain', scale = 0.5, tint = true, light = { 255, 220, 170 } },
+        comet    = { asset = 'scr_indep_fireworks', name = 'scr_indep_firework_trailburst', scale = 0.6, tint = true, light = { 255, 230, 200 } },
+        burst    = { asset = 'scr_indep_fireworks', name = 'scr_indep_firework_starburst', scale = 0.8, tint = true, light = { 255, 240, 220 } },
+        shot     = { asset = 'scr_indep_fireworks', name = 'scr_indep_firework_shotburst', scale = 0.7, tint = true, light = { 255, 240, 220 } },
+        shell    = { asset = 'proj_xmas_firework', name = 'scr_firework_xmas_burst_rgw', scale = 0.3, light = { 255, 240, 220 } },
+        spiral   = { asset = 'proj_xmas_firework', name = 'scr_firework_xmas_spiral_burst_rgw', scale = 0.3, light = { 255, 240, 220 } },
+        crackle  = { asset = 'proj_xmas_firework', name = 'scr_firework_xmas_repeat_burst_rgw', scale = 0.3, light = { 255, 240, 220 } },
+        sparkler = { asset = 'scr_ih_club', name = 'scr_ih_club_sparkler', scale = 2.5, loop = 5.0, light = { 255, 230, 180 } },
+        smoke    = { asset = 'scr_ba_club', name = 'scr_ba_club_smoke_machine', scale = 1.2, loop = 3.0 },
+        puff     = { asset = 'scr_rcbarry2', name = 'scr_clown_appears', scale = 1.0 },
+        confetti = { asset = 'scr_xs_celebration', name = 'scr_xs_confetti_burst', scale = 1.6 },
+        money    = { asset = 'scr_xs_celebration', name = 'scr_xs_money_rain', scale = 1.2, loop = 6.0 },
+    },
+    -- the desk's buttons, in this order (a new group starts where the cues' group changes)
+    order = { 'flames', 'firewall', 'blueflames', 'longburn', 'gerbs', 'chase', 'sweep', 'smoke',
+              'ramp', 'rampfire', 'posts', 'postfire', 'sparklers',
+              'burst', 'shells', 'crackle', 'waterfall', 'sparkrain', 'puffs', 'confetti', 'money',
+              'entrance', 'bighit', 'rapid', 'winner', 'inferno', 'finale' },
+    cues = {
+        flames     = { label = 'Flames',      group = 'Stage', steps = { { units = 'flames', fx = 'flame' } } },
+        firewall   = { label = 'Fire wall',   group = 'Stage', steps = { { units = 'mortars', fx = 'flame', scale = 0.8 } } },
+        blueflames = { label = 'Blue flames', group = 'Stage', steps = { { units = 'flames', fx = 'blue' } } },
+        longburn   = { label = 'Long burn',   group = 'Stage', steps = { { units = 'flames', fx = 'longburn' } } },
+        gerbs      = { label = 'Sparks',      group = 'Stage', steps = { { units = 'mortars', fx = 'gerb' } } },
+        chase      = { label = 'Chase',       group = 'Stage', steps = { { units = 'mortars', fx = 'comet', stagger = 0.12 } } },
+        sweep      = { label = 'Sweep',       group = 'Stage', steps = { { units = 'mortars', fx = 'comet', stagger = 0.1,
+                                                                         pick = { 1, 3, 5, 7, 8, 6, 4, 2 } } } },   -- one end to the other
+        smoke      = { label = 'Smoke',       group = 'Stage', steps = { { units = 'flames', fx = 'smoke' } } },
+        ramp       = { label = 'Ramp sparks', group = 'Ramp and ring', steps = { { units = 'ramp', fx = 'gerb', stagger = 0.09 } } },
+        rampfire   = { label = 'Ramp flames', group = 'Ramp and ring', steps = { { units = 'ramp', fx = 'flame', scale = 0.5, loop = 1.0, stagger = 0.09 } } },
+        posts      = { label = 'Post sparks', group = 'Ramp and ring', steps = { { units = 'posts', fx = 'gerb' } } },
+        postfire   = { label = 'Post flames', group = 'Ramp and ring', steps = { { units = 'posts', fx = 'flame', scale = 0.6 } } },
+        sparklers  = { label = 'Sparklers',   group = 'Ramp and ring', steps = { { units = 'posts', fx = 'sparkler' } } },
+        burst      = { label = 'Burst',       group = 'Overhead', steps = { { units = 'over', fx = 'burst', stagger = 0.25 } } },
+        shells     = { label = 'Fireworks',   group = 'Overhead', steps = { { units = 'over', fx = 'shell', stagger = 0.3 },
+                                                                            { units = 'above', fx = 'spiral', at = 0.9, stagger = 0.25 } } },
+        crackle    = { label = 'Crackle',     group = 'Overhead', steps = { { units = 'above', fx = 'crackle', stagger = 0.2 } } },
+        waterfall  = { label = 'Waterfall',   group = 'Overhead', steps = { { units = 'truss', fx = 'gerb', down = true } } },
+        sparkrain  = { label = 'Spark rain',  group = 'Overhead', steps = { { units = 'above', fx = 'gerb', down = true, stagger = 0.1 } } },
+        puffs      = { label = 'Smoke puffs', group = 'Overhead', steps = { { units = 'over', fx = 'puff', stagger = 0.2 } } },
+        confetti   = { label = 'Confetti',    group = 'Overhead', steps = { { units = 'confetti', fx = 'confetti', stagger = 0.1 } } },
+        money      = { label = 'Money rain',  group = 'Overhead', steps = { { units = 'above', fx = 'money' } } },
+        entrance   = { label = 'Entrance',    group = 'Sequences',
+                       steps = { { units = 'flames', fx = 'flame' },
+                                 { units = 'mortars', fx = 'comet', at = 0.3, stagger = 0.1 },
+                                 { units = 'over', fx = 'burst', at = 1.3, stagger = 0.2 },
+                                 { units = 'ramp', fx = 'gerb', at = 1.8, stagger = 0.09 } } },
+        bighit     = { label = 'Big hit',     group = 'Sequences',
+                       steps = { { units = 'flames', fx = 'flame' }, { units = 'mortars', fx = 'comet' },
+                                 { units = 'over', fx = 'burst' } } },
+        rapid      = { label = 'Rapid fire',  group = 'Sequences',
+                       steps = { { units = 'mortars', fx = 'comet', stagger = 0.07 },
+                                 { units = 'mortars', fx = 'comet', stagger = 0.07, at = 0.7, reverse = true },
+                                 { units = 'mortars', fx = 'comet', stagger = 0.07, at = 1.4 } } },
+        winner     = { label = 'Winner',      group = 'Sequences',
+                       steps = { { units = 'posts', fx = 'gerb' },
+                                 { units = 'above', fx = 'shell', at = 0.5, stagger = 0.2 },
+                                 { units = 'confetti', fx = 'confetti', at = 1.0, stagger = 0.1 },
+                                 { units = 'above', fx = 'money', at = 1.2 } } },
+        inferno    = { label = 'Inferno',     group = 'Sequences',
+                       steps = { { units = 'mortars', fx = 'flame', scale = 0.8 }, { units = 'flames', fx = 'longburn' },
+                                 { units = 'posts', fx = 'flame', scale = 0.6, at = 0.3 },
+                                 { units = 'ramp', fx = 'flame', scale = 0.5, loop = 1.0, at = 0.6, stagger = 0.09 } } },
+        finale     = { label = 'Finale',      group = 'Sequences',
+                       steps = { { units = 'flames', fx = 'flame' },
+                                 { units = 'mortars', fx = 'gerb' },
+                                 { units = 'posts', fx = 'gerb', at = 0.4 },
+                                 { units = 'mortars', fx = 'comet', at = 1.0, stagger = 0.08 },
+                                 { units = 'over', fx = 'shot', at = 1.8, stagger = 0.15 },
+                                 { units = 'over', fx = 'burst', at = 2.6, stagger = 0.15 },
+                                 { units = 'flames', fx = 'flame', at = 3.0 },
+                                 { units = 'confetti', fx = 'confetti', at = 3.2, stagger = 0.1 } } },
+    },
+}
+
 -- ------------------------------------------------------------------ props of your own (client/props.lua)
 -- Vanilla props put down for a show without CodeWalker: { model, x, y, z, heading [, ground = true] }. x y z is where
 -- the model's own origin goes (CreateObjectNoOffset); ground = true sets it down on the floor under it instead. Local
 -- props, frozen, made while you are in the arena; /arenainfo prints where you stand. room = the interior room a prop
 -- stands in when that is not the bowl. Out of the box:
---   * the interview set in the backstage hall (wrestling and MMA): a green screen standing off the east wall north of
---     the tunnel, a TV camera on it and two studio lights. The subject stands on the green floor, facing the hall
+--   * the interview set in the backstage hall (wrestling and MMA): a green screen (the arena's own prop,
+--     mzb_bh_green_screen: 3.5 m wide, 2.4 m high, its cloth swept out over the floor) standing off the east wall
+--     north of the tunnel, a TV camera on it and two studio lights. The subject stands on the cloth, facing the hall
 --   * a camera crane (the movie set's) on the wrestling stage deck, right of the titantron as the house sees it, its
 --     arm up over the stage's lip towards the ring
 Config.ShowProps = {
     wrestling = {
         { 'prop_dolly_02', -336.218, -1946.076, 21.273, 320.0 },                                -- the camera crane
-        { 'prop_ld_greenscreen_01', -361.594, -1924.979, 21.153, 230.0, room = 'backstage' },   -- 5.5 x 4.2 x 3.2 m
-        { 'prop_tv_cam_02', -365.730, -1921.508, 20.562, 50.0, room = 'backstage' },
-        { 'prop_studio_light_02', -365.531, -1925.004, 19.734, 99.2, room = 'backstage' },
-        { 'prop_studio_light_02', -362.253, -1921.097, 19.734, 0.8, room = 'backstage' },
+        { 'mzb_bh_green_screen', -360.177, -1926.168, 19.556, 50.0, room = 'backstage' },
+        { 'prop_tv_cam_02', -364.505, -1922.537, 20.562, 50.0, room = 'backstage' },
+        { 'prop_studio_light_02', -364.508, -1925.341, 19.734, 90.1, room = 'backstage' },
+        { 'prop_studio_light_02', -361.744, -1922.047, 19.734, 9.9, room = 'backstage' },
     },
     mma = {
-        { 'prop_ld_greenscreen_01', -361.594, -1924.979, 21.153, 230.0, room = 'backstage' },
-        { 'prop_tv_cam_02', -365.730, -1921.508, 20.562, 50.0, room = 'backstage' },
-        { 'prop_studio_light_02', -365.531, -1925.004, 19.734, 99.2, room = 'backstage' },
-        { 'prop_studio_light_02', -362.253, -1921.097, 19.734, 0.8, room = 'backstage' },
+        { 'mzb_bh_green_screen', -360.177, -1926.168, 19.556, 50.0, room = 'backstage' },
+        { 'prop_tv_cam_02', -364.505, -1922.537, 20.562, 50.0, room = 'backstage' },
+        { 'prop_studio_light_02', -364.508, -1925.341, 19.734, 90.1, room = 'backstage' },
+        { 'prop_studio_light_02', -361.744, -1922.047, 19.734, 9.9, room = 'backstage' },
     },
+}
+
+-- What stands in the store rooms while its show is NOT up: the two basket units, folded down (the arena's own prop,
+-- mzb_bb_hoop_stowed: the unit off the court with its mast lowered and the shot clock off, 6.9 m long, 2.25 m high;
+-- its origin is on the floor under its base, its board end is +y), side by side in the east store.
+-- { model, x, y, z, heading, room = the interior room, unless = the show (or { shows }) that has it out on the floor }
+Config.StowedProps = {
+    { 'mzb_bb_hoop_stowed', -292.050, -1964.301, 19.556, 230.0, room = 'east_store', unless = 'basketball' },
+    { 'mzb_bb_hoop_stowed', -290.282, -1962.195, 19.556, 230.0, room = 'east_store', unless = 'basketball' },
 }
 
 -- ------------------------------------------------------------------ litter (client/litter.lua)

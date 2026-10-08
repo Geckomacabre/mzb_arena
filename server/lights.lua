@@ -1,14 +1,19 @@
 -- mzb_arena - server: the light desk's state (GlobalState.mzbLights, synced to every client incl. late joiners)
 --   GlobalState.mzbLights = { on, mode, move, colors = { {r, g, b} x 1..3 }, bpm, intensity (0..1),
---                             focus (one of floor / stage / crowd, or a list of them), ring, house }
+--                             focus (one of floor / stage / crowd, or a list of them), ring, house,
+--                             follow (off / both / tempo / colour: the lights follow the music, Config.LightFollow),
+--                             fade ({ at = server ms, dur = s }: the show lights are fading out, off when they are
+--                             down; switching them on or off ends it) }
 -- Who may change it: Config.LightAccess (an ACE; false = anyone). The desk (NUI) and chat both land in setLights.
 --   /arenalights                   open the desk
 --   /arenalights on | off | blackout | status | help
+--   /arenalights fade [seconds]    the show lights fade out, then off (a video that stops does this: Config.Media.lightsOut)
 --   /arenalights mode <static|chase|strobe|pulse|rainbow|sweep|ballyhoo|random|police|fade|wave|flash|alternate|
 --                      twinkle|lightning|fire|bounce>       the colour effect
 --   /arenalights move <none|sweep|ballyhoo|fan|nod|cross>    the beams' movement (combines with any mode)
 --   /arenalights color <name|#rrggbb> [second] [third]
 --   /arenalights bpm <30-240> | intensity <0-100> | house <show|full|dim|off>
+--   /arenalights follow <off|on|tempo|colour>   the effects run on the music's beat and / or in the video's colours
 --   /arenalights focus <floor|stage|crowd> [more ...]      several: the fixtures take turns (e.g. focus floor crowd)
 --   /arenalights ring <on|off|color <c>|level <0-100>|own> the ring lights (the rig's own, on by default): off, a
 --                                                          colour for all of them, their level, back to their own colours
@@ -20,6 +25,7 @@ local MODES = { static = true, chase = true, strobe = true, pulse = true, rainbo
 local MOVES = { none = true, sweep = true, ballyhoo = true, fan = true, nod = true, cross = true }
 local FOCUS = { floor = true, stage = true, crowd = true }
 local HOUSE = { show = true, full = true, dim = true, off = true }
+local FOLLOW = { off = 'off', both = 'both', on = 'both', tempo = 'tempo', colour = 'colour', color = 'colour' }
 
 local function copy(t)
     if type(t) ~= 'table' then return t end
@@ -52,7 +58,7 @@ end
 local function sanitize(patch, cur)
     local out = copy(cur)
     if type(patch) ~= 'table' then return out end
-    if patch.on ~= nil then out.on = patch.on == true end
+    if patch.on ~= nil then out.on, out.fade = patch.on == true, nil end
     if MODES[patch.mode] then out.mode = patch.mode end
     if MOVES[patch.move] then out.move = patch.move end
     if FOCUS[patch.focus] then
@@ -75,6 +81,11 @@ local function sanitize(patch, cur)
     end
     if tonumber(patch.ringLevel) then out.ringLevel = math.max(0.0, math.min(1.0, tonumber(patch.ringLevel))) end
     if HOUSE[patch.house] then out.house = patch.house end
+    if patch.follow == false then
+        out.follow = 'off'
+    elseif type(patch.follow) == 'string' and FOLLOW[patch.follow] then
+        out.follow = (Config.LightFollow or {}).enabled ~= false and FOLLOW[patch.follow] or 'off'
+    end
     if tonumber(patch.bpm) then out.bpm = math.floor(math.max(30, math.min(240, tonumber(patch.bpm)))) end
     if tonumber(patch.intensity) then out.intensity = math.max(0.0, math.min(1.0, tonumber(patch.intensity))) end
     if type(patch.colors) == 'table' then
@@ -110,6 +121,27 @@ end
 
 -- (server/fights.lua: the bout's cues)
 MzbLightPreset = preset
+
+-- the show lights fade out over the seconds, then they are off (0: off at once). The clients take the level down from
+-- the moment they hear of it (client/lights.lua); the ring and house lights stay as they are
+local function fadeOut(seconds)
+    local cur = copy(current())
+    if not cur.on then return false end
+    if cur.fade then return true end
+    local dur = math.min(30.0, tonumber(seconds) or 2.0)
+    if dur < 0.1 then return setLights({ on = false }) end
+    local at = GetGameTimer()
+    cur.fade = { at = at, dur = dur }
+    GlobalState.mzbLights = cur
+    SetTimeout(math.floor(dur * 1000) + 100, function()
+        local now = current()
+        if now.fade and now.fade.at == at then setLights({ on = false }) end
+    end)
+    return true
+end
+
+-- (server/media.lua: a video that stops)
+MzbLightsOut = fadeOut
 
 AddEventHandler('onResourceStart', function(res)
     if res ~= GetCurrentResourceName() then return end
@@ -165,14 +197,14 @@ local function status(src)
     local fo = type(l.focus) == 'table' and table.concat(l.focus, '+') or l.focus
     local ring = l.ring and ('ON (%s, %d%%)'):format(l.ringColor and ('#%02x%02x%02x'):format(l.ringColor[1],
         l.ringColor[2], l.ringColor[3]) or 'own colours', math.floor((l.ringLevel or 1.0) * 100 + 0.5)) or 'off'
-    reply(src, ('show lights %s | mode %s | move %s | colours %s | %d bpm | intensity %d%% | aim %s | ring lights %s | house %s')
-        :format(l.on and 'ON' or 'off', l.mode, l.move or 'none', table.concat(cs, ' '), l.bpm,
-            math.floor(l.intensity * 100 + 0.5), fo, ring, l.house))
+    reply(src, ('show lights %s | mode %s | move %s | colours %s | %d bpm | intensity %d%% | aim %s | ring lights %s | house %s | follow the music: %s')
+        :format(l.on and (l.fade and 'ON (fading out)' or 'ON') or 'off', l.mode, l.move or 'none', table.concat(cs, ' '), l.bpm,
+            math.floor(l.intensity * 100 + 0.5), fo, ring, l.house, l.follow or 'off'))
 end
 
-local HELP = '/%s [on|off|blackout|status] | mode <m> | move <none|sweep|ballyhoo|fan|nod|cross> | color <c> [c2] [c3] | ' ..
+local HELP = '/%s [on|off|fade [s]|blackout|status] | mode <m> | move <none|sweep|ballyhoo|fan|nod|cross> | color <c> [c2] [c3] | ' ..
              'bpm <n> | intensity <0-100> | focus <floor|stage|crowd> [more] | ring <on|off|color <c>|level <n>|own> | ' ..
-             'house <show|full|dim|off> | preset <name>'
+             'house <show|full|dim|off> | follow <off|on|tempo|colour> | preset <name>'
 
 RegisterCommand(Config.LightCommand, function(src, args)
     if not allowed(src) then return reply(src, 'you are not allowed to run the arena lights') end
@@ -183,6 +215,7 @@ RegisterCommand(Config.LightCommand, function(src, args)
     end
     if sub == 'on' then setLights({ on = true })
     elseif sub == 'off' then setLights({ on = false })
+    elseif sub == 'fade' then fadeOut(args[2])
     elseif sub == 'blackout' then preset('blackout')
     elseif sub == 'mode' and MODES[args[2] or ''] then setLights({ mode = args[2] })
     elseif (sub == 'color' or sub == 'colour') and args[2] then setLights({ colors = { args[2], args[3], args[4] } })
@@ -197,6 +230,7 @@ RegisterCommand(Config.LightCommand, function(src, args)
     elseif sub == 'ring' and args[2] == 'level' and tonumber(args[3]) then setLights({ ringLevel = tonumber(args[3]) / 100.0 })
     elseif sub == 'ring' and args[2] == 'own' then setLights({ ringColor = false })
     elseif sub == 'house' and HOUSE[args[2] or ''] then setLights({ house = args[2] })
+    elseif sub == 'follow' and FOLLOW[(args[2] or ''):lower()] then setLights({ follow = args[2]:lower() })
     elseif sub == 'preset' and args[2] then
         if not preset(args[2]:lower()) then
             local names = {}
@@ -213,3 +247,4 @@ end, false)
 exports('SetLights', function(patch) return setLights(patch) end)
 exports('GetLights', function() return copy(current()) end)
 exports('LightPreset', function(name) return preset(name) end)
+exports('FadeLights', function(seconds) return fadeOut(seconds) end)

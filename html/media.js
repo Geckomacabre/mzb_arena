@@ -10,13 +10,21 @@
 
   function render() {
     const m = media || { kind: 'off' };
+    const off = m.kind === 'off';
     const now = m.kind === 'youtube' ? `YouTube ${m.id}` : m.kind === 'images' ? `${(m.urls || []).length} pictures`
-      : m.kind === 'image' ? 'one picture' : m.kind === 'look' ? `the ${m.look} look` : 'off';
+      : m.kind === 'image' ? 'one picture' : m.kind === 'look' ? `the ${m.look} look`
+      : m.kind === 'feed' ? `camera: ${m.camName || '?'}` : m.black ? 'off (dark)' : 'own graphics';
     Array.from(document.querySelectorAll('#scr-looks button')).forEach((b) =>
       b.classList.toggle('active', m.kind === 'look' && b.dataset.look === m.look));
-    $('#scr-now').textContent = now + (m.paused ? ' (paused)' : '');
+    const text = now + (m.fade ? ' (fading out)' : m.paused ? ' (paused)' : '');
+    $('#scr-now').textContent = text; $('#q-scr-now').textContent = text;
     $('#scr-pause').textContent = m.paused ? 'Resume' : 'Pause';
-    $('#scr-pause').disabled = m.kind === 'off';
+    $('#scr-pause').disabled = off;
+    $('#scr-fade').disabled = $('#q-scr-fade').disabled = off || !!m.fade;
+    $('#scr-stop').classList.toggle('active', off && !!m.black);       // dark
+    $('#scr-own').classList.toggle('active', off && !m.black);         // the show's own graphics
+    $('#scr-cam').classList.toggle('active', m.kind === 'feed');       // a camera feed
+    $('#q-scr-off').disabled = off && !!m.black;
     if (document.activeElement !== $('#scr-vol')) { $('#scr-vol').value = m.volume || 0; $('#scr-vol-val').textContent = m.volume || 0; }
   }
 
@@ -24,7 +32,10 @@
   $('#scr-play').onclick = play;
   $('#scr-url').addEventListener('keyup', (e) => { if (e.key === 'Enter') play(); });
   $('#scr-pause').onclick = () => post({ action: media.paused ? 'resume' : 'pause' });
-  $('#scr-stop').onclick = () => post({ action: 'stop' });
+  $('#scr-stop').onclick = $('#q-scr-off').onclick = () => post({ action: 'stop' });
+  $('#scr-fade').onclick = $('#q-scr-fade').onclick = () => post({ action: 'fade' });
+  $('#scr-own').onclick = () => post({ action: 'own' });
+  $('#scr-cam').onclick = () => post({ action: 'feed' });               // this player's own view, live
   // the volume: at most one change every 200 ms, the last one always sent
   let volTimer = null;
   $('#scr-vol').oninput = (e) => {
@@ -36,7 +47,8 @@
     const m = e.data || {};
     if (m.type !== 'media') return;
     if (m.media) media = m.media;
-    if (m.enabled !== undefined) $('#screens').classList.toggle('hidden', !m.enabled);
+    if (m.enabled !== undefined) { $('#screens').classList.toggle('hidden', !m.enabled); $('#q-scr').classList.toggle('hidden', !m.enabled); }
+    if (m.feed !== undefined) $('#scr-cam').classList.toggle('hidden', !m.feed);
     if (m.looks) {
       const box = $('#scr-looks');
       box.innerHTML = '';

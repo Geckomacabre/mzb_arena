@@ -63,6 +63,19 @@ Every show from the same seat, the back row of the upper tier.
 | ![MMA](screenshots/nosebleed_mma.jpg)<br>**Fight night** | ![Hockey](screenshots/nosebleed_hockey.jpg)<br>**Hockey** |
 | ![Basketball](screenshots/nosebleed_basketball.jpg)<br>**Basketball** | ![Tennis](screenshots/nosebleed_tennis.jpg)<br>**Tennis** |
 
+## In the works
+
+**Not in this release.** These are previews rendered from the models, not screenshots of the game, and none of it
+is in the files below yet. A bigger event floor - the lower tier's front seven rows fold back on all four sides, as
+the stage end's stands already do for a stage, taking the floor from 60 x 30 m to 70.6 x 40.6 m - and the shows that
+need it. No vehicles are part of any of them: the trucks, the karts and the cars to be crushed are the game's own.
+
+| | |
+|---|---|
+| ![The bigger floor](screenshots/preview_bigfloor.jpg)<br>**The bigger floor** | ![Monster trucks](screenshots/preview_monster.jpg)<br>**Monster trucks** |
+| ![Kart circuit: Grand Prix](screenshots/preview_karting.jpg)<br>**Kart circuit: Grand Prix** (a flyover) | ![Kart circuit: Sprint](screenshots/preview_sprint.jpg)<br>**Kart circuit: Sprint** |
+| ![Kart circuit: Oval](screenshots/preview_oval.jpg)<br>**Kart circuit: Oval** (banked ends) | ![Skate park](screenshots/preview_skatepark.jpg)<br>**Skate park** (park course and vert ramp) |
+
 ## Requirements
 
 - **Game build 2060 or newer** (`sv_enforceGameBuild 2060`). The interior uses vanilla props from the Diamond Casino
@@ -128,8 +141,9 @@ and the menu's picks are checked on the server with the same ACE. ox_lib is not 
 Every switch is logged in the server console with the player's name. A short cooldown (`Config.SwitchCooldown`)
 stops a switch being spammed, since each one reloads the interior for everyone inside.
 
-`/arenainfo` (everyone, client side) prints the interior and room you are standing in, which helps when reporting
-issues.
+`/arenainfo` (everyone, client side) prints where you stand: the position, the room, the interior, the show and how
+many of its sets your own game has switched on, which helps when reporting issues. `/arenareset` (everyone, your own
+screen only) takes the show's pieces down and sets them up again.
 
 ## Exports (server)
 
@@ -140,8 +154,14 @@ exports.mzb_arena:GetShows()                -- every show's name, sorted
 exports.mzb_arena:SetDock('a', 'open')      -- 'a' | 'b' | 'c' | 'all', 'open' | 'close' | 'toggle'
 exports.mzb_arena:SetLights({ on = true, mode = 'strobe', colors = { 'red', 'white' }, bpm = 150, house = 'off' })
 exports.mzb_arena:LightPreset('goal')       -- a Config.LightPresets name (a goal horn script can call it)
+exports.mzb_arena:FadeLights(3)             -- the show lights fade out over 3 s, then off
 exports.mzb_arena:GetLights()               -- the desk's current state
+exports.mzb_arena:HideSets({ 'mzb_set_wwe_ring', 'mzb_set_wwe_stage' })   -- leave these pieces out, whatever the show
+exports.mzb_arena:HideSets({})              -- ... and have them back
 ```
+
+`HideSets` is for a resource that brings a ring, a stage or a floor of its own: the arena's pieces named (entity
+sets from `Config.Shows`) are not switched on while they are in the list.
 
 The current state is public in `GlobalState.mzbShow`, `GlobalState.mzbDock` and `GlobalState.mzbLights`, so a job
 script or an ox_target panel can read it.
@@ -153,10 +173,20 @@ moving heads, beams and washes of the wrestling, concert and MMA rigs) and from 
 show, and the only ones for hockey, basketball, tennis and the empty house). Every player in the bowl sees the same
 show at the same moment.
 
-`/arenalights` opens the desk: show lights on / off, the ring lights, blackout, the house lights (the show's
-setting, full, dimmed, off), the effect, the movement, up to three colours from a palette or a colour picker, the speed
-in BPM (with a tap button), intensity, the aim and presets. The desk's sections fold: click a section's title to put
-it away, and the desk remembers. A look is built from independent parts, as on a lighting console:
+`/arenalights` opens the desk (or a key: bind "Maze Bank Arena: open the desk" in the game's Key Bindings > FiveM,
+or set `Config.LightDeskKey`). Its head stays put: show lights on / off, the ring lights, blackout, and what is on
+the screens and in the speakers with a **Fade** and an **Off / Stop** beside each. Under it, four tabs (keys `1`-`4`,
+the last one used is remembered):
+
+- **Show**: the presets, the pyro, the crowd - what gets pressed during a show.
+- **Lights**: the effect, the movement, up to three colours from a palette or a colour picker, the speed in BPM
+  (with a tap button), intensity, the aim, follow the music, the house lights (the show's setting, full, dimmed,
+  off), the ring lights' colour and level, the followspot.
+- **Screens & music**: the screens' and the music player's sections (below).
+- **Fights**: the card.
+
+A section's title still folds it away, and the desk remembers. A look is built from independent parts, as on a
+lighting console:
 
 - **Effect** (the colour and level of each fixture): static, chase, strobe, pulse, rainbow, fade (a slow crossfade
   through the colours), wave (a band of light rolling round the rig), flash (the whole rig hits on the beat and dies
@@ -167,8 +197,11 @@ it away, and the desk remembers. A look is built from independent parts, as on a
 - **Aim**: floor, stage, crowd - or several at once (the fixtures take turns), e.g. floor and crowd.
 - **Ring lights**: the ring truss's, the cage truss's and the concert rig's own lights (they light the ring, the cage
   and the stage, with the show lights on or off - TV lighting for the match while the rest of the rig runs the
-  show). They are on by default, each in the colour the build gave it; the desk turns them off, gives them all one
-  colour, or sets their level.
+  show), and the glow off the video wall onto the stage. They are on by default, each in the colour the build gave
+  it; the desk turns them off, gives them all one colour, or sets their level.
+- **The stage's trusses** (wrestling): their thirteen moving heads are show lights like the rest of the rig - the
+  desk's colours, effects and movement, dark while the show lights are off. (Until 1.1.2 they were part of the stage
+  model: always on, in red, white and blue.)
 - **Presets**: walk-in, entrance, goal, concert, party, fight, police, TV ring, storm, inferno, hype, house up,
   blackout, reset.
 
@@ -176,6 +209,7 @@ It also runs from chat:
 
 ```
 /arenalights on | off | blackout | status
+/arenalights fade 3                   (the show lights fade out over 3 s, then off; no number: 2 s)
 /arenalights mode wave                (the effect)
 /arenalights move fan                 (none | sweep | ballyhoo | fan | nod | cross)
 /arenalights color red white          (names from Config.LightColors, or #rrggbb; up to three)
@@ -184,6 +218,7 @@ It also runs from chat:
 /arenalights ring color red           (one colour for all of them; ring own = each its own colour again)
 /arenalights ring level 60            (0-100)
 /arenalights bpm 128 | intensity 80 | house dim
+/arenalights follow on                (off | on | tempo | colour: the lights follow the music)
 /arenalights preset storm
 ```
 
@@ -191,6 +226,14 @@ The interior's own (baked) lights can't change colour in GTA; the house buttons 
 off, and the desk's colour comes from the spot lights it draws. That is why the rigs' ring lights are drawn by the
 script (`shared/rig_lights.lua`, taken from the rig models, which no longer carry them). Players with
 photosensitivity: `Config.LightMaxStrobeHz` caps the strobe (0 turns it into a pulse).
+
+**Follow the music** (the Lights tab, `/arenalights follow <off|on|tempo|colour>`): the effects run on the beat of
+what the music player is playing and in the colours of its video, instead of the Speed slider and the colour slots.
+Each player's own game listens to the track (the kick drum's hits make the beat; the rig dips between them) and
+looks at the video's picture five times a second for its two or three main colours - a YouTube track's video, or the
+screens' video while its sound comes from the speakers. A file has no picture and a pause no beat: the desk's own
+colours and speed stay for whatever is not there. `Config.LightFollow` has how hard the rig hits the beat (`punch`),
+how far quiet passages dim it, and how soft a hit still counts (`sensitivity`).
 
 ## The crowd (ACE `command.arena`)
 
@@ -333,14 +376,34 @@ light desk's **Screens** section (paste a link, play / pause / off, volume, pict
 | `/arenascreen <youtube link or id>` | play a video (watch, youtu.be, shorts, embed and live links all work) |
 | `/arenascreen <picture url> [more ...]` | one picture, or a cycle of several (https only) |
 | `/arenascreen images [set]` | a picture set from `Config.Media.imageSets` (no name: the show's own set) |
+| `/arenascreen look` | **a camera feed**: your own view of the game, live on the screens (below) |
+| `/arenascreen look <player id>` | that player's view; `/arenascreen look off` ends a feed |
 | `/arenascreen look <name>` | an LED-wall look drawn in step with the lights: show, pulse, colour, bars, stripes, waves |
-| `/arenascreen pause` / `resume` / `off` | |
-| `/arenascreen volume <0-100>` / `interval <s>` | the video's volume; seconds per picture |
+| `/arenascreen pause` / `resume` | |
+| `/arenascreen off` | the screens go dark |
+| `/arenascreen own` | the show's own graphics again (nothing of ours on the screens) |
+| `/arenascreen fade [seconds]` | fade to black (3 s unless said), then off; a video's sound from the speakers fades with it |
+| `/arenascreen volume <0-100>` / `interval <s>` | the browser's own volume (only with `Config.Media.sound = 'screen'`); seconds per picture |
 | `/arenascreen status` | what is on |
 | `/arenascreeninfo` | for you only: whether the screens' page loaded and is being drawn (to report a dark screen) |
 
-The video's sound comes from the screens' browser, which is not positional: it is full in the bowl, low in the rooms
-that open onto it (concourse, tunnel, backstage, stairs: `Config.Listener`) and silent outside the building.
+**A video starts a moment after the Play** (`Config.Media.leadIn`, 2.5 s): every player's game has it loaded by
+then, so it starts at its start for everyone at once instead of a second in. The screens are dark for that moment.
+
+**Off is dark.** The desk's **Off** (and a Blackout while the screens show a look or nothing) puts a black picture
+over the show's own graphics, so the titantron is really off; **Own graphics** lets go of the screens again, which
+is how the arena starts. `Config.Media.offBlack = false` makes Off the show's own graphics, as it was.
+
+**A video that stops takes the show lights with it** (`Config.Media.lightsOut`): they fade out with the picture
+(**Fade out**), or over `lightsFade` seconds (2) when the video is switched off or comes to its end. A video that
+has ended is switched off - the screens go to Off instead of sitting on its last frame. Pictures, looks and camera
+feeds leave the lights alone.
+
+**A video's sound comes from the arena's speakers**, through the music player (below): the same video plays there
+for its sound, started at the same moment, and the two pause, fade and stop together.
+Its level is the music's (`/arenamusic volume`, and each player's `mine`). `Config.Media.sound = 'screen'` gives the
+browser's own sound back, which is not placed in the room (the same in both ears wherever you stand); `'off'` makes
+videos silent.
 
 **Picture sets** ship for every show (`html/img/`, from the arena's own boards: the house's welcome and sponsor
 cards, SAPW for wrestling, the Sirens for the concert, SAFC for MMA, and a live card each for hockey, basketball and
@@ -351,45 +414,88 @@ resource.
 over them (`show` breathes the show's artwork). The desk's presets bring one up with the lights (`screen` in `Config.LightPresets`) while the screens show a
 look or nothing; `Config.Media.presetLooks = false` leaves the screens to you.
 
+**A camera feed** puts a player's own view of the game on the screens, live: someone walks the floor as the camera
+operator and the house watches the titantron. `/arenascreen look` (or the desk's **My camera**) makes you the
+camera; `/arenascreen look <player id>` puts another player's view on - they are told, and they may take it off
+themselves with `/arenascreen look off`, staff or not. The camera sees a red **ON AIR** tally with the number of
+screens connected; their radar and HUD are hidden while they are live (`hideHud`), because the picture is the game's
+own: the 3D view as the camera sees it, and nothing of the chat, a phone or any menu. First or third person, a
+vehicle, a scripted camera of another resource - whatever is on their screen.
+
+- The picture goes from the camera's PC straight to each watcher's (WebRTC, the way the phone resources' video calls
+  work); the server only introduces them. It costs the server nothing, and it costs the camera's PC and upload one
+  small stream per watcher: `width` 640, `fps` 24, `bitrate` 700 kbit/s each, `maxViewers` 16 (players beyond that
+  see the show's artwork). Raise or lower them in `Config.Media.feed`.
+- **Peer to peer means the two PCs see each other's IP address** - not on screen, but a player who goes looking in
+  the browser tools can read it. That is how every peer-to-peer call works; if your community minds, set a TURN
+  server in `Config.Media.feed.ice` and `relayOnly = true` (the picture then goes through that server and nobody
+  learns anybody's address), or `enabled = false`.
+- `ice` starts with a public STUN server, which only tells a PC its own public address. Some routers still refuse a
+  direct connection; those players see the show's artwork until there is a TURN server to fall back on.
+- `/arenascreeninfo`, typed by the camera, says whether the picture is being taken and how many screens have it.
+  `flip = true` if it comes out upside down.
+
 **How it is drawn:** the page is loaded from the resource's own https address and drawn over the screens' texture
 (`Config.Media.method = 'replace'`). `'rendertarget'` is the older way, kept for servers where another script owns
 the texture.
 
-**Living with pmms and TV scripts:** the built-in player only touches the `mzb_screens` render target while it is
-playing something. Turn it off (`/arenascreen off`) before starting pmms on the screens, or set
+**Living with pmms and TV scripts:** the built-in player only touches the screens while it is playing something
+or holding them dark. Give them back (`/arenascreen own`, the desk's **Own graphics**) before starting pmms on the
+screens - a script that registers the `mzb_screens` render target takes them from the dark by itself - or set
 `Config.Media.enabled = false` to leave the screens to the other script for good.
 
 **YouTube:** some videos refuse to play embedded (the owner turned embedding off, or age / region limits); the
 screens then stay dark, and a picture cycle or a look still works.
 
-Exports (server): `SetScreenMedia(urlOrListOfPictureUrls)`, `ScreenImageSet(name)`, `ScreenOff()`,
-`ScreenPause(on)`, `ScreenVolume(0-100)`, `GetScreenMedia()`. Client: `IsScreenMediaOn()`.
+Exports (server): `SetScreenMedia(urlOrListOfPictureUrls)`, `ScreenImageSet(name)`, `ScreenCamera(playerId)`,
+`ScreenOff()`, `ScreenPause(on)`, `ScreenVolume(0-100)`, `GetScreenMedia()`. Client: `IsScreenMediaOn()`.
 
 ## Music player (ACE `command.arena`)
 
-Music off the light desk, heard from the show's PA speakers, with no sound resource needed (no xsound). Paste a link
-in the desk's **Music** section or use chat; every player hears the same moment of the track (late joiners too):
+Music off the light desk, heard from the arena's speakers and in no other way, with no sound resource needed (no
+xsound). Paste a link in the desk's **Music** section or use chat; every player hears the same moment of the track
+(late joiners too):
 
 | Command | What it does |
 |---|---|
-| `/arenamusic <url>` | play a direct audio file or stream (mp3, ogg, m4a, an icecast / shoutcast stream) or a YouTube link |
+| `/arenamusic <url>` | play a YouTube link, or a direct audio file or stream (mp3, ogg, opus, wav, flac, an icecast stream) |
 | `/arenamusic pause` / `resume` / `stop` | |
+| `/arenamusic fade [seconds]` | fade out (3 s unless said), then stop |
 | `/arenamusic volume <0-100>` | the level for everyone |
-| `/arenamusic status` | what is playing (anyone may ask) |
+| `/arenamusic status` | what is playing, and what your own game is doing with it (anyone may ask) |
 | `/arenamusic mine <0-100>` | **your own** level, for you only, kept between sessions (anyone; also the desk's "Mine" slider) |
 
-How it sounds: each PA hang of the show is its own source in the world (`Config.Music.hangs`: the ring truss's
-corners for wrestling and MMA, either side of the stage for the concert, the centre-hung board otherwise). You hear
-each one from where it hangs, louder as you walk up to it and from the side it is on as you turn, and the room shapes
-it: full with the arena's echo in the bowl, muffled and quieter in the rooms that open onto it (concourse, tunnel,
-backstage, stairs), faint elsewhere in the building, nothing outside. Far from the arena (`Config.Music.range`) the
-track is not even loaded.
+**How it sounds.** Every speaker of the show that is up is its own source in the world (`Config.Music.speakers`): the
+line arrays under the ring truss for wrestling and MMA; the two PA hangs, the subs under the stage's lip and the
+band's backline for the concert; the centre-hung board otherwise; and in every show the production control room's
+monitors, heard in that room. You hear each one from where it is: louder as you walk up to it, from the side it is
+on as you turn, behind you when it is behind you. On top comes the arena: a reverb and an echo off the far end
+(`reverbSeconds`, `preDelay`, `echo`, and `rooms.<zone>.wet` for how much), more of it the farther you are from the
+speakers. In the rooms that open onto the bowl (concourse, tunnel, backstage, stairs) it comes through the walls,
+muffled and quieter but still from where the speakers are; fainter elsewhere in the building; nothing outside. Far
+from the arena (`Config.Music.range`) the track is not even loaded.
 
-**What gets the full treatment:** placing the sound at the hangs, the filter and the echo need the browser to read
-the audio, which the audio's server must allow (CORS: `Access-Control-Allow-Origin`). Files and streams from servers
-that do not send it still play, but with the level only; so does YouTube (the player is a hidden YouTube embed,
-whose sound a page cannot touch). Plain `http://` links may be blocked by the game's browser: use `https://`.
-A link that will not play is reported once to whoever started it, not to everyone.
+**How loud.** `Config.Music.boost` turns the whole of it up after the speakers, the walls, the reverb and the echo, so
+their balance stays as it is: `1` is the level of v1.1.1, `2` (the default) twice that (+6 dB), `3` is +9.5 dB. A
+limiter behind it holds the loudest peaks. The screens' video sound goes the same way. Each player still sets their
+own share with `/arenamusic mine <0-100>`.
+
+**Nothing is played "flat", and nothing else is needed.** For a YouTube link the page runs a hidden YouTube player
+and takes that player's sound into its own sound graph, where the speakers, the walls and the arena are (the player
+stays muted until it is in there); a file or stream goes in the same way. No sound resource, no helper program, no
+server setting. A track whose sound cannot be taken in (a video that may not be embedded, a dead link, a format the
+game's browser lacks) stays silent, and whoever started it is told why.
+
+**The server's own fetcher (optional, off).** `Config.Music.relay.enabled = true` has the server fetch every track
+itself and hand it to the players from its own HTTP port (`server/relay.js`): a fallback should a game update ever
+stop the page reaching the YouTube player. It then needs [yt-dlp](https://github.com/yt-dlp/yt-dlp) and
+[Deno](https://deno.com) on the server machine for YouTube (in this resource's `bin` folder or installed; Windows:
+`winget install yt-dlp.yt-dlp DenoLand.Deno`), and on newer server builds, which do not let a resource start a
+program by itself, this line in `server.cfg` above the one that starts the arena:
+`add_unsafe_child_process_permission "mzb_arena"`. `Config.Music.relay` has its limits (size, length, time).
+
+`/arenamusic status` ends with a line about your own game, for checking it in the building:
+`here: in the world from 4 speakers (bowl), reverb on`.
 
 Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `MusicVolume(0-100)`, `GetMusic()`.
 
@@ -397,7 +503,7 @@ Exports (server): `PlayMusic(url)`, `StopMusic()`, `PauseMusic(on)`, `MusicVolum
 
 Footsteps are the game's quiet ones inside the building (`Config.QuietFootsteps`), and the rooms' reverb is shorter
 than before (`audio/mzb_arena_game.dat151.rel`): steps no longer ring round the hall. The arena makes no room tone
-and no crowd noise of its own: play what you like through the music player.
+and no crowd noise of its own: play what you like through the music player, which puts it in the room.
 
 ## Followspot (ACE `command.arena`)
 
@@ -435,6 +541,30 @@ effects (a chase runs from the stage to the ring), their lenses glowing so the e
 With the show lights off they rest in `Config.RampLightIdle` (a dim blue; `false` = dark). They do not count against
 `Config.LightMaxFixtures`.
 
+## Pyro (ACE `command.arena`)
+
+The pyro of the shows with a stage - wrestling, the concert, MMA - fired from the desk's **Pyro** section (Show tab)
+or chat; every player in the arena sees a cue at the same moment. The desk has a size (Small / Normal / Big) and a
+colour for the next cue; the colour goes to the effects that take one (sparks, comets, bursts).
+
+| Command | What it does |
+|---|---|
+| `/arenapyro <cue> [small\|big] [colour]` | fire a cue; the colour is a name from `Config.LightColors`, `#rrggbb`, or `lights` (the show lights' first colour) |
+| `/arenapyro list` | the cues the show that is up can fire (anyone may ask) |
+
+| Group | Cues |
+|---|---|
+| Stage | `flames`, `firewall` (flames along the whole lip), `blueflames`, `longburn`, `gerbs` (spark fountains), `chase` (comets from the outside in), `sweep` (comets from one end to the other), `smoke` |
+| Ramp and ring | `ramp` (sparks down both edges), `rampfire`, `posts` (sparks on the ring or cage posts), `postfire`, `sparklers` |
+| Overhead | `burst`, `shells` (fireworks), `crackle`, `waterfall` (sparks falling from a line over the stage), `sparkrain` (over the ring), `puffs` (smoke), `confetti`, `money` |
+| Sequences | `entrance`, `bighit`, `rapid`, `winner`, `inferno`, `finale` |
+
+A show is offered only the cues it has the places for (the concert has no ramp and no posts). They are the game's own
+particle effects, each name checked against the game's files: nothing burns and nobody is hurt. `Config.Pyro` has
+the units' places per show, the effects (asset, name, scale: the sizes are first guesses, tune them there) and the
+cues, which are lists of steps you can rewrite or add to. A bout fires `entrance` at its walk-out and `finale` at its
+end (`Config.Fights.pyro`, `false` for none). Exports (server): `Pyro(cue, { size, colour })`, `PyroCues()`.
+
 ## Props of your own (`Config.ShowProps`)
 
 Vanilla props put down for a show without CodeWalker: `Config.ShowProps[show]` is a list of
@@ -443,7 +573,8 @@ arena; `ground` drops the prop onto the floor under it, `room` is the interior r
 bowl; `/arenainfo` prints where you stand). Out of the box:
 
 - **The interview set** (wrestling, MMA): a green screen in the backstage hall, off the east wall north of the
-  tunnel, with a TV camera on it and two studio lights.
+  tunnel, with a TV camera on it and two studio lights. The screen is the arena's own prop (`mzb_bh_green_screen`,
+  3.5 m wide and 2.4 m high, its cloth swept out over the floor), yours to put anywhere else too.
 - **A camera crane** on the wrestling stage deck beside the titantron, its arm up over the stage's lip towards the
   ring.
 
@@ -485,6 +616,8 @@ Take a line out of the list to remove a prop, or move it.
 - `Config.Fights`: the bouts (rounds, times, the knockout line, the count-out, who may challenge, the NPC fighters'
   models and names, the rings, the cues for the lights and the crowd).
 - `Config.RampLights`: the wrestling ramp's lights. `Config.ShowProps`: props of your own per show.
+- `Config.Pyro`: the pyro's units per show, effects, cues and sizes.
+- `Config.LightFollow`: the lights following the music.
 
 ## Notes
 
@@ -494,6 +627,52 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **Next**: music only from the speakers.
+  - **The music player plays in the world and nowhere else**: every speaker of the show is a source of its own
+    (the concert's subs and backline and the control room's monitors too), with the arena's reverb and an echo on
+    top, through the walls outside the bowl. The plain "level only" playback is gone: the YouTube player's sound
+    and every file's go through the same sound graph; what cannot be taken into it stays silent and is reported.
+    (`Config.Music.relay`: an optional server-side fetcher, off by default.)
+  - **A video on the screens is heard from the speakers too** (`Config.Media.sound`).
+  - **Pyro on the wrestling stage**: flames, spark fountains, comets, bursts and confetti from the stage, the ramp
+    and the ring posts, as cues on the desk and `/arenapyro`; a bout fires them at its walk-out and its end.
+  - The interview set's green screen is the arena's own prop (`mzb_bh_green_screen`).
+  - **The lights follow the music**: its beat and its video's colours drive the rig (the desk's Follow the music,
+    `Config.LightFollow`).
+  - **Nothing loses its first second**: a new track or video starts 2.5 s after the Play, loaded by then on every
+    player's side (`leadIn` in `Config.Music` and `Config.Media`).
+  - **Fade out** for the music and the screens (the desk's Fade buttons, `/arenamusic fade`, `/arenascreen fade`).
+  - **Off turns the titantron off**: the screens go dark; `/arenascreen own` (Own graphics) brings the show's own
+    graphics back; a Blackout darkens the screens too. `ScreenOff` (export) is dark as well: `ScreenOwn` is the old
+    behaviour.
+  - **More pyro**: 27 cues in four groups, a size and a colour for each press, and pyro for the concert and MMA.
+  - **The desk in tabs** (Show / Lights / Screens & music / Fights) under a head that stays put, with what is
+    playing and its Fade / Off always there; a key can open it (`Config.LightDeskKey`).
+  - `HideSets` (server export): another resource can have pieces of a show left out while its own stand there.
+  - **The show's pieces look after themselves**: once a second each player's game compares the interior's sets with
+    the show and puts right what is missing or left over, and the interior a player stands in counts as the arena
+    even when the game answers with another one at the arena's centre. (Seen once: the arena stood bare - no ring,
+    no stage, no chairs - for a player who joined again after a server restart with the game left open.)
+    `/arenareset` does it by hand, `/arenainfo` counts the sets that are on.
+  - `Config.Music.hangs` is `Config.Music.speakers` (the old name still works); new: `relay`, `preDelay`, `echo`,
+    `farWet`. `/arenamusic status` says what your own game is doing with the track.
+  - **A camera feed on the screens**: `/arenascreen look` puts your own view of the game on the titantron, live
+    (`/arenascreen look <player id>` another player's), so someone can work the floor as the camera operator
+    (`Config.Media.feed`; see the screen player's section for what peer to peer means).
+  - **The wrestling stage's lights are the desk's**: the thirteen moving heads on its trusses were part of the stage
+    model, always on in red, white and blue; they are show lights now. The red glow off the video wall (wrestling,
+    concert, MMA) goes with the ring lights.
+  - **The lights go out with a video**: faded with it, or over two seconds when it is switched off or ends; a video
+    that has ended is switched off. `/arenalights fade [seconds]` and the `FadeLights` export do it by hand.
+  - **New basket units**: modelled after the portable units arenas roll out - a base with cushions strapped on, a
+    mast leaning up to an elbow, a level boom with a padded end, stays and a gas strut, a framed glass board with
+    its border, target and edge cushion, a breakaway rim and a knotted net, the shot clock on top.
+  - **The basket units in the store room**: while another show is up the two units stand folded down in the east
+    store (`mzb_bb_hoop_stowed`, `Config.StowedProps`); the basketball court takes them out.
+  - **Louder**: `Config.Music.boost` (2 = twice the level) turns the music and the screens' sound up after the
+    speakers, the walls, the reverb and the echo, so their balance is the same; a limiter holds the peaks.
+  - **Sprunk's own logo** ("The Essence of Life") wherever Sprunk is a sponsor: the board's screens, the LED ribbon,
+    the dasher boards, the cage's canvas, the interview backdrop, a concourse mural.
 - **1.1.1**: the ring to size, a ramp without steps.
   - **The ring is 20 ft x 20 ft** (it was 24 ft), on round posts. The fights' corners and ring-out line
     (`Config.Fights.venues.wrestling`) follow it.

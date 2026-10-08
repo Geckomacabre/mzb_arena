@@ -477,8 +477,8 @@ CreateThread(function()
         local me = GetEntityCoords(ped)
         local id = 0
         if ST.on and maxPeds > 0 then
-            id = GetInteriorAtCoords(Config.InteriorProbe.x, Config.InteriorProbe.y, Config.InteriorProbe.z)
-            local ready = id ~= 0 and IsInteriorReady(id)
+            local ready
+            id, ready = MzbInterior()
             -- in the arena: they come in; outside it and far away (or the interior gone): they go
             if ready and GetInteriorFromEntity(ped) == id then
                 present = true
