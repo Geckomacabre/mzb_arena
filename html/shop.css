@@ -1,0 +1,35 @@
+/* the merch stand's try-on (shop.js): over the game while a tee is on trial - the category top left, the cash top right,
+   the item bottom left, the keys bottom right. Display only: nothing here takes a click */
+#shop { position: absolute; inset: 0; pointer-events: none; color: #fff; text-transform: uppercase;
+  font-family: "Bahnschrift", "Arial Narrow", "Roboto Condensed", "Segoe UI", Arial, sans-serif; font-stretch: 78%;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 12px rgba(0, 0, 0, 0.45); }
+#shop-title { position: absolute; top: 5.5vh; left: 4vw; font-size: 40px; font-weight: 700; letter-spacing: 0.03em; }
+#shop-cash { position: absolute; top: 5.5vh; right: 4vw; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
+#shop-cash.spent { animation: shop-spent 0.9s ease-out; }
+@keyframes shop-spent { 0% { color: #ff5a5a; transform: translateY(-4px); } 100% { color: #fff; transform: none; } }
+
+#shop-item { position: absolute; left: 4vw; bottom: 7vh; max-width: 46vw; }
+#shop-price { font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+#shop-name { font-size: 26px; font-weight: 800; letter-spacing: 0.02em; line-height: 1.15; }
+#shop-colour { font-size: 17px; font-weight: 600; letter-spacing: 0.06em; opacity: 0.85; margin-top: 2px; }
+#shop-swatches { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 12px; }
+#shop-swatches i { position: relative; display: block; width: 64px; height: 64px; box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.55); background-color: rgba(0, 0, 0, 0.35); background-repeat: no-repeat;
+  background-size: 400% 200%; }
+#shop-swatches i.on { border: 3px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6); }
+#shop-swatches i.owned::after { content: "\2713"; position: absolute; right: 2px; bottom: 1px; font-style: normal;
+  font-size: 15px; font-weight: 800; line-height: 1; color: #fff; text-shadow: 0 0 3px #000, 0 1px 2px #000; }
+#shop-status { font-size: 17px; font-weight: 700; letter-spacing: 0.08em; }
+#shop-status.owned { color: #cfe9c8; }
+#shop-status.wearing { color: #8fe08a; }
+
+#shop-keys { position: absolute; right: 4vw; bottom: 7vh; display: flex; flex-direction: row; align-items: center; gap: 26px; }
+#shop-keys div { display: flex; align-items: center; gap: 7px; font-size: 18px; font-weight: 700; letter-spacing: 0.06em; }
+#shop-keys kbd { display: inline-block; min-width: 14px; padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.92);
+  color: #111; font: inherit; font-size: 13px; font-weight: 800; text-align: center; text-shadow: none; line-height: 1.25; }
+#shop-keys span { margin-right: 4px; }
+
+#shop-toast { position: absolute; right: 4vw; top: 44vh; padding: 9px 16px; font-size: 20px; font-weight: 800;
+  letter-spacing: 0.06em; background: rgba(0, 0, 0, 0.55); border-left: 3px solid #8fe08a; animation: shop-toast 0.25s ease-out; }
+#shop-toast.failed { border-left-color: #ff5a5a; text-transform: none; font-size: 16px; max-width: 30vw; }
+@keyframes shop-toast { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }

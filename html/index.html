@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="crowd.css">
 <link rel="stylesheet" href="fights.css">
+<link rel="stylesheet" href="shop.css">
 </head>
 <body>
 <div id="desk" class="hidden" role="dialog" aria-label="Arena light desk">
@@ -280,6 +281,24 @@
 </div>
 <!-- the camera's tally (html/feed.js): the player whose view is live on the screens sees it; it is not in the picture -->
 <div id="feed-tally" class="hidden"><i></i><b>ON AIR</b><span id="feed-tally-info"></span><small id="feed-tally-hint"></small></div>
+<!-- the merch stand's try-on (html/shop.js): while a tee off the stand's wall is on trial. Display only: the game reads the keys -->
+<div id="shop" class="hidden">
+  <div id="shop-title">T-Shirts</div>
+  <div id="shop-cash"></div>
+  <div id="shop-item">
+    <div id="shop-price"></div>
+    <div id="shop-name"></div>
+    <div id="shop-colour"></div>
+    <div id="shop-swatches"></div>
+    <div id="shop-status"></div>
+  </div>
+  <div id="shop-keys">
+    <div><span id="shop-show">Show shirt</span><kbd>&#9668;</kbd><kbd>&#9658;</kbd></div>
+    <div><span id="shop-action">Buy &amp; wear</span><kbd>Enter</kbd></div>
+    <div><span>Exit</span><kbd>Backspace</kbd></div>
+  </div>
+  <div id="shop-toast" class="hidden"><span id="shop-toast-text"></span> <b id="shop-toast-tick">&#10003;</b></div>
+</div>
 <script src="app.js"></script>
 <script src="media.js"></script>
 <script src="feed.js"></script>
@@ -288,6 +307,7 @@
 <script src="spot.js"></script>
 <script src="crowd.js"></script>
 <script src="fights.js"></script>
+<script src="shop.js"></script>
 <script src="pyro.js"></script>
 <script src="cars.js"></script>
 <script src="fold.js"></script>

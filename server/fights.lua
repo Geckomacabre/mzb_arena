@@ -407,6 +407,10 @@ local function accept(src)
     MzbReply(src, 'fight', 'accepted: get in the ring')
 end
 
+-- the event desk's "Set up a fight" (server/desk.lua): the same two as /arenafight challenge and accept
+function MzbFightChallenge(src, target) return challenge(src, target) end
+function MzbFightAccept(src) return accept(src) end
+
 local HELP = '/%s [status] | challenge [id] | accept | npc [in <min>] | vs <id> [in <min>] | pvp <id> <id> [in <min>] | ' ..
              'stop | clear'
 
