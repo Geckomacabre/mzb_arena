@@ -925,6 +925,12 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.3.2**: the main lobby laid out again. A clear way from the security check to section 100's entrance, with
+  nothing standing in it; guest services is a desk beside that way, not across it; the box office stands further
+  from the doors and clear of the glass; the check's flanks are belt posts, not beer-branded barriers; four high
+  tables on the concessions' side instead of eight all over; planters and benches along the glass. The crowd's
+  four pop-up merch tables are gone from the lobby: the merch stand is a real one now.
+  Updating from 1.3.1: stream files, the interior's definition and collision changed (restart the server).
 - **1.3.1**: what the first walk round 1.3.0 in game turned up.
   - **Tank tops**: every tee at the merch stands also comes as a tank top. In the try-on, up and down switch
     between the two cuts (`Config.MerchShop.cuts`: each cut has its own price and the arms that go with it). The
