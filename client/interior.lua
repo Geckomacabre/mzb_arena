@@ -156,7 +156,7 @@ end)
 
 -- What a per-show table has for a show, or what it has for the empty house: the screens' model, the light rig and
 -- its aim, the speakers and the screens' artwork are looked up through this. A show such a table does not name -
--- the big-floor shows (floor, monster, karting, sprint, oval, skatepark), a show of the owner's own - is then
+-- the big-floor shows (floor, monster, motocross, karting, sprint, oval, skatepark), a show of the owner's own - is then
 -- screened, lit and heard as the empty house is: the centre-hung board and the roof's house lights.
 function MzbShowEntry(t, show)
     if type(t) ~= 'table' then return nil end

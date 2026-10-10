@@ -40,10 +40,11 @@ exterior with no changes to the outside. The entire building is open:
 | `tennis` | A hard court with its run-off, the net and posts, the umpire's chair, players' chairs, line judges, sponsor boards behind the baselines, about 1,300 floor seats along both sides and at both ends, and the board's tennis score |
 | `mma` | Fight night: a UFC-size octagon (9.1 m, the canvas 1.2 m up, a 1.8 m black chain-link fence, padded posts, two gates with steps and handrails, a printed canvas), the end stage with an LED wall and a walkway, a ring of cageside press and officials' tables with monitors, about 1,450 floor seats in rows out to the floor's edges, a lighting rig with moving heads and four line-array PA hangs over the cage, and the house dimmed |
 | `house` | The empty arena with the house lights up |
-| `monster` | **Monster trucks**, on the bigger floor: clay over the whole floor, a chalked oval lane, a painted jump in the middle (two long ramps and two short ones up to a deck), pylons, tyres, a sponsor wall round the floor, tarps over the first rows left out - and six real cars on the deck to be flattened (see [Cars to crush](#cars-to-crush-ace-commandarena)). Bring your own trucks |
-| `karting` | **Kart circuit: the Grand Prix**, on the bigger floor: 266 m of asphalt with a flyover bridge, kerbs, red and white barriers, tyre stacks, a start gantry and grid, paddock tents, a podium with its backdrop, a timing tower and marshal posts. No karts are part of it: bring your own |
-| `sprint` | **Kart circuit: the Sprint**: 201 m, flat, blue and white barriers, a covered pit lane, the grid on the back straight, a big screen on the infield |
-| `oval` | **Kart circuit: the Oval**: 154 m with banked ends, an outer wall, and the pits on the infield - seven bays under tents, a pit lane, tyre walls at both ends |
+| `monster` | **Monster trucks**, on the bigger floor: clay over the whole floor with the trucks' wheel tracks in it, a chalked oval lane, a jump of clay in the middle (two long ramps and two short ones up to a deck, their ridden faces painted) on the line from the event tunnel to the vehicle tunnel, the game's own traffic drums and half-buried marker tyres at the turns, tyre walls at the tunnel mouths, hay bales in the corners, the safety crew's kit, a sponsor wall round the floor, tarps over the first rows left out - and six real cars on the deck to be flattened (see [Cars to crush](#cars-to-crush-ace-commandarena)). Nothing stands in a lane. Bring your own trucks |
+| `motocross` | **Arenacross**, on the bigger floor: 257 m of dirt over the whole floor in four lanes joined by bermed 180-degree turns - a start straight with a gate, a triple and a tabletop, a whoops section and a double, a big tabletop and rollers, the finish table under a gantry - with the bikes' ruts in it, hay bales on the corners, marker drums, tyre walls at the tunnel mouths and a banner wall of sponsors (two of the boards are for a mud club from out of state) |
+| `karting` | **Kart circuit: the Grand Prix**, on the bigger floor: 266 m of asphalt with a flyover bridge, rubber on the line, kerbs, red and white barrier blocks, a start gantry and grid, a paddock out of the game's own props (gazebos over the bays, rolling tool chests, trolley jacks, compressors, fuel cans, extinguishers), a pit lane, Arena War's podium with a sponsors' backdrop, race control, a timing board on a scaffold, marshal posts. No karts are part of it: bring your own |
+| `sprint` | **Kart circuit: the Sprint**: 201 m, flat, blue and white barrier blocks, five paddock bays and a pit lane in the corner the stadium section turns round, the grid on the back straight, the podium, race control and the timing board on the infield |
+| `oval` | **Kart circuit: the Oval**: 154 m with banked ends, an outer wall, and the pits on the infield - seven bays under gazebos along a pit road, marker tyres and chevron bales round both ends |
 | `skatepark` | **Skate park**, on the bigger floor: a walled park course with bowled corners (a start wall, a vert wall with a wall ride, box jumps, a spine, a pyramid, a stair plaza with a hand rail and hubbas, ledges and rails) and a 4.1 m vert ramp beside it with railed decks and stairs, a judges' tower between the two |
 | `floor` | **The open floor**: the bigger floor with nothing on it and the house lights up, for an event of your own (a car show, a drift night) |
 
@@ -53,12 +54,12 @@ riser stacks, and the space becomes a real backstage area behind the masking, re
 wardrobe rails, a video village with monitors, catering, work lights and road cases. For the other shows the sections
 are seated as usual.
 
-The lower tier's **front seven rows fold back** on all four sides for the shows that need room (`monster`, the
-three kart circuits, `skatepark`, `floor`): the event floor grows from 60 x 30 m to 70.6 x 40.6 m, the rows stand as
+The lower tier's **front seven rows fold back** on all four sides for the shows that need room (`monster`,
+`motocross`, the three kart circuits, `skatepark`, `floor`): the event floor grows from 60 x 30 m to 70.6 x 40.6 m, the rows stand as
 a stack against row 8's riser with a guard rail along the top, and all four tunnels open straight onto the floor.
 The stage end's telescopic sections then have rows 8 to 20 out. Every other show has the rows out and seated. No
-vehicles are part of any show: the trucks and the karts are yours to bring, and the cars to be crushed are the
-game's own.
+vehicles are part of any show: the trucks, the bikes and the karts are yours to bring (or sign up for the race at
+the event desk, which puts every racer in one: Racing, below), and the cars to be crushed are the game's own.
 
 All brands are GTA V's own, with the sponsor logos taken from the game's textures (Maze Bank, Sprunk, eCola,
 Pisswasser, Cluckin' Bell, Fame or Shame, Burger Shot). The acts, teams and events are made up ("San Andreas Pro
@@ -85,13 +86,33 @@ The front seven rows folded back all round, and what goes on the floor then.
 | ![The open floor](screenshots/nosebleed_floor.jpg)<br>**The open floor** | ![Monster trucks](screenshots/nosebleed_monster.jpg)<br>**Monster trucks** |
 | ![Kart circuit: Grand Prix](screenshots/nosebleed_karting.jpg)<br>**Kart circuit: Grand Prix** (a flyover) | ![Kart circuit: Sprint](screenshots/nosebleed_sprint.jpg)<br>**Kart circuit: Sprint** |
 | ![Kart circuit: Oval](screenshots/nosebleed_oval.jpg)<br>**Kart circuit: Oval** (banked ends) | ![Skate park](screenshots/nosebleed_skatepark.jpg)<br>**Skate park** (park course and vert ramp) |
+| ![Arenacross](screenshots/nosebleed_motocross.jpg)<br>**Arenacross** (jumps, whoops, berms) | ![Arenacross: the finish table and the banner wall](screenshots/floor_motocross.jpg)<br>**Arenacross**: down on the dirt |
+
+Down on the floor: the dressing is the game's own props.
+
+| | |
+|---|---|
+| ![Monster trucks: the run up the long ramp](screenshots/floor_monster.jpg)<br>**Monster trucks**: the run up the long ramp | ![Grand Prix: the paddock](screenshots/floor_karting.jpg)<br>**Grand Prix**: the paddock |
+| ![Sprint: the paddock and its pit lane](screenshots/floor_sprint.jpg)<br>**Sprint**: the paddock and its pit lane | ![Oval: race control and the timing board](screenshots/floor_oval.jpg)<br>**Oval**: race control and the timing board |
+
+### The merch stand
+
+In the main lobby, dressed for whichever show is up: its own tables, backdrop and shirts. Every tee on the racks can be
+tried on and bought (see "Trying on and buying the tees").
+
+| | |
+|---|---|
+| ![The wrestling night's stand](screenshots/merch_wrestling.jpg)<br>**Wrestling** | ![A rack of the night's tees](screenshots/merch_tees.jpg)<br>**A rack of the night's tees** |
+| ![The truck show's stand](screenshots/merch_monster.jpg)<br>**Monster trucks** | ![Arenacross](screenshots/merch_arenacross.jpg)<br>**Arenacross** |
 
 ## Requirements
 
 - **Game build 2060 or newer** (`sv_enforceGameBuild 2060`). The interior uses vanilla props from the Diamond Casino
   Heist, After Hours and other DLC packs, and on older builds those props are missing.
 - No framework or other resources. If your server runs **ox_lib**, the arena uses it for a staff menu and its
-  notifications (below); without it, everything works from chat.
+  notifications (below); without it, everything works from chat. The event desk and the merch stand likewise use
+  **ox_target** or **qb-target** when one runs (else an **E** prompt), and **qbx_core**, **qb-core**, **es_extended**
+  or **ox_inventory** for money and items when one runs (else see Merch, below). None of them is a dependency.
 
 ## Install
 
@@ -127,14 +148,14 @@ The quick switch, for staff on the spot:
 ```
 /mzb wrestling        switch the show for everyone (late joiners get it too)
 /mzb basketball       ... wrestling concert mma hockey basketball tennis house
-/mzb monster          ... and the bigger floor's: floor monster karting sprint oval skatepark
+/mzb monster          ... and the bigger floor's: floor monster motocross karting sprint oval skatepark
 /mzb list             the shows, the current one in [brackets]
 /mzb status           the current show and the dock doors
 /mzb dock a open      the loading street's roller doors (a | b | c | all, open | close | toggle)
 ```
 
 `/mzb` also takes the aliases in `Config.ShowAliases` (`/mzb fight` is MMA, `/mzb empty` is the empty house,
-`/mzb open` the open floor, `/mzb trucks` the monster trucks, `/mzb gp` the kart Grand Prix, `/mzb skate` the skate park, and so
+`/mzb open` the open floor, `/mzb trucks` the monster trucks, `/mzb mx` arenacross, `/mzb gp` the kart Grand Prix, `/mzb skate` the skate park, and so
 on), suggests the show names in chat as you type, and uses the same permission as `/arena`: one ACE line covers both.
 The long form still works:
 
@@ -252,7 +273,7 @@ how far quiet passages dim it, and how soft a hit still counts (`sensitivity`).
 Staff can fill the house: people in the bowl's seats, in the floor chairs of the shows that have them (wrestling, MMA,
 basketball, tennis) and on the concert's standing floor, a row of them on the barricade. The stage end is only seated
 for the shows that seat it: the end-stage shows kill the seats behind their masking, as real ones do. The bigger
-floor's shows (floor, monster, karting, sprint, oval, skatepark) have the lower tier's front seven rows folded back all
+floor's shows (floor, monster, motocross, karting, sprint, oval, skatepark) have the lower tier's front seven rows folded back all
 round, so nobody sits in them, and the truck show keeps the three rows behind those closed as well, under their
 tarps (`Config.Crowd.ClosedDepth`: how deep in the stands a show's closed rows go, in metres from the floor's edge).
 
@@ -343,6 +364,208 @@ The desk has a Fights section: pick the red and blue corners (an NPC or any play
 Exports (server): `AddBout(red, blue, inMinutes)` (red / blue = `'npc'` or a server id), `StopBout()`, `GetBout()`;
 the state is `GlobalState.mzbFight` (and `mzbFightCard`).
 
+## The event desk
+
+An event official with a clipboard stands at the floor end of the event tunnel (`Config.EventDesk.ped`: the model,
+the place, the scenario). Walk up and talk to him: through **ox_target** or **qb-target** if your server runs one,
+else an **E** prompt within `distance`. He is a local ped, there while you are within 60 m. What he offers goes by
+the show that is up:
+
+- **A show with a track** (`karting`, `sprint`, `oval`, `monster`, `motocross`): the race. Join it, leave it, start
+  it now if you were first on the list, and see who has signed up (Racing, below).
+- **A show with a ring or a cage** (`wrestling`, `mma`): set up a fight. Take on an NPC, challenge a player near
+  you, accept a challenge, ask for the card: `/arenafight challenge` and `accept` behind a menu, with the same rules
+  (Fights, above). `Config.EventDesk.fights = 'staff'` keeps them to the fight card's staff.
+- **Any other show**: nothing to sign up for.
+
+The menu is an ox_lib context menu when the server runs ox_lib; without it, a numbered list on the left of the
+screen (the number keys pick, Backspace shuts it). Every pick is checked by the server: that you are at the desk,
+that the show has what you asked for, that you may.
+
+## Racing
+
+Each show with a track has a race on it, signed up for at the event desk:
+
+| Show | Race | Laps | A lap | Grid | Vehicle (the first your game build has) |
+|---|---|---|---|---|---|
+| `karting` | Grand Prix | 5 | 266 m | 8 | `veto2`, `veto`, else `blazer` |
+| `sprint` | Sprint | 6 | 201 m | 8 | `veto2`, `veto`, else `blazer` |
+| `oval` | Oval | 8 | 154 m | 10 | `veto2`, `veto`, else `blazer` |
+| `monster` | Monster Mayhem | 3 | 134 m | 4 | `monster`, else `sandking` |
+| `motocross` | Arenacross | 4 | 257 m | 8 | `sanchez2`, `bf400`, `manchez`, `sanchez` |
+
+- **Sign-up**: the first player to join opens it for 45 seconds (`Config.Race.signup`) and may start it early at
+  the desk; everyone in or at the arena is told. Grid slots go in the order of joining, as many as the track has.
+- **The start**: every racer is put on their slot in the track's vehicle, held there through the countdown, and let
+  go together.
+- **The race**: the next checkpoint is a marker on the track and a blip (the line is the chequered one); position,
+  lap and time are at the bottom of the screen. The server counts a checkpoint only when it is the next one in order
+  and it sees the racer near it, so nothing a client says wins a race. The Grand Prix's flyover counts at its own
+  height only: driving under it does not.
+- **The end**: the winner is announced to the arena, and whoever has not finished 240 seconds later (`dnf`) is
+  classified DNF. Out of the vehicle for 15 seconds, dead, or gone from the server: retired. The vehicles are taken
+  away and the racers stand at the desk again (`Config.Race.returnTo` for somewhere else).
+- Switching to another show calls the race off (an entry fee goes back).
+
+```
+/arenarace                 the race on, or the last result (anyone)
+/arenarace start           staff: close the sign-up and go
+/arenarace cancel          staff: call the race off
+```
+
+`Config.Race` has the times, `minPlayers`, `fee` and `prize` (money through the bridge below, 0 = none), `access`
+(who may run the command: the light desk's ACE unless set) and `enabled`. The tracks themselves (grid, checkpoints,
+laps, vehicles) are `Config.Races` in `shared/races.lua`, made from the tracks' own centre lines: change `laps` or
+`vehicles` there if you like, leave the coordinates. The racers' vehicles are made by their own games (networked),
+so a server that blocks client-made entities has to let these through. A full tank is set for the usual fuel scripts
+and qb-vehiclekeys is handed the keys; for anything else the client event `mzb_arena:raceVehicle` (the vehicle, its
+plate) fires when a racer's vehicle is made. Exports (server): `GetRace()`, `CancelRace()`; the state is
+`GlobalState.mzbRace`.
+
+## Merch
+
+The lobby's merch stand is dressed for the show that is up (an entity set per stand, `mzb_set_merch_<style>`, in
+`Config.Shows`) and has a seller (`Config.Merch.ped`): talk to her as to the event desk's official and she lists what
+that show's stand sells. The kart circuits share a stand; the empty house and the open floor have the arena's own.
+A purchase is the item's name sent to the server, which looks the item and its price up itself in
+`Config.Merch.items`, checks that you are standing at the stand, takes the money and hands the item over. The tees
+hanging on the stand's walls are a shop of their own, with a try-on: Trying on and buying the tees, below.
+
+**Money and items** go through one small bridge (`server/bridge.lua`), which uses the first of these your server
+runs:
+
+1. **qbx_core** (cash; items through ox_inventory)
+2. **qb-core** (cash; the player's own inventory)
+3. **es_extended** (cash; ox_inventory when it runs, else ESX's inventory)
+4. **ox_inventory** on its own (its `money` item)
+5. none of them: only a price of 0 can be "bought" and nothing is handed over, the player is just told they have
+   it. Set the prices to 0 for a souvenir stand, or run one of the above.
+
+An item your inventory does not know is not sold: the money goes straight back and the player is told which item is
+missing. So register the ones you want to sell, and take the others out of `Config.Merch.items` (names, labels and
+prices are yours to change there):
+
+| Stand (shows) | Items |
+|---|---|
+| SAPW (`wrestling`) | `mzb_tee_sapw` SAPW Tee ($35), `mzb_cap_sapw` SAPW Cap ($25), `mzb_finger_sapw` SAPW Foam Finger ($15), `mzb_poster_sapw` SAPW Poster ($12), `mzb_programme_sapw` SAPW Programme ($10), `mzb_belt_sapw` SAPW Replica Title Belt ($150) |
+| Sirens of San Andreas - The Neon Coast Tour (`concert`) | `mzb_tee_sirens` Sirens of San Andreas Tour Tee ($40), `mzb_hoodie_sirens` Neon Coast Tour Hoodie ($70), `mzb_cap_sirens` Sirens of San Andreas Cap ($25), `mzb_poster_sirens` Neon Coast Tour Poster ($15), `mzb_programme_sirens` Neon Coast Tour Programme ($12), `mzb_glowstick_sirens` Neon Coast Glow Stick ($8) |
+| SAFC - Vespucci Vengeance (`mma`) | `mzb_tee_safc` SAFC Tee ($35), `mzb_cap_safc` SAFC Cap ($25), `mzb_gloves_safc` SAFC Replica Gloves ($60), `mzb_poster_safc` Vespucci Vengeance Poster ($12), `mzb_programme_safc` Vespucci Vengeance Programme ($10) |
+| Los Santos Blizzard (`hockey`) | `mzb_jersey_blizzard` Los Santos Blizzard Jersey ($90), `mzb_tee_blizzard` Los Santos Blizzard Tee ($35), `mzb_cap_blizzard` Los Santos Blizzard Cap ($25), `mzb_finger_blizzard` Los Santos Blizzard Foam Finger ($15), `mzb_puck_blizzard` Los Santos Blizzard Puck ($18), `mzb_programme_blizzard` Los Santos Blizzard Programme ($10) |
+| LS Panic (`basketball`) | `mzb_jersey_panic` LS Panic Jersey ($85), `mzb_tee_panic` LS Panic Tee ($35), `mzb_cap_panic` LS Panic Cap ($25), `mzb_finger_panic` LS Panic Foam Finger ($15), `mzb_ball_panic` LS Panic Mini Basketball ($20), `mzb_programme_panic` LS Panic Programme ($10) |
+| Maze Bank Open (`tennis`) | `mzb_tee_mbopen` Maze Bank Open Tee ($35), `mzb_visor_mbopen` Maze Bank Open Visor ($22), `mzb_towel_mbopen` Maze Bank Open Towel ($30), `mzb_ball_mbopen` Maze Bank Open Souvenir Ball ($15), `mzb_programme_mbopen` Maze Bank Open Programme ($10) |
+| Monster Mayhem (`monster`) | `mzb_tee_mayhem` Monster Mayhem Tee ($35), `mzb_cap_mayhem` Monster Mayhem Cap ($25), `mzb_finger_mayhem` Monster Mayhem Foam Finger ($15), `mzb_poster_mayhem` Monster Mayhem Poster ($12), `mzb_programme_mayhem` Monster Mayhem Programme ($10), `mzb_tee_mudflaps` SHOW ME YOUR MUDFLAPS Tee ($35), `mzb_tee_thrillbilly` Thrillbilly Mud Club Tee ($35) |
+| Maze Bank Grand Prix (`karting`, `sprint`, `oval`) | `mzb_tee_gp` Maze Bank Grand Prix Tee ($35), `mzb_cap_gp` Maze Bank Grand Prix Cap ($25), `mzb_flag_gp` Maze Bank Grand Prix Chequered Flag ($15), `mzb_poster_gp` Maze Bank Grand Prix Poster ($12), `mzb_programme_gp` Maze Bank Grand Prix Programme ($10), `mzb_tee_mudflaps` SHOW ME YOUR MUDFLAPS Tee ($35), `mzb_tee_thrillbilly` Thrillbilly Mud Club Tee ($35) |
+| Arenacross (`motocross`) | `mzb_tee_arenacross` Arenacross Tee ($35), `mzb_jersey_arenacross` Arenacross Race Jersey ($60), `mzb_cap_arenacross` Arenacross Cap ($25), `mzb_poster_arenacross` Arenacross Poster ($12), `mzb_programme_arenacross` Arenacross Programme ($10), `mzb_tee_mudflaps` SHOW ME YOUR MUDFLAPS Tee ($35), `mzb_tee_thrillbilly` Thrillbilly Mud Club Tee ($35) |
+| Los Santos Open (`skatepark`) | `mzb_tee_lsopen` Los Santos Open Tee ($35), `mzb_hoodie_lsopen` Los Santos Open Hoodie ($65), `mzb_cap_lsopen` Los Santos Open Cap ($25), `mzb_deck_lsopen` Los Santos Open Skate Deck ($80), `mzb_stickers_lsopen` Los Santos Open Sticker Pack ($8), `mzb_poster_lsopen` Los Santos Open Poster ($12) |
+| Maze Bank Arena (`house`, `floor`) | `mzb_tee_arena` Maze Bank Arena Tee ($30), `mzb_hoodie_arena` Maze Bank Arena Hoodie ($60), `mzb_cap_arena` Maze Bank Arena Cap ($25), `mzb_finger_arena` Maze Bank Arena Foam Finger ($15), `mzb_mug_arena` Maze Bank Arena Mug ($14), `mzb_keyring_arena` Maze Bank Arena Keyring ($6) |
+
+For **ox_inventory**, in `data/items.lua` (the pictures are up to you: `web/images/<item name>.png`); qb-core's
+`shared/items.lua` takes the same names:
+
+```lua
+    ['mzb_tee_sapw'] = { label = 'SAPW Tee', weight = 200 },
+    ['mzb_cap_sapw'] = { label = 'SAPW Cap', weight = 100 },
+    ['mzb_finger_sapw'] = { label = 'SAPW Foam Finger', weight = 150 },
+    ['mzb_poster_sapw'] = { label = 'SAPW Poster', weight = 50 },
+    ['mzb_programme_sapw'] = { label = 'SAPW Programme', weight = 100 },
+    ['mzb_belt_sapw'] = { label = 'SAPW Replica Title Belt', weight = 2500 },
+    ['mzb_tee_sirens'] = { label = 'Sirens of San Andreas Tour Tee', weight = 200 },
+    ['mzb_hoodie_sirens'] = { label = 'Neon Coast Tour Hoodie', weight = 450 },
+    ['mzb_cap_sirens'] = { label = 'Sirens of San Andreas Cap', weight = 100 },
+    ['mzb_poster_sirens'] = { label = 'Neon Coast Tour Poster', weight = 50 },
+    ['mzb_programme_sirens'] = { label = 'Neon Coast Tour Programme', weight = 100 },
+    ['mzb_glowstick_sirens'] = { label = 'Neon Coast Glow Stick', weight = 50 },
+    ['mzb_tee_safc'] = { label = 'SAFC Tee', weight = 200 },
+    ['mzb_cap_safc'] = { label = 'SAFC Cap', weight = 100 },
+    ['mzb_gloves_safc'] = { label = 'SAFC Replica Gloves', weight = 400 },
+    ['mzb_poster_safc'] = { label = 'Vespucci Vengeance Poster', weight = 50 },
+    ['mzb_programme_safc'] = { label = 'Vespucci Vengeance Programme', weight = 100 },
+    ['mzb_jersey_blizzard'] = { label = 'Los Santos Blizzard Jersey', weight = 300 },
+    ['mzb_tee_blizzard'] = { label = 'Los Santos Blizzard Tee', weight = 200 },
+    ['mzb_cap_blizzard'] = { label = 'Los Santos Blizzard Cap', weight = 100 },
+    ['mzb_finger_blizzard'] = { label = 'Los Santos Blizzard Foam Finger', weight = 150 },
+    ['mzb_puck_blizzard'] = { label = 'Los Santos Blizzard Puck', weight = 170 },
+    ['mzb_programme_blizzard'] = { label = 'Los Santos Blizzard Programme', weight = 100 },
+    ['mzb_jersey_panic'] = { label = 'LS Panic Jersey', weight = 300 },
+    ['mzb_tee_panic'] = { label = 'LS Panic Tee', weight = 200 },
+    ['mzb_cap_panic'] = { label = 'LS Panic Cap', weight = 100 },
+    ['mzb_finger_panic'] = { label = 'LS Panic Foam Finger', weight = 150 },
+    ['mzb_ball_panic'] = { label = 'LS Panic Mini Basketball', weight = 300 },
+    ['mzb_programme_panic'] = { label = 'LS Panic Programme', weight = 100 },
+    ['mzb_tee_mbopen'] = { label = 'Maze Bank Open Tee', weight = 200 },
+    ['mzb_visor_mbopen'] = { label = 'Maze Bank Open Visor', weight = 80 },
+    ['mzb_towel_mbopen'] = { label = 'Maze Bank Open Towel', weight = 300 },
+    ['mzb_ball_mbopen'] = { label = 'Maze Bank Open Souvenir Ball', weight = 60 },
+    ['mzb_programme_mbopen'] = { label = 'Maze Bank Open Programme', weight = 100 },
+    ['mzb_tee_mayhem'] = { label = 'Monster Mayhem Tee', weight = 200 },
+    ['mzb_cap_mayhem'] = { label = 'Monster Mayhem Cap', weight = 100 },
+    ['mzb_finger_mayhem'] = { label = 'Monster Mayhem Foam Finger', weight = 150 },
+    ['mzb_poster_mayhem'] = { label = 'Monster Mayhem Poster', weight = 50 },
+    ['mzb_programme_mayhem'] = { label = 'Monster Mayhem Programme', weight = 100 },
+    ['mzb_tee_mudflaps'] = { label = 'SHOW ME YOUR MUDFLAPS Tee', weight = 200 },
+    ['mzb_tee_thrillbilly'] = { label = 'Thrillbilly Mud Club Tee', weight = 200 },
+    ['mzb_tee_gp'] = { label = 'Maze Bank Grand Prix Tee', weight = 200 },
+    ['mzb_cap_gp'] = { label = 'Maze Bank Grand Prix Cap', weight = 100 },
+    ['mzb_flag_gp'] = { label = 'Maze Bank Grand Prix Chequered Flag', weight = 100 },
+    ['mzb_poster_gp'] = { label = 'Maze Bank Grand Prix Poster', weight = 50 },
+    ['mzb_programme_gp'] = { label = 'Maze Bank Grand Prix Programme', weight = 100 },
+    ['mzb_tee_arenacross'] = { label = 'Arenacross Tee', weight = 200 },
+    ['mzb_jersey_arenacross'] = { label = 'Arenacross Race Jersey', weight = 300 },
+    ['mzb_cap_arenacross'] = { label = 'Arenacross Cap', weight = 100 },
+    ['mzb_poster_arenacross'] = { label = 'Arenacross Poster', weight = 50 },
+    ['mzb_programme_arenacross'] = { label = 'Arenacross Programme', weight = 100 },
+    ['mzb_tee_lsopen'] = { label = 'Los Santos Open Tee', weight = 200 },
+    ['mzb_hoodie_lsopen'] = { label = 'Los Santos Open Hoodie', weight = 450 },
+    ['mzb_cap_lsopen'] = { label = 'Los Santos Open Cap', weight = 100 },
+    ['mzb_deck_lsopen'] = { label = 'Los Santos Open Skate Deck', weight = 1500 },
+    ['mzb_stickers_lsopen'] = { label = 'Los Santos Open Sticker Pack', weight = 20 },
+    ['mzb_poster_lsopen'] = { label = 'Los Santos Open Poster', weight = 50 },
+    ['mzb_tee_arena'] = { label = 'Maze Bank Arena Tee', weight = 200 },
+    ['mzb_hoodie_arena'] = { label = 'Maze Bank Arena Hoodie', weight = 450 },
+    ['mzb_cap_arena'] = { label = 'Maze Bank Arena Cap', weight = 100 },
+    ['mzb_finger_arena'] = { label = 'Maze Bank Arena Foam Finger', weight = 150 },
+    ['mzb_mug_arena'] = { label = 'Maze Bank Arena Mug', weight = 350 },
+    ['mzb_keyring_arena'] = { label = 'Maze Bank Arena Keyring', weight = 30 },
+```
+
+## Trying on and buying the tees
+
+Every tee hanging on the merch stand's walls can be tried on and bought, the way a clothes shop in the game works.
+Walk up to one: the nearest carries a white dot and the word TEES, and you pick it through **ox_target** or
+**qb-target** (a small zone on every hanging tee) when the server runs one, else by looking at it and pressing **E**.
+Your character turns its back to the wall, the camera cuts to its front, and the tee is on:
+
+| Key | What it does |
+|---|---|
+| **Left** / **Right** | show the stand's other tees (eight to a stand) |
+| **Enter** | buy and wear it; wear it if you own it; take it off if you are wearing it |
+| **Backspace** / **Esc** | leave |
+
+The screen shows what a shop shows: the category top left, your cash top right (when the server has a framework to
+ask), bottom left the price, the tee's name and colour, a row of swatches (the one that is on framed, the ones you
+own ticked) and "Not owned" / "Owned" / "Wearing", the keys bottom right, and "Purchased" on the right when you buy.
+Leaving, you wear what you kept: a tee you bought or put on, else what you came in with. One you only tried is off
+again.
+
+- **The shirts** are addon clothing for the two freemode characters, streamed by the resource (`stream/clothes`):
+  the top (component 11), one drawable per stand and a texture per tee, in the collections `mp_m_mzbmerch` and
+  `mp_f_mzbmerch` (`Config.MerchShop.collection`). Any other ped model is told the shirts do not fit it.
+  `Config.MerchShop.fit` is the arms and the undershirt that go on with a tee (check them in game against your
+  characters); `firstDrawable` is only for a client build without the collection natives.
+- **The price** is `Config.MerchShop.price` (35), or per stand with `prices = { monster = 40 }`; the money goes
+  through the same bridge as the seller's (Merch, above). The server decides every purchase: the stand has to be
+  the show's own, you have to be standing at it as a freemode character, and the price is never the client's.
+- **What you own** is kept by the server per licence, in the resource's own KVP (`mzb_tees:<licence>`): no database
+  and no inventory item, and it is still yours after a restart. Wearing a tee you own, and taking it off, cost
+  nothing.
+- **Saving the look**: after a purchase, a wear or a remove, the look is saved through **illenium-appearance** when
+  the server runs it (`Config.MerchShop.save`). For any other clothing script, hook the client event
+  `mzb_arena:shop:worn` (the style, the tee or `false` for taken off, and the top's drawable and texture as they
+  are on the ped) and save from there.
+- Which tees hang where, and what they are called, is `Config.MerchTees` in `shared/merch_tees.lua`, made with the
+  stands (not edited by hand); the swatches are `html/img/tees/<style>.jpg`. `Config.MerchShop.reach` is how close
+  you have to be to a tee, `camera` where the try-on camera stands.
+
 ## Slippery ice
 
 While the `hockey` show is up, the rink's surface is GTA's ice: vehicles slide on it, and on foot you keep your
@@ -364,7 +587,7 @@ The object sits at the centre of the arena floor. There is one model per show:
 | `wrestling` | `mzb_screens_wrestling` |
 | `concert` | `mzb_screens_concert` |
 | `mma` | `mzb_screens_mma` |
-| `hockey`, `basketball`, `tennis`, `house`, and every other show (`floor`, `monster`, `karting`, `sprint`, `oval`, `skatepark`, a show of your own) | `mzb_screens_board` |
+| `hockey`, `basketball`, `tennis`, `house`, and every other show (`floor`, `monster`, `motocross`, `karting`, `sprint`, `oval`, `skatepark`, a show of your own) | `mzb_screens_board` |
 
 **pmms:** add these to `Config.models` in pmms' `config.lua`, then stand in the bowl, open pmms and pick the arena
 screens:
@@ -685,6 +908,13 @@ Take a line out of the list to remove a prop, or move it.
 - `Config.Music.loop` / `Config.Media.loop`: whether a new track / a new video starts looped.
 - `Config.ShowCars` / `Config.CarsCommand` / `Config.CarsAccess`: the real cars a show has on its floor (the truck
   show's), their command and who may run it.
+- `Config.EventDesk`: the event desk's official (model, place, scenario), how close to talk, and who may set up a
+  fight there.
+- `Config.Race`: the race's sign-up time, countdown, fewest racers, DNF time, fee and prize, where racers are put
+  afterwards, its command and who may run it. `Config.Races` (`shared/races.lua`): the tracks.
+- `Config.Merch`: the merch seller, which stand a show has (`styleOf`), and each stand's items and prices.
+- `Config.MerchShop`: the tees on the stand's walls: the price, the clothing collections, what goes on with a tee,
+  how close to stand, the try-on camera, and whether the look is saved.
 
 ## Notes
 
@@ -694,6 +924,46 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.3.0**: arenacross, races to join, a merch stand to shop at - and the truck show and the circuits done properly.
+  - **Arenacross** (`/mzb motocross`): a 257 m dirt track on the bigger floor - a start gate, a triple, a
+    tabletop, whoops, a double, a big table, rollers, bermed turns, a finish gantry - with ruts, bales, marker drums
+    and a banner wall.
+  - **The event desk**: an official at the floor end of the tunnel. Talk to them to join the race of the show that
+    is up, or to set up a fight on a wrestling or fight night (the ring and the cage's own fights, behind a menu).
+  - **Races**: the three kart circuits, the truck show and arenacross each have a grid, checkpoints and laps made
+    from the track itself. Sign up at the desk; everyone is put on the grid in a kart (a truck, a dirt bike), the
+    server counts the checkpoints and keeps the positions, and the vehicles are taken away afterwards.
+    `/arenarace start | cancel | status` for staff.
+  - **The merch stand**: an island in the main lobby, dressed for each show (eleven of them: its own tables,
+    backdrop, piles of folded tees and two racks of hanging ones) with a seller who has that show's merchandise
+    (money and items through qbx_core, qb-core, ESX or ox_inventory, whichever the server runs).
+  - **Tees you can try on and buy**: walk up to any tee on a rack, and the camera turns to you wearing it - its
+    name, its price, the stand's other tees to flick through, buy and wear. 88 of them, eight a show: each event's
+    own, and the kind of shirt a merch stand in this state would sell. They are real clothing for the freemode
+    characters (`stream/clothes`); what you own is kept per licence.
+  - **The folded front rows** of the bigger floor now look like rows that folded: each row's black front with its
+    seats folded on it, yellow only on the aisles' steps, and the ring tunnels' mouths lined to match.
+  - Two of arenacross's boards, and two tees at the dirt shows' stands, are for a mud club from out of state.
+  - The show alias `monsterjam` is now `monstertrucks`.
+  - **The truck show and the three circuits, done properly:**
+  - **The dressing is the game's own.** The hand-made tents, tool chests, tyre stacks, pylon and timing tower are
+    gone; in their place Rockstar's props, as entities of each show's set: gazebos, rolling tool chests, job boxes,
+    trolley jacks, compressors, fuel cans, extinguishers, plastic chairs and tables in the paddocks; marker tyres,
+    tyre walls with chevrons, hay bales, cones and traffic drums round the floors; Arena War's podium, a scaffold
+    for the timing board, speaker stacks, a generator and work lights. About 270 of them over the four shows, none
+    newer than game build 2060. The ones the game makes loose (cones, chairs, tyre stacks, gazebos) can be knocked
+    about and are back in place when the show is next switched on.
+  - **The truck show's jump is clay**: rounded lips, steep back faces down to the cars' deck, flanks that slump out
+    to the floor; only the faces that are ridden are painted. Wheel tracks run the main lane - event tunnel, long
+    ramp, cars, long ramp, vehicle tunnel - and round the oval lane; torn-up and damp patches lie where they would.
+  - **The circuits' barriers are moulded plastic blocks**, a joint every metre, with a block's panel and fork
+    pockets; rubber lies on the line and into every corner, oil under the tents.
+  - **Nothing stands in a lane.** Every prop is beside the runs to the ramps, off the oval lane, off the asphalt,
+    out of the pit lanes and clear of the tunnel mouths.
+  - Updating from 1.2.0: stream files and the interior's definition changed (restart the server, not only the
+    resource). `shared/config.lua` has a new show (`motocross`), a merch set in every show's list, and four new
+    blocks - `Config.EventDesk`, `Config.Race`, `Config.Merch`, `Config.MerchShop`: take the new file, or copy
+    those over into yours. To sell the stand's items, register them in your inventory ("Merch" has the list).
 - **1.2.0**: a bigger floor and six shows on it (monster trucks, three kart circuits, a skate park, the open
   floor), cars for the trucks to crush, a loop for the music and the screens.
   - **The bigger floor**: the lower tier's front seven rows fold back on all four sides, as the stage end's stands

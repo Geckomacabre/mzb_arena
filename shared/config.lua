@@ -29,38 +29,55 @@ Config.DockCooldown = 2.0         -- s between two presses on one door
 -- instead of 60 x 30 m). With them folded, mzb_set_low_nw_back is the stage end's telescopic sections with only
 -- rows 8 to 20 out. A show that names neither of the two front sets (a show of your own from before 1.2.0) is given
 -- the seated rows by the scripts, so it keeps rows 1 to 7.
+-- mzb_set_merch_<style>: the lobby merch stand dressed for the show (its shirts, its posters); what the stand's
+-- seller has for sale goes by the same style (Config.Merch).
 Config.Shows = {
     house     = { 'mzb_set_house_lights', 'mzb_set_low_nw_seated',
-                  'mzb_set_low_front_seated' },                          -- the empty arena, house lights up
+                  'mzb_set_low_front_seated', 'mzb_set_merch_arena' },   -- the empty arena, house lights up
     wrestling = { 'mzb_set_wwe_ring', 'mzb_set_wwe_stage', 'mzb_set_wwe_floor', 'mzb_set_wwe_rig',
                   'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
-                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated' }, -- the ring show, the house dimmed
+                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_wrestling' },                           -- the ring show, the house dimmed
     concert   = { 'mzb_set_nw_deck', 'mzb_set_con_stage', 'mzb_set_con_rig', 'mzb_set_con_floor',
                   'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
-                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated' }, -- end-stage concert, standing floor
+                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_concert' },                             -- end-stage concert, standing floor
     hockey    = { 'mzb_set_hockey', 'mzb_set_hockey_board', 'mzb_set_house_lights',
-                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated' }, -- the ice rink, boards and glass
+                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_hockey' },                              -- the ice rink, boards and glass
     basketball = { 'mzb_set_basketball', 'mzb_set_basketball_board', 'mzb_set_house_lights',
-                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated' }, -- the hardwood court, courtside seats
+                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_basketball' },                          -- the hardwood court, courtside seats
     tennis    = { 'mzb_set_tennis', 'mzb_set_tennis_board', 'mzb_set_house_lights',
-                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated' }, -- the hard court, the umpire's chair
+                  'mzb_set_low_nw_seated', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_tennis' },                              -- the hard court, the umpire's chair
     mma       = { 'mzb_set_nw_deck', 'mzb_set_mma_stage', 'mzb_set_mma_cage', 'mzb_set_mma_floor',
                   'mzb_set_mma_rig', 'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
-                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated' }, -- fight night: the cage, end stage
+                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_mma' },                                 -- fight night: the cage, end stage
     -- the bigger floor's shows (the front rows folded back all round; no stage, no ring, no floor chairs). floor is
     -- the big floor with nothing on it and the house lights up: for an event of your own (a car show, a drift night)
     floor     = { 'mzb_set_house_lights',
-                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- the open floor
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_arena' },                               -- the open floor
     monster   = { 'mzb_set_monster', 'mzb_set_house_lights',
-                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- the monster truck show: clay floor, the painted jump
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_monster' },                             -- the monster truck show: clay floor, the painted jump
+    motocross = { 'mzb_set_motocross', 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_motocross' },                           -- arenacross: a dirt track of jumps, whoops and berms
     karting   = { 'mzb_set_karting', 'mzb_set_house_lights',
-                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- kart circuit: the Grand Prix, with a flyover
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_racing' },                              -- kart circuit: the Grand Prix, with a flyover
     sprint    = { 'mzb_set_sprint', 'mzb_set_house_lights',
-                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- kart circuit: the Sprint
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_racing' },                              -- kart circuit: the Sprint
     oval      = { 'mzb_set_oval', 'mzb_set_house_lights',
-                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- kart circuit: the Oval, banked ends
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_racing' },                              -- kart circuit: the Oval, banked ends
     skatepark = { 'mzb_set_skate_park', 'mzb_set_skate_vert', 'mzb_set_skate_dress', 'mzb_set_house_lights',
-                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back' },   -- the skate park: park course and vert ramp
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_skatepark' },                           -- the skate park: park course and vert ramp
 }
 -- What the scripts look up per show - the screens' model, the light rig and its aim, the speakers, the screens'
 -- artwork - a show without an entry of its own takes from the empty house: the centre-hung board and the roof's
@@ -83,9 +100,10 @@ Config.ShowAliases = {
     gig = 'concert', band = 'concert', music = 'concert',
     empty = 'house', off = 'house', clear = 'house',
     bigfloor = 'floor', open = 'floor', openfloor = 'floor',
-    monsterjam = 'monster', trucks = 'monster',
+    monstertrucks = 'monster', trucks = 'monster',
     kart = 'karting', karts = 'karting', gp = 'karting',
     skate = 'skatepark',
+    mx = 'motocross', arenacross = 'motocross', dirtbikes = 'motocross',
 }
 
 -- seconds between two show switches (a switch reloads the interior's sets for everyone inside)
@@ -104,7 +122,8 @@ Config.ShowLabels = {
     house = { 'Empty house', 'building' }, wrestling = { 'Wrestling', 'hand-fist' }, concert = { 'Concert', 'music' },
     mma = { 'MMA', 'shield-halved' }, hockey = { 'Hockey', 'hockey-puck' }, basketball = { 'Basketball', 'basketball' },
     tennis = { 'Tennis', 'table-tennis-paddle-ball' }, floor = { 'Open floor', 'expand' },
-    monster = { 'Monster trucks', 'truck-monster' }, karting = { 'Karting: Grand Prix', 'flag-checkered' },
+    monster = { 'Monster trucks', 'truck-monster' }, motocross = { 'Arenacross', 'motorcycle' },
+    karting = { 'Karting: Grand Prix', 'flag-checkered' },
     sprint = { 'Karting: Sprint', 'stopwatch' }, oval = { 'Karting: Oval', 'rotate' },
     skatepark = { 'Skate park', 'person-skating' },
 }
@@ -383,7 +402,7 @@ Config.Music = {
     -- the speakers per show (world positions from the arena's build; move them if you move the rig). A speaker is a
     -- vector3, or { vector3, gain } for a quieter one; { vector3, gain, room = '<room>', ref = m } is a speaker in a
     -- room of its own: heard only in that room, as it is (no walls, no arena reverb). A show that is not listed
-    -- (the big-floor shows: floor, monster, karting, sprint, oval, skatepark) plays from the house's: the
+    -- (the big-floor shows: floor, monster, motocross, karting, sprint, oval, skatepark) plays from the house's: the
     -- centre-hung board
     speakers = {
         wrestling = { vector3(-335.059, -1969.540, 30.75), vector3(-323.370, -1979.349, 30.75),      -- the line arrays
@@ -996,3 +1015,186 @@ Config.CrowdRoles = {
 -- crowd - the ones nearest you, MaxPeds at most within Radius (FromBowl while you are in the bowl: the seats get the
 -- peds) - and the staff among them go home with the staff.
 Config.Concourse = { enabled = true, MaxPeds = 36, FromBowl = 8, Radius = 45.0 }
+
+-- ------------------------------------------------------------------ the event desk (client/desk.lua, server/desk.lua)
+-- An event official with a clipboard at the floor end of the tunnel: walk up and talk to them (ox_target or qb-target
+-- when the server runs one, else [E]). What they offer goes by the show that is up: a show with a race track
+-- (Config.Races, shared/races.lua: the kart circuits, the truck show, arenacross) has the race's sign-up; a show
+-- with a ring or a cage (Config.Fights.venues) has "Set up a fight", which is /arenafight challenge and accept
+-- behind a menu; the others have nothing to sign up for. The ped is a local one, there while you are within 60 m.
+--   ped       model, coords = vector4(x, y, the floor's z, heading), scenario; room = '<interior room>' if the game
+--             does not find the room itself (the ped stays unseen)
+Config.EventDesk = {
+    enabled = true,
+    ped = { model = 's_m_m_highsec_01', coords = vector4(-308.63, -1951.86, 19.55, 140.0), scenario = 'WORLD_HUMAN_CLIPBOARD' },
+    distance = 2.2,          -- how close to talk
+    -- who may set up a fight at the desk: 'anyone' or 'staff' (the fight card's staff: Config.Fights.access).
+    -- Config.Fights.challenge = false turns challenges off for everyone but staff, here as in chat
+    fights = 'anyone',
+}
+
+-- ------------------------------------------------------------------ racing (client/race.lua, server/race.lua)
+-- A race on the track of the show that is up (Config.Races: the grid, the checkpoints, the laps, the vehicles - made
+-- with the tracks, shared/races.lua). One race at a time, run by the server: the first to join at the event desk
+-- opens the sign-up, which closes after `signup` seconds or when that player starts it; everyone is put on the grid
+-- in the order they joined, in a kart (a truck, a dirt bike) of the track's own, held until the countdown is over.
+-- The server counts the checkpoints (only the next one in order, and only with the racer near it), keeps the
+-- positions and the times, and classifies whoever has not finished `dnf` seconds after the winner as DNF. Out of the
+-- vehicle for 15 seconds, dead, or gone from the server: retired. Afterwards the vehicles are taken away and the
+-- racers stand at the desk again. Another show coming up cancels the race.
+--   staff: /arenarace start (close the sign-up and go) | cancel | status
+Config.Race = {
+    enabled = true,
+    command = 'arenarace',
+    access = nil,            -- who may run /arenarace start and cancel: an ACE, false = anyone, nil = the same as the lights
+    signup = 45,             -- seconds the sign-up stays open after the first entrant (the entrant can start it early)
+    countdown = 5,
+    minPlayers = 1,
+    dnf = 240,               -- seconds after the winner finishes before everyone else is classified DNF
+    timeout = 900,           -- seconds a race may run at most (nobody finishing: everyone is classified DNF)
+    fee = 0, prize = 0,      -- money through the bridge below; 0 = none
+    returnTo = nil,          -- where racers are put when it ends; nil = back at the desk
+                             -- (a place of your own: vector4(x, y, the floor's z, heading))
+}
+
+-- ------------------------------------------------------------------ merch (client/merch.lua, server/merch.lua)
+-- The seller at the lobby's merch stand (the stand itself is dressed per show: the mzb_set_merch_<style> entity sets
+-- in Config.Shows). Talking to them lists what the show that is up has for sale; the server looks the item and its
+-- price up here itself, takes the money and hands the item over through the bridge (server/bridge.lua), which uses
+-- the first of these the server runs: qbx_core (items through ox_inventory), qb-core, es_extended, ox_inventory on
+-- its own (its 'money' item), or none of them. With none, only a price of 0 can be bought and nothing is handed
+-- over (the player is told they have it): set the prices to 0, or run a framework. Money is cash.
+-- Every item named here has to exist in your inventory (README.md, "Merch", has the list and an ox_inventory
+-- snippet); one that does not is not sold and the money goes back.
+Config.Merch = {
+    enabled = true,
+    ped = { model = 'a_f_y_hipster_02', coords = vector4(-277.83, -2033.38, 28.95, 320.0), scenario = 'WORLD_HUMAN_STAND_IMPATIENT' },
+    distance = 2.2,
+    -- what a stand sells, by the stand's style (a show's style: see styleOf). item = the inventory item's name
+    styleOf = { wrestling = 'wrestling', concert = 'concert', mma = 'mma', hockey = 'hockey', basketball = 'basketball',
+                tennis = 'tennis', monster = 'monster', karting = 'racing', sprint = 'racing', oval = 'racing',
+                skatepark = 'skatepark', motocross = 'motocross', house = 'arena', floor = 'arena' },
+    -- the stand's name per style (the menu's title); a show that is not in styleOf has the arena's stand
+    titles = { wrestling = 'SAPW', concert = 'Sirens of San Andreas - The Neon Coast Tour', mma = 'SAFC - Vespucci Vengeance',
+               hockey = 'Los Santos Blizzard', basketball = 'LS Panic', tennis = 'Maze Bank Open', monster = 'Monster Mayhem',
+               racing = 'Maze Bank Grand Prix', skatepark = 'Los Santos Open', motocross = 'Arenacross',
+               arena = 'Maze Bank Arena' },
+    items = {
+        wrestling = {                                    -- San Andreas Pro Wrestling
+            { item = 'mzb_tee_sapw', label = 'SAPW Tee', price = 35 },
+            { item = 'mzb_cap_sapw', label = 'SAPW Cap', price = 25 },
+            { item = 'mzb_finger_sapw', label = 'SAPW Foam Finger', price = 15 },
+            { item = 'mzb_poster_sapw', label = 'SAPW Poster', price = 12 },
+            { item = 'mzb_programme_sapw', label = 'SAPW Programme', price = 10 },
+            { item = 'mzb_belt_sapw', label = 'SAPW Replica Title Belt', price = 150 },
+        },
+        concert = {                                      -- Sirens of San Andreas - The Neon Coast Tour
+            { item = 'mzb_tee_sirens', label = 'Sirens of San Andreas Tour Tee', price = 40 },
+            { item = 'mzb_hoodie_sirens', label = 'Neon Coast Tour Hoodie', price = 70 },
+            { item = 'mzb_cap_sirens', label = 'Sirens of San Andreas Cap', price = 25 },
+            { item = 'mzb_poster_sirens', label = 'Neon Coast Tour Poster', price = 15 },
+            { item = 'mzb_programme_sirens', label = 'Neon Coast Tour Programme', price = 12 },
+            { item = 'mzb_glowstick_sirens', label = 'Neon Coast Glow Stick', price = 8 },
+        },
+        mma = {                                          -- SAFC - Vespucci Vengeance
+            { item = 'mzb_tee_safc', label = 'SAFC Tee', price = 35 },
+            { item = 'mzb_cap_safc', label = 'SAFC Cap', price = 25 },
+            { item = 'mzb_gloves_safc', label = 'SAFC Replica Gloves', price = 60 },
+            { item = 'mzb_poster_safc', label = 'Vespucci Vengeance Poster', price = 12 },
+            { item = 'mzb_programme_safc', label = 'Vespucci Vengeance Programme', price = 10 },
+        },
+        hockey = {                                       -- Los Santos Blizzard
+            { item = 'mzb_jersey_blizzard', label = 'Los Santos Blizzard Jersey', price = 90 },
+            { item = 'mzb_tee_blizzard', label = 'Los Santos Blizzard Tee', price = 35 },
+            { item = 'mzb_cap_blizzard', label = 'Los Santos Blizzard Cap', price = 25 },
+            { item = 'mzb_finger_blizzard', label = 'Los Santos Blizzard Foam Finger', price = 15 },
+            { item = 'mzb_puck_blizzard', label = 'Los Santos Blizzard Puck', price = 18 },
+            { item = 'mzb_programme_blizzard', label = 'Los Santos Blizzard Programme', price = 10 },
+        },
+        basketball = {                                   -- LS Panic
+            { item = 'mzb_jersey_panic', label = 'LS Panic Jersey', price = 85 },
+            { item = 'mzb_tee_panic', label = 'LS Panic Tee', price = 35 },
+            { item = 'mzb_cap_panic', label = 'LS Panic Cap', price = 25 },
+            { item = 'mzb_finger_panic', label = 'LS Panic Foam Finger', price = 15 },
+            { item = 'mzb_ball_panic', label = 'LS Panic Mini Basketball', price = 20 },
+            { item = 'mzb_programme_panic', label = 'LS Panic Programme', price = 10 },
+        },
+        tennis = {                                       -- Maze Bank Open
+            { item = 'mzb_tee_mbopen', label = 'Maze Bank Open Tee', price = 35 },
+            { item = 'mzb_visor_mbopen', label = 'Maze Bank Open Visor', price = 22 },
+            { item = 'mzb_towel_mbopen', label = 'Maze Bank Open Towel', price = 30 },
+            { item = 'mzb_ball_mbopen', label = 'Maze Bank Open Souvenir Ball', price = 15 },
+            { item = 'mzb_programme_mbopen', label = 'Maze Bank Open Programme', price = 10 },
+        },
+        monster = {                                      -- Monster Mayhem
+            { item = 'mzb_tee_mayhem', label = 'Monster Mayhem Tee', price = 35 },
+            { item = 'mzb_cap_mayhem', label = 'Monster Mayhem Cap', price = 25 },
+            { item = 'mzb_finger_mayhem', label = 'Monster Mayhem Foam Finger', price = 15 },
+            { item = 'mzb_poster_mayhem', label = 'Monster Mayhem Poster', price = 12 },
+            { item = 'mzb_programme_mayhem', label = 'Monster Mayhem Programme', price = 10 },
+            { item = 'mzb_tee_mudflaps', label = 'SHOW ME YOUR MUDFLAPS Tee', price = 35 },
+            { item = 'mzb_tee_thrillbilly', label = 'Thrillbilly Mud Club Tee', price = 35 },
+        },
+        racing = {                                       -- Maze Bank Grand Prix (the three kart circuits)
+            { item = 'mzb_tee_gp', label = 'Maze Bank Grand Prix Tee', price = 35 },
+            { item = 'mzb_cap_gp', label = 'Maze Bank Grand Prix Cap', price = 25 },
+            { item = 'mzb_flag_gp', label = 'Maze Bank Grand Prix Chequered Flag', price = 15 },
+            { item = 'mzb_poster_gp', label = 'Maze Bank Grand Prix Poster', price = 12 },
+            { item = 'mzb_programme_gp', label = 'Maze Bank Grand Prix Programme', price = 10 },
+            { item = 'mzb_tee_mudflaps', label = 'SHOW ME YOUR MUDFLAPS Tee', price = 35 },
+            { item = 'mzb_tee_thrillbilly', label = 'Thrillbilly Mud Club Tee', price = 35 },
+        },
+        skatepark = {                                    -- Los Santos Open
+            { item = 'mzb_tee_lsopen', label = 'Los Santos Open Tee', price = 35 },
+            { item = 'mzb_hoodie_lsopen', label = 'Los Santos Open Hoodie', price = 65 },
+            { item = 'mzb_cap_lsopen', label = 'Los Santos Open Cap', price = 25 },
+            { item = 'mzb_deck_lsopen', label = 'Los Santos Open Skate Deck', price = 80 },
+            { item = 'mzb_stickers_lsopen', label = 'Los Santos Open Sticker Pack', price = 8 },
+            { item = 'mzb_poster_lsopen', label = 'Los Santos Open Poster', price = 12 },
+        },
+        motocross = {                                    -- Arenacross
+            { item = 'mzb_tee_arenacross', label = 'Arenacross Tee', price = 35 },
+            { item = 'mzb_jersey_arenacross', label = 'Arenacross Race Jersey', price = 60 },
+            { item = 'mzb_cap_arenacross', label = 'Arenacross Cap', price = 25 },
+            { item = 'mzb_poster_arenacross', label = 'Arenacross Poster', price = 12 },
+            { item = 'mzb_programme_arenacross', label = 'Arenacross Programme', price = 10 },
+            { item = 'mzb_tee_mudflaps', label = 'SHOW ME YOUR MUDFLAPS Tee', price = 35 },
+            { item = 'mzb_tee_thrillbilly', label = 'Thrillbilly Mud Club Tee', price = 35 },
+        },
+        arena = {                                        -- Maze Bank Arena (the empty house, the open floor)
+            { item = 'mzb_tee_arena', label = 'Maze Bank Arena Tee', price = 30 },
+            { item = 'mzb_hoodie_arena', label = 'Maze Bank Arena Hoodie', price = 60 },
+            { item = 'mzb_cap_arena', label = 'Maze Bank Arena Cap', price = 25 },
+            { item = 'mzb_finger_arena', label = 'Maze Bank Arena Foam Finger', price = 15 },
+            { item = 'mzb_mug_arena', label = 'Maze Bank Arena Mug', price = 14 },
+            { item = 'mzb_keyring_arena', label = 'Maze Bank Arena Keyring', price = 6 },
+        },
+    },
+}
+
+-- ------------------------------------------------------------------ the tees on the stand's walls (client/shop.lua, server/shop.lua)
+-- Every tee hanging on the merch stand's gridwalls can be tried on and bought (Config.MerchTees, shared/merch_tees.lua:
+-- the eight tees of each stand and where each one hangs, made with the stands). Walk up to one - ox_target or
+-- qb-target when the server runs one, else a prompt - and the camera cuts to the front of your character wearing it,
+-- the wall behind: the arrows show the stand's other tees, Enter buys and wears (wears one you own, takes off the one
+-- you wear), Backspace leaves. A tee you only tried goes back to what you had on.
+-- The shirts are addon clothing for the two freemode characters (stream/clothes): the top (component 11), one
+-- drawable per stand, a texture per tee. What a player owns is kept by the server, per licence (the resource's KVP);
+-- the money is the bridge's (server/bridge.lua, see Config.Merch).
+Config.MerchShop = {
+    enabled = true,
+    price = 35,                       -- a tee; prices = { monster = 40 } overrides per style
+    prices = {},
+    component = 11,
+    collection = { male = 'mp_m_mzbmerch', female = 'mp_f_mzbmerch' },
+    -- what goes with a tee so the arms and the neck are right: what the game's own shop data puts with the two
+    -- tees these are made from (his plain crew neck, her tuner tee). Not seen in game yet - if an arm or a neck
+    -- shows through, these are the numbers to change
+    fit = { male = { arms = 0, undershirt = 15 }, female = { arms = 14, undershirt = 2 } },
+    -- only if the collection natives are missing on an old client build: the first of the pack's drawables in the
+    -- model's own numbering (nil = assume the pack is the last one loaded)
+    firstDrawable = { male = nil, female = nil },
+    reach = 1.7,                      -- how close to a hanging tee
+    camera = { distance = 2.3, height = 0.35, fov = 38.0 },
+    save = true,                      -- after a purchase / wear / remove, ask the server's clothing script to save the look
+}

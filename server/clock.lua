@@ -47,3 +47,21 @@ function MzbReply(src, tag, msg)
         TriggerClientEvent('chat:addMessage', src, { args = { tag, msg } })
     end
 end
+
+-- a line on one player's screen: an ox_lib notification when the server runs it (client/oxmenu.lua), else chat
+function MzbNotify(src, msg)
+    if src == 0 then
+        print('[mzb_arena] ' .. msg)
+    else
+        TriggerClientEvent('mzb_arena:notify', src, msg)
+    end
+end
+
+-- is the player within range (m) of someone to talk to (the event desk, the merch stand)? c = where the ped stands:
+-- x, y and the floor's z (a player's own place is a metre over the floor)
+function MzbNear(src, c, range)
+    local ped = GetPlayerPed(tostring(src))
+    if not ped or ped == 0 then return false end
+    local p = GetEntityCoords(ped)
+    return #(vector3(p.x, p.y, p.z) - vector3(c.x, c.y, c.z + 1.0)) <= range
+end
