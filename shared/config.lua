@@ -1205,4 +1205,9 @@ Config.MerchShop = {
     reach = 1.7,                      -- how close to a hanging tee
     camera = { distance = 2.3, height = 0.35, fov = 38.0 },
     save = true,                      -- after a purchase / wear / remove, ask the server's clothing script to save the look
+    -- who draws the try-on. 'auto': on a server with vice_hud the HUD does - its shop panel, its prompts, and its
+    -- wallet as the only money on the screen - else this resource's page, which then shows the cash itself.
+    -- 'own': always this resource's page (the cash is still left to vice_hud's wallet when that runs)
+    hud = 'auto',
+    store = 'Maze Bank Arena',        -- the store's name over the category
 }

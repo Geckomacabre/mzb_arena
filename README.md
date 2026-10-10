@@ -542,9 +542,10 @@ Your character turns its back to the wall, the camera cuts to its front, and the
 | **Up** / **Down** | the same design as a T-shirt or as a tank top (when the stand's pack has both) |
 | **Backspace** / **Esc** | leave |
 
-The screen shows what a shop shows: the category top left, your cash top right (when the server has a framework to
-ask), bottom left the price, the tee's name and colour, a row of swatches (the one that is on framed, the ones you
-own ticked) and "Not owned" / "Owned" / "Wearing", the keys bottom right, and "Purchased" on the right when you buy.
+The screen shows what a shop shows: the store and the category top left, your cash top right (when the server has a
+framework to ask), bottom left the price, the tee's name and colour, a row of swatches (the one that is on framed,
+the ones you own ticked) and "Not owned" / "Owned" / "Wearing" - or "Not enough money" - the keys bottom right, and
+"Purchased" on the right when you buy.
 Leaving, you wear what you kept: a tee you bought or put on, else what you came in with. One you only tried is off
 again.
 
@@ -563,6 +564,13 @@ again.
   the server runs it (`Config.MerchShop.save`). For any other clothing script, hook the client event
   `mzb_arena:shop:worn` (the style, the tee or `false` for taken off, and the top's drawable and texture as they
   are on the ped) and save from there.
+- **With vice_hud**: a server that runs `vice_hud` has a HUD with a wallet and a shop panel of its own, so the
+  try-on is drawn there instead (`Config.MerchShop.hud = 'auto'`): the HUD's shop panel (store and category,
+  price, the tee, a swatch of each tee's cloth with its mark on the ones you do not own, "Not enough money"), its
+  action prompts and its feed. This resource's page stays shut, so the only money on the screen is the HUD's own
+  wallet, which shows the new total itself when you buy. `hud = 'own'` keeps this resource's page; it then leaves
+  the cash off whenever `vice_hud` is running, so there are never two wallets. A `vice_hud` without the shop
+  panel (`ShowShopItem`) is handled the same way.
 - Which tees hang where, and what they are called, is `Config.MerchTees` in `shared/merch_tees.lua`, made with the
   stands (not edited by hand); the swatches are `html/img/tees/<style>.jpg`. `Config.MerchShop.reach` is how close
   you have to be to a tee, `camera` where the try-on camera stands.
@@ -915,7 +923,7 @@ Take a line out of the list to remove a prop, or move it.
   afterwards, its command and who may run it. `Config.Races` (`shared/races.lua`): the tracks.
 - `Config.Merch`: the merch seller, which stand a show has (`styleOf`), and each stand's items and prices.
 - `Config.MerchShop`: the tees on the stand's walls: the price, the clothing collections, what goes on with a tee,
-  how close to stand, the try-on camera, and whether the look is saved.
+  how close to stand, the try-on camera, whether the look is saved, and who draws the try-on (`hud`).
 
 ## Notes
 
@@ -925,6 +933,12 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.3.3**: the try-on and the HUD's wallet. On a server with `vice_hud` the merch stand's try-on is drawn by
+  the HUD itself - its shop panel, its prompts, its feed - and the only money on the screen is the HUD's own
+  wallet; this resource's page no longer puts a second cash figure in the same corner (`Config.MerchShop.hud`,
+  `store`). Without `vice_hud` nothing changes but two details: the store's name stands over the category, and a
+  tee you cannot pay for says "Not enough money". `Config.MerchTees` gained each tee's cloth colour (`hex`).
+  Updating from 1.3.2: scripts and the page only (no stream files); `Config.MerchShop` gained `hud` and `store`.
 - **1.3.2**: the main lobby laid out again. A clear way from the security check to section 100's entrance, with
   nothing standing in it; guest services is a desk beside that way, not across it; the box office stands further
   from the doors and clear of the glass; the check's flanks are belt posts, not beer-branded barriers; four high

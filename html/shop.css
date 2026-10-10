@@ -1,9 +1,13 @@
-/* the merch stand's try-on (shop.js): over the game while a tee is on trial - the category top left, the cash top right,
-   the item bottom left, the keys bottom right. Display only: nothing here takes a click */
+/* the merch stand's try-on (shop.js): over the game while a tee is on trial - the store and the category top left,
+   the cash top right (only when no HUD keeps the wallet), the item bottom left, the keys bottom right. Display only:
+   nothing here takes a click. On a server with vice_hud none of this is shown: the HUD draws the try-on */
 #shop { position: absolute; inset: 0; pointer-events: none; color: #fff; text-transform: uppercase;
   font-family: "Bahnschrift", "Arial Narrow", "Roboto Condensed", "Segoe UI", Arial, sans-serif; font-stretch: 78%;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85), 0 0 12px rgba(0, 0, 0, 0.45); }
-#shop-title { position: absolute; top: 5.5vh; left: 4vw; font-size: 40px; font-weight: 700; letter-spacing: 0.03em; }
+#shop-head { position: absolute; top: 5.5vh; left: 4vw; line-height: 1.08; }
+#shop-store { font-size: 28px; font-weight: 700; letter-spacing: 0.03em; color: rgba(226, 224, 236, 0.62); }
+#shop-store:not(:empty)::after { content: " /"; }
+#shop-title { font-size: 40px; font-weight: 700; letter-spacing: 0.03em; }
 #shop-cash { position: absolute; top: 5.5vh; right: 4vw; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; }
 #shop-cash.spent { animation: shop-spent 0.9s ease-out; }
 @keyframes shop-spent { 0% { color: #ff5a5a; transform: translateY(-4px); } 100% { color: #fff; transform: none; } }
@@ -22,6 +26,7 @@
 #shop-status { font-size: 17px; font-weight: 700; letter-spacing: 0.08em; }
 #shop-status.owned { color: #cfe9c8; }
 #shop-status.wearing { color: #8fe08a; }
+#shop-status.poor { color: #ff8f8f; }
 
 #shop-keys { position: absolute; right: 4vw; bottom: 7vh; display: flex; flex-direction: row; align-items: center; gap: 26px; }
 #shop-keys div { display: flex; align-items: center; gap: 7px; font-size: 18px; font-weight: 700; letter-spacing: 0.06em; }
