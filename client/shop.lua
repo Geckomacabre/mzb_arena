@@ -6,7 +6,8 @@
 --     goes on (the stand's own drawable of the addon collection, the tee's texture, the arms and the undershirt that
 --     go with a tee). Left / right show the stand's other tees, Enter buys and wears (wears one you own, takes off
 --     the one you wear), Backspace or Esc leaves. The page shows what the clip shows (html/shop.js): it is display
---     only, the keys are read here;
+--     only, the keys are read here. On a server with vice_hud the HUD draws it instead - its shop panel, its
+--     prompts, its wallet - and the page stays shut ("the screen" below);
 --   * leaving: what you wear is what you kept - a tee you bought or put on - else what you came in with.
 -- Only the freemode characters can wear them. The server decides every purchase; wearing what is owned and taking
 -- it off are this game's own business. After each, the look is saved through illenium-appearance when the server
@@ -121,7 +122,29 @@ local function worn(t, n)
     TriggerEvent('mzb_arena:shop:worn', t.style, n or false, GetPedDrawableVariation(ped, COMP), GetPedTextureVariation(ped, COMP))
 end
 
--- ------------------------------------------------------------------ the page (html/shop.js)
+-- ------------------------------------------------------------------ the screen
+-- Who draws the try-on. A server with vice_hud has a HUD that keeps the wallet (top right: it shows the new total
+-- and the "- $35" itself when money goes) and has a shop panel of its own, made after the same game's stores. There
+-- the try-on is the HUD's to draw - its panel (ShowShopItem), its action prompts, its feed - and this resource's
+-- page stays shut: one wallet on the screen, the HUD's. Else the page draws it (html/shop.js), with the cash only
+-- when no vice_hud is there to show it. Config.MerchShop.hud = 'own' keeps the page whatever runs.
+local PROMPTS = { 'mzb_arena_shop_cut', 'mzb_arena_shop_show', 'mzb_arena_shop_act', 'mzb_arena_shop_exit' }
+local ACTION = { ['Not owned'] = 'Buy & wear', Owned = 'Wear', Wearing = 'Remove' }
+local viceUp = false               -- vice_hud's panel is up
+
+-- one of vice_hud's exports: false when it does not run, or is one that has no such export
+local function vice(name, ...)
+    if not started('vice_hud') then return false end
+    local args = table.pack(...)
+    return (pcall(function() exports.vice_hud[name](nil, table.unpack(args, 1, args.n)) end))
+end
+
+-- how many of vice_hud's swatches fit on the screen's bottom line beside its row of prompts (a swatch with its gap is
+-- 11.2 % of the screen's height wide, the prompts and the margins some 63 %): eight on 16:9 and 16:10, six on 4:3
+local function swatchRoom()
+    return math.max(3, math.min(8, math.floor((GetAspectRatio(false) * 98.2 - 63.0) / 11.2)))
+end
+
 local function status(t)
     if t.wearing == item(t) then return 'Wearing' end
     return t.owned[item(t)] and 'Owned' or 'Not owned'
@@ -136,11 +159,64 @@ local function hud(t)
         tees[i] = { label = label, colour = x.colour, owned = t.owned[item(t, i)] == true }
     end
     local n = #t.offered
-    SendNUIMessage({ shop = { open = true, style = t.style, tee = t.tee, tees = tees,
-                              price = (t.prices or {})[t.cut] or priceOf(t.style, t.cut),
-                              cash = t.cash or false, status = status(t), index = t.tee, count = #tees,
-                              title = cut.title or 'T-Shirts', cut = n > 1 and { index = t.cut, count = n,
-                              other = (CUTS[t.offered[(t.cutAt % n) + 1]] or {}).title } or false } })
+    local price = (t.prices or {})[t.cut] or priceOf(t.style, t.cut)
+    local st = status(t)
+    local other = n > 1 and (CUTS[t.offered[(t.cutAt % n) + 1]] or {}).title or nil
+    local poor = st == 'Not owned' and t.cash ~= nil and t.cash < price
+    local store = SC.store or 'Maze Bank Arena'
+    if SC.hud ~= 'own' then
+        -- vice_hud's panel: a swatch is a tee's cloth, with the panel's "$" on the ones not owned yet (as many
+        -- as the screen has room for, around the tee that is on); what is owned has no price on it
+        local mine, me, swatches = st ~= 'Not owned', tees[t.tee] or {}, {}
+        local room = swatchRoom()
+        local first = math.max(1, math.min(t.tee - math.floor(room / 2), #tees - room + 1))
+        for i = first, math.min(#tees, first + room - 1) do
+            swatches[#swatches + 1] = { color = t.stand.tees[i].hex or '#888888', locked = not tees[i].owned }
+        end
+        if vice('ShowShopItem', { store = store, category = cut.title or 'T-Shirts', price = not mine and price or nil,
+                                  pay = { mine and 'none' or 'cash' }, name = me.label,
+                                  variant = mine and ('%s - %s'):format(me.colour or '', st) or me.colour,
+                                  swatches = swatches, selected = t.tee - first + 1, afford = not poor }) then
+            if not viceUp then
+                viceUp = true
+                SendNUIMessage({ shop = { open = false } })
+            end
+            -- (its prompts lie in a row while its panel is up, in the order they first came - on the same line
+            -- as the swatches, so their labels are short: the other cut's name, which shirt of how many)
+            if other then vice('ShowActionPrompt', PROMPTS[1], other, 172) end
+            vice('ShowActionPrompt', PROMPTS[2], ('Shirt %d/%d'):format(t.tee, #tees), 175)
+            vice('ShowActionPrompt', PROMPTS[3], ACTION[st], 191, { off = poor })
+            vice('ShowActionPrompt', PROMPTS[4], 'Exit', 177)
+            return
+        end
+    end
+    if viceUp then                                         -- (vice_hud went in the middle of it: the page takes over)
+        viceUp = false
+        for _, id in ipairs(PROMPTS) do vice('HideActionPrompt', id) end
+    end
+    SendNUIMessage({ shop = { open = true, style = t.style, tee = t.tee, tees = tees, price = price, store = store,
+                              cash = not started('vice_hud') and t.cash or false, poor = poor, status = st,
+                              index = t.tee, count = #tees, title = cut.title or 'T-Shirts',
+                              cut = other and { index = t.cut, count = n, other = other } or false } })
+end
+
+-- a line for a moment: "Purchased", or why not
+local function toast(text, failed)
+    if viceUp then
+        if not vice('ShowFeed', text) then notify(text) end
+        return
+    end
+    SendNUIMessage({ shop = { toast = text, failed = failed or nil } })
+end
+
+-- all of it off the screen
+local function screenOff()
+    if viceUp then
+        viceUp = false
+        vice('HideShopItem')
+        for _, id in ipairs(PROMPTS) do vice('HideActionPrompt', id) end
+    end
+    SendNUIMessage({ shop = { open = false } })
 end
 
 -- ------------------------------------------------------------------ trying on
@@ -156,7 +232,7 @@ local function leave(quick)
         DestroyCam(t.cam, false)
     end
     FreezeEntityPosition(ped, false)
-    SendNUIMessage({ shop = { open = false } })
+    screenOff()
 end
 
 local function show(t, n)
@@ -287,7 +363,7 @@ RegisterNetEvent('mzb_arena:shop:bought', function(d)
     if not t or type(d) ~= 'table' or d.style ~= t.style then return end
     t.busy = nil
     if not d.ok then
-        SendNUIMessage({ shop = { toast = tostring(d.why or 'the payment did not go through'), failed = true } })
+        toast(tostring(d.why or 'the payment did not go through'), true)
         return
     end
     t.owned[d.tee] = true
@@ -296,7 +372,7 @@ RegisterNetEvent('mzb_arena:shop:bought', function(d)
         t.keep, t.wearing = wornNow(PlayerPedId()), d.tee
         worn(t, d.tee)
     end
-    SendNUIMessage({ shop = { toast = 'Purchased' } })
+    toast('Purchased')
     PlaySoundFrontend(-1, 'PURCHASE', 'HUD_LIQUOR_STORE_SOUNDSET', true)
     hud(t)
 end)

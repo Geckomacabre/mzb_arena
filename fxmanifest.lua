@@ -4,7 +4,7 @@ lua54 'yes'
 
 author 'gecko'
 description 'mzb_arena - the Maze Bank Arena with a full interior: seating bowl, street-level concourse (concessions, rest rooms, security, merch), event level (tunnel, backstage, locker rooms, production control room, loading dock behind working roller doors), switchable shows (wrestling, concert, MMA, hockey, basketball, tennis, and on a bigger floor monster trucks, arenacross, three kart circuits and a skate park), a synced light desk with a crowd, staff and press, a screen player, a music player and a followspot, fights in the ring and the cage, races on the tracks signed up for at an event desk, a merch stand with tees to try on and buy, and slippery ice'
-version '1.3.2'
+version '1.3.3'
 
 this_is_a_map 'yes'
 
