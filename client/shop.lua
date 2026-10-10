@@ -26,8 +26,11 @@ local BARE = { [COMP] = { 15, 0 }, [ARMS] = { 15, 0 }, [UNDER] = { 15, 0 } }   -
 local MODELS = { [GetHashKey('mp_m_freemode_01')] = 'male', [GetHashKey('mp_f_freemode_01')] = 'female' }
 local STYLES = 0
 for _ in pairs(TEES) do STYLES = STYLES + 1 end
+-- the cuts a design comes in (Config.MerchShop.cuts): an item's number is its tee's plus the stand's count of
+-- tees for every cut before its own - 1..8 the tees, 9..16 the tank tops
+local CUTS = (type(SC.cuts) == 'table' and #SC.cuts > 0) and SC.cuts or { { id = 'tee', title = 'T-Shirts', word = 'Tee', offset = 0 } }
 
-local T = nil                      -- trying on: { style, stand, gender, tee, before, keep, wearing, cameIn, owned,
+local T = nil                      -- trying on: { style, stand, gender, tee, cut, before, keep, wearing, cameIn, owned,
                                    --   cash, price, cam, busy }
 local zones, zonesFor = {}, nil    -- the target zones that are up, and what for ('<target script>:<style>')
 
@@ -46,9 +49,14 @@ local function standOf(style)
     return s
 end
 
-local function priceOf(style)
-    local p = type(SC.prices) == 'table' and SC.prices[style] or SC.price
+local function priceOf(style, cut)
+    local p = (CUTS[cut or 1] or {}).price or (type(SC.prices) == 'table' and SC.prices[style]) or SC.price
     return math.max(0, math.floor(tonumber(p) or 35))
+end
+
+-- an item's number: tee n of the stand in cut c
+local function item(t, n, c)
+    return (n or t.tee) + ((c or t.cut) - 1) * #t.stand.tees
 end
 
 local function notify(msg)
@@ -70,9 +78,11 @@ local function dress(ped, w)
     end
 end
 
--- the stand's tee n on the ped: false when the game has no such shirt (the clothing pack is not installed)
-local function putOn(ped, t, n)
-    local drawable, texture = tonumber(t.stand.drawable) or 0, n - 1
+-- the stand's tee n on the ped, in cut c: false when the game has no such shirt (the clothing pack is not
+-- installed, or is one without that cut)
+local function putOn(ped, t, n, c)
+    local cut = CUTS[c or t.cut] or CUTS[1]
+    local drawable, texture = (tonumber(t.stand.drawable) or 0) + (tonumber(cut.offset) or 0), n - 1
     local pack = (SC.collection or {})[t.gender]
     if SetPedCollectionComponentVariation and pack then
         -- by the pack's name: the drawable is the pack's own number, wherever the game has put the pack
@@ -85,11 +95,11 @@ local function putOn(ped, t, n)
         -- an old client build: by the model's own numbering (Config.MerchShop.firstDrawable, else the pack is taken
         -- to be the last one loaded: its drawables are the model's last)
         local first = (SC.firstDrawable or {})[t.gender]
-        first = tonumber(first) or (GetNumberOfPedDrawableVariations(ped, COMP) - STYLES)
+        first = tonumber(first) or (GetNumberOfPedDrawableVariations(ped, COMP) - STYLES * #CUTS)
         if first < 0 or not IsPedComponentVariationValid(ped, COMP, first + drawable, texture) then return false end
         SetPedComponentVariation(ped, COMP, first + drawable, texture, 0)
     end
-    local fit = (SC.fit or {})[t.gender] or {}
+    local fit = (type(cut.fit) == 'table' and cut.fit[t.gender]) or (SC.fit or {})[t.gender] or {}
     if fit.arms then SetPedComponentVariation(ped, ARMS, fit.arms, 0, 0) end
     if fit.undershirt then SetPedComponentVariation(ped, UNDER, fit.undershirt, 0, 0) end
     return true
@@ -113,17 +123,24 @@ end
 
 -- ------------------------------------------------------------------ the page (html/shop.js)
 local function status(t)
-    if t.wearing == t.tee then return 'Wearing' end
-    return t.owned[t.tee] and 'Owned' or 'Not owned'
+    if t.wearing == item(t) then return 'Wearing' end
+    return t.owned[item(t)] and 'Owned' or 'Not owned'
 end
 
 local function hud(t)
     local tees = {}
+    local cut = CUTS[t.cut]
     for i, x in ipairs(t.stand.tees) do
-        tees[i] = { label = x.label, colour = x.colour, owned = t.owned[i] == true }
+        local label = x.label
+        if cut.word and cut.word ~= 'Tee' then label = label:gsub(' Tee$', ' ' .. cut.word) end
+        tees[i] = { label = label, colour = x.colour, owned = t.owned[item(t, i)] == true }
     end
-    SendNUIMessage({ shop = { open = true, style = t.style, tee = t.tee, tees = tees, price = t.price,
-                              cash = t.cash or false, status = status(t), index = t.tee, count = #tees } })
+    local n = #t.offered
+    SendNUIMessage({ shop = { open = true, style = t.style, tee = t.tee, tees = tees,
+                              price = (t.prices or {})[t.cut] or priceOf(t.style, t.cut),
+                              cash = t.cash or false, status = status(t), index = t.tee, count = #tees,
+                              title = cut.title or 'T-Shirts', cut = n > 1 and { index = t.cut, count = n,
+                              other = (CUTS[t.offered[(t.cutAt % n) + 1]] or {}).title } or false } })
 end
 
 -- ------------------------------------------------------------------ trying on
@@ -150,24 +167,35 @@ local function show(t, n)
     return true
 end
 
+-- the next cut of the design that is on (up / down)
+local function recut(t, step)
+    local n = #t.offered
+    if n < 2 then return end
+    local at = (t.cutAt - 1 + step) % n + 1
+    if not putOn(PlayerPedId(), t, t.tee, t.offered[at]) then return end
+    t.cutAt, t.cut = at, t.offered[at]
+    hud(t)
+end
+
 -- Enter: buy and wear what is not owned (the server's word first), wear what is, take off what is worn
 local function act(t)
     local ped = PlayerPedId()
-    if t.wearing == t.tee then
+    local id = item(t)
+    if t.wearing == id then
         -- off: back to what the player came in with - unless that is this very tee: then a bare top
         local back = same(t.before, wornNow(ped)) and BARE or t.before
         dress(ped, back)
         t.keep, t.wearing = back, nil
         worn(t, nil)
         hud(t)
-    elseif t.owned[t.tee] then
+    elseif t.owned[id] then
         if not putOn(ped, t, t.tee) then return end         -- (on again: it may just have been taken off)
-        t.keep, t.wearing = wornNow(ped), t.tee
-        worn(t, t.tee)
+        t.keep, t.wearing = wornNow(ped), id
+        worn(t, id)
         hud(t)
     elseif not t.busy then
         t.busy = GetGameTimer()
-        TriggerServerEvent('mzb_arena:shop:buy', t.style, t.tee)
+        TriggerServerEvent('mzb_arena:shop:buy', t.style, id)
     end
 end
 
@@ -183,6 +211,10 @@ local function frame(t)
         show(t, (t.tee - 2) % count + 1)
     elseif IsDisabledControlJustPressed(0, 175) then
         show(t, t.tee % count + 1)
+    elseif IsDisabledControlJustPressed(0, 172) then
+        recut(t, -1)
+    elseif IsDisabledControlJustPressed(0, 173) then
+        recut(t, 1)
     elseif IsDisabledControlJustPressed(0, 191) then
         act(t)
     elseif IsDisabledControlJustPressed(0, 177) or IsDisabledControlJustPressed(0, 200)
@@ -201,9 +233,16 @@ local function tryOn(style, hung)
     local gender = MODELS[GetEntityModel(ped)]
     if not gender then return notify('the arena\'s shirts fit the freemode characters only') end
     local before = wornNow(ped)
-    local t = { style = style, stand = stand, gender = gender, tee = h.tee, before = before, keep = before,
-                owned = {}, price = priceOf(style) }
-    if not putOn(ped, t, h.tee) then return notify('the arena\'s shirts are not installed on this server') end
+    local t = { style = style, stand = stand, gender = gender, tee = h.tee, cut = 1, cutAt = 1, before = before,
+                keep = before, owned = {}, price = priceOf(style), offered = {} }
+    -- which cuts this server's pack has (each is tried on the ped once: the last one tried is the tee itself)
+    for c = #CUTS, 1, -1 do
+        if putOn(ped, t, h.tee, c) then table.insert(t.offered, 1, c) end
+    end
+    if t.offered[1] ~= 1 then
+        dress(ped, before)
+        return notify('the arena\'s shirts are not installed on this server')
+    end
     if same(before, wornNow(ped)) then t.cameIn = h.tee end     -- (already in this one: "Wearing" once the server says it is owned)
     T = t
     ArenaMenu.close()
@@ -237,6 +276,7 @@ RegisterNetEvent('mzb_arena:shop:state', function(d)
     t.owned = {}
     for _, n in ipairs(type(d.owned) == 'table' and d.owned or {}) do t.owned[n] = true end
     t.cash, t.price = tonumber(d.cash), tonumber(d.price) or t.price
+    t.prices = type(d.prices) == 'table' and d.prices or nil
     if t.cameIn and t.owned[t.cameIn] and not t.wearing then t.wearing = t.cameIn end
     hud(t)
 end)
@@ -252,7 +292,7 @@ RegisterNetEvent('mzb_arena:shop:bought', function(d)
     end
     t.owned[d.tee] = true
     t.cash = tonumber(d.cash)
-    if t.tee == d.tee then                                 -- still looking at it: it stays on
+    if item(t) == d.tee then                               -- still looking at it: it stays on
         t.keep, t.wearing = wornNow(PlayerPedId()), d.tee
         worn(t, d.tee)
     end

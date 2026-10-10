@@ -539,6 +539,7 @@ Your character turns its back to the wall, the camera cuts to its front, and the
 |---|---|
 | **Left** / **Right** | show the stand's other tees (eight to a stand) |
 | **Enter** | buy and wear it; wear it if you own it; take it off if you are wearing it |
+| **Up** / **Down** | the same design as a T-shirt or as a tank top (when the stand's pack has both) |
 | **Backspace** / **Esc** | leave |
 
 The screen shows what a shop shows: the category top left, your cash top right (when the server has a framework to
@@ -924,6 +925,20 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.3.1**: what the first walk round 1.3.0 in game turned up.
+  - **Tank tops**: every tee at the merch stands also comes as a tank top. In the try-on, up and down switch
+    between the two cuts (`Config.MerchShop.cuts`: each cut has its own price and the arms that go with it). The
+    clothing pack has 22 tops a character now (11 tees, 11 tanks), 176 looks each way.
+  - **The city no longer vanishes through the lobby doors.** The four gateways' portals were set to close with
+    their doors, and the doors are glass: with them shut, nothing outside was drawn through the doorway (and
+    nothing inside, from the street).
+  - **The concourse's glass is clearer.** It was three times as opaque as the game's own door glass, so the sun's
+    patches and the mullions' shadows lay on it like shards.
+  - **Skate park**: the vert ramp is solid (one deck and its back wall could be walked through), and the sponsors'
+    boards on it are gone.
+  - The arenacross stand has real helmets on its table, not hollow masks.
+  - Updating from 1.3.0: stream files and the interior's definition changed (restart the server). In your own
+    `shared/config.lua`, `Config.MerchShop` gained `cuts`.
 - **1.3.0**: arenacross, races to join, a merch stand to shop at - and the truck show and the circuits done properly.
   - **Arenacross** (`/mzb motocross`): a 257 m dirt track on the bigger floor - a start gate, a triple, a
     tabletop, whoops, a double, a big table, rollers, bermed turns, a finish gantry - with ruts, bales, marker drums

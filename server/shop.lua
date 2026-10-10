@@ -14,15 +14,19 @@ local TEES = type(Config.MerchTees) == 'table' and Config.MerchTees or {}
 local MC = Config.Merch or {}
 local FREEMODE = { [GetHashKey('mp_m_freemode_01') & 0xFFFFFFFF] = true, [GetHashKey('mp_f_freemode_01') & 0xFFFFFFFF] = true }
 
-local owned = {}                 -- [src] = { key = the KVP's, set = { ['<style>:<tee>'] = true } }, read once per player
+-- the cuts a design comes in (Config.MerchShop.cuts): an item's number is its tee's plus the stand's count of tees
+-- for every cut before its own - 1..8 the tees, 9..16 the tank tops
+local CUTS = (type(SC.cuts) == 'table' and #SC.cuts > 0) and SC.cuts or { { id = 'tee', word = 'Tee', offset = 0 } }
+
+local owned = {}                 -- [src] = { key = the KVP's, set = { ['<style>:<item>'] = true } }, read once per player
 local throttled = MzbThrottle(500)
 
 local function styleNow()
     return (MC.styleOf or {})[GlobalState.mzbShow or Config.DefaultShow] or 'arena'
 end
 
-local function priceOf(style)
-    local p = type(SC.prices) == 'table' and SC.prices[style] or SC.price
+local function priceOf(style, cut)
+    local p = (CUTS[cut or 1] or {}).price or (type(SC.prices) == 'table' and SC.prices[style]) or SC.price
     return math.max(0, math.floor(tonumber(p) or 35))
 end
 
@@ -58,7 +62,7 @@ local function ownedOf(src, style)
     local out = {}
     local w = wardrobe(src)
     local stand = TEES[style]
-    for i = 1, (w and stand) and #stand.tees or 0 do
+    for i = 1, (w and stand) and #stand.tees * #CUTS or 0 do
         if w.set[style .. ':' .. i] then out[#out + 1] = i end
     end
     return out
@@ -79,8 +83,11 @@ end
 RegisterNetEvent('mzb_arena:shop:open', function(style)
     local src = source
     if type(style) ~= 'string' or not TEES[style] then return end
+    local prices = {}
+    for c = 1, #CUTS do prices[c] = priceOf(style, c) end
     TriggerClientEvent('mzb_arena:shop:state', src, { style = style, owned = ownedOf(src, style),
-                                                      cash = Bridge.money(src) or false, price = priceOf(style) })
+                                                      cash = Bridge.money(src) or false, price = priceOf(style),
+                                                      prices = prices })
 end)
 
 RegisterNetEvent('mzb_arena:shop:buy', function(style, tee)
@@ -91,8 +98,12 @@ RegisterNetEvent('mzb_arena:shop:buy', function(style, tee)
     end
     local stand = TEES[style]
     if SC.enabled == false or not stand or style ~= styleNow() then return no('the stand does not have that today') end
-    local t = stand.tees[tee]
+    local n = #stand.tees
+    local cut = (tee >= 1 and n > 0) and (tee - 1) // n + 1 or 0
+    local t = CUTS[cut] and stand.tees[(tee - 1) % n + 1]
     if not t then return no('the stand does not have that today') end
+    local label = t.label
+    if CUTS[cut].word and CUTS[cut].word ~= 'Tee' then label = label:gsub(' Tee$', ' ' .. CUTS[cut].word) end
     local near, ped = atStand(src, style, 8.0)
     if not near then return no('come to the merch stand') end
     if not FREEMODE[GetEntityModel(ped) & 0xFFFFFFFF] then return no('the arena\'s shirts fit the freemode characters only') end
@@ -100,8 +111,8 @@ RegisterNetEvent('mzb_arena:shop:buy', function(style, tee)
     if not w then return no('your licence could not be read') end
     local key = style .. ':' .. tee
     if w.set[key] then return no('you own that one already') end
-    local price = priceOf(style)
-    local paid, err = Bridge.pay(src, price, 'Maze Bank Arena merch: ' .. t.label)
+    local price = priceOf(style, cut)
+    local paid, err = Bridge.pay(src, price, 'Maze Bank Arena merch: ' .. label)
     if not paid then return no(err or 'the payment did not go through') end
     w.set[key] = true
     keep(w)

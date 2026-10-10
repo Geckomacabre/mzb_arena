@@ -1194,6 +1194,14 @@ Config.MerchShop = {
     -- only if the collection natives are missing on an old client build: the first of the pack's drawables in the
     -- model's own numbering (nil = assume the pack is the last one loaded)
     firstDrawable = { male = nil, female = nil },
+    -- the cuts a design comes in. A cut's drawable in the pack is the stand's own number (Config.MerchTees) plus
+    -- `offset`; `word` replaces "Tee" in the design's name; price and fit are the tee's unless given. Up / down in
+    -- the try-on switches cut. A cut the installed pack does not have is simply not offered.
+    cuts = {
+        { id = 'tee', title = 'T-Shirts', word = 'Tee', offset = 0 },
+        { id = 'tank', title = 'Tank Tops', word = 'Tank', offset = 11, price = 29,
+          fit = { male = { arms = 5, undershirt = 15 }, female = { arms = 11, undershirt = 3 } } },   -- (the game's own, as the tee's)
+    },
     reach = 1.7,                      -- how close to a hanging tee
     camera = { distance = 2.3, height = 0.35, fov = 38.0 },
     save = true,                      -- after a purchase / wear / remove, ask the server's clothing script to save the look
