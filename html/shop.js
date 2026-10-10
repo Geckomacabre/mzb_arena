@@ -38,6 +38,10 @@
     status.textContent = m.status || '';
     status.className = (m.status || '').toLowerCase().replace(/\s+/g, '-');
     $('#shop-show').textContent = `SHOW SHIRT (${m.index || m.tee}/${m.count || m.tees.length})`;
+    // the cut: the stand's designs come as tees and as tank tops when the server's pack has both
+    $('#shop-title').textContent = m.title || 'T-Shirts';
+    $('#shop-cut').classList.toggle('hidden', !m.cut);
+    if (m.cut) $('#shop-cut-text').textContent = `SHOW ${String(m.cut.other || 'OTHER CUT').toUpperCase()} (${m.cut.index}/${m.cut.count})`;
     $('#shop-action').textContent = ACTION[m.status] || ACTION['Not owned'];
     // the cash: there when the server has a framework to ask; it drops with a flash when something was bought
     const box = $('#shop-cash');
