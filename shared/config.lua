@@ -1178,7 +1178,8 @@ Config.Merch = {
 -- qb-target when the server runs one, else a prompt - and the camera cuts to the front of your character wearing it,
 -- the wall behind: the arrows show the stand's other tees, Enter buys and wears (wears one you own, takes off the one
 -- you wear), Backspace leaves. A tee you only tried goes back to what you had on.
--- The shirts are addon clothing for the two freemode characters (stream/clothes): the top (component 11), one
+-- The shirts are addon clothing for the two freemode characters - the optional resource mzb_arena_clothes, not
+-- this one (README.md, "The clothing pack"): the top (component 11), one
 -- drawable per stand, a texture per tee. What a player owns is kept by the server, per licence (the resource's KVP);
 -- the money is the bridge's (server/bridge.lua, see Config.Merch).
 Config.MerchShop = {
@@ -1187,6 +1188,12 @@ Config.MerchShop = {
     prices = {},
     component = 11,
     collection = { male = 'mp_m_mzbmerch', female = 'mp_f_mzbmerch' },
+    -- the resource that streams those collections. It is optional: where the shirts are not there, nothing is
+    -- offered at the tees on the walls. false = they come from somewhere else - merged into a clothing pack of
+    -- your own: then `collection` is that pack's, and `drawableOffset` the number of tops (jbib) in it before
+    -- the arena's first
+    pack = 'mzb_arena_clothes',
+    drawableOffset = { male = 0, female = 0 },
     -- what goes with a tee so the arms and the neck are right: what the game's own shop data puts with the two
     -- tees these are made from (his plain crew neck, her tuner tee). Not seen in game yet - if an arm or a neck
     -- shows through, these are the numbers to change

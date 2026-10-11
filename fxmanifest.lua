@@ -4,7 +4,7 @@ lua54 'yes'
 
 author 'gecko'
 description 'mzb_arena - the Maze Bank Arena with a full interior: seating bowl, street-level concourse (concessions, rest rooms, security, merch), event level (tunnel, backstage, locker rooms, production control room, loading dock behind working roller doors), switchable shows (wrestling, concert, MMA, hockey, basketball, tennis, and on a bigger floor monster trucks, arenacross, three kart circuits and a skate park), a synced light desk with a crowd, staff and press, a screen player, a music player and a followspot, fights in the ring and the cage, races on the tracks signed up for at an event desk, a merch stand with tees to try on and buy, and slippery ice'
-version '1.3.3'
+version '1.3.4'
 
 this_is_a_map 'yes'
 
@@ -20,11 +20,10 @@ data_file 'DLC_ITYP_REQUEST' 'stream/interior/mzb_arena.ytyp'
 data_file 'AUDIO_GAMEDATA' 'audio/mzb_arena_game.dat'
 -- the interior's own time cycle: no daylight / outdoor fog inside the closed rooms, none of the fog in the concourse
 data_file 'TIMECYCLEMOD_FILE' 'data/mzb_timecycle.xml'
--- the merch stand's tees as clothing for the two freemode characters (stream/clothes: jbib, a drawable a stand, a
--- texture a tee; client/shop.lua puts them on)
-data_file 'SHOP_PED_APPAREL_META_FILE' 'data/mp_m_freemode_01_mp_m_mzbmerch.meta'
-data_file 'SHOP_PED_APPAREL_META_FILE' 'data/mp_f_freemode_01_mp_f_mzbmerch.meta'
-files { 'data/mzb_timecycle.xml', 'data/mp_m_freemode_01_mp_m_mzbmerch.meta', 'data/mp_f_freemode_01_mp_f_mzbmerch.meta',
+-- (the merch stand's tees as clothing are NOT in this resource. A clothing collection takes one of the few places
+-- the game has for them on a freemode character, and a server that is out of places crashes its players when
+-- their character is made. They are the optional resource mzb_arena_clothes: README.md, "The clothing pack")
+files { 'data/mzb_timecycle.xml',
         'audio/mzb_arena_game.dat151.rel', 'html/index.html', 'html/style.css', 'html/app.js',
         'html/media.js', 'html/feed.js', 'html/music.js', 'html/follow.js', 'html/spot.js', 'html/crowd.css', 'html/crowd.js',
         'html/pyro.js', 'html/cars.js', 'html/fold.js', 'html/tabs.js', 'html/fights.css', 'html/fights.js', 'html/shop.css',

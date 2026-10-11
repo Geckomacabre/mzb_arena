@@ -7,6 +7,18 @@
 -- Config.MerchShop's and the money the bridge's (server/bridge.lua). Wearing a tee that is owned, and taking it
 -- off, cost nothing and are the player's own game's business.
 
+-- Up to 1.3.3 the shirts were streamed by this resource (stream/clothes). They are the optional resource
+-- mzb_arena_clothes now: a clothing collection takes one of the few places a freemode character has for them, and a
+-- server that is out of places crashes its players when their character is made. An update unzipped over the old
+-- folder leaves the old files streaming from here: say so
+if LoadResourceFile(GetCurrentResourceName(), 'stream/clothes/mp_m_freemode_01_mp_m_mzbmerch.ymt')
+   or LoadResourceFile(GetCurrentResourceName(), 'stream/clothes/mp_f_freemode_01_mp_f_mzbmerch.ymt') then
+    print('^3[mzb_arena] the folder stream/clothes is left over from a version before 1.3.4: delete it. The shirts '
+        .. 'are the optional resource mzb_arena_clothes now. Left here they still take a clothing place on every '
+        .. 'freemode character, and a server with none to spare crashes its players as they spawn '
+        .. '(README.md, "The clothing pack").^7')
+end
+
 local SC = Config.MerchShop or {}
 if SC.enabled == false then return end
 
