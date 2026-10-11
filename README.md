@@ -136,9 +136,12 @@ occluders that would hide the interior through the glass removed. If another res
 example `cfx-gabz-mapdata`), `ensure mzb_arena` **after** it. Otherwise the arena's interior can vanish when you look
 at it from outside. Our file keeps everything else in it as Rockstar shipped it.
 
-The resource also replaces a handful of vanilla `sp1_10` files (the painted fake interior, the glass panes in front of
-the gateway doors, the loading street's roller-door panels and their collision). Any other resource that replaces
-these exact files will conflict with it.
+The resource also replaces a handful of vanilla `sp1_10` files: the painted fake interior (blanked), the four
+pieces of the building's own window wall (`sp1_10_wind01` .. `04`: its glass, mullions and transoms are gone at
+concourse level, because the arena's own glazed wall stands just inside it; its kerb is rebuilt in to that glass
+and runs flush across the doors; a soffit and the concrete panels' inner faces close the rest), the loading
+street's roller-door panels, and their collision. Any other resource that replaces these exact files will
+conflict with it.
 
 `bob74_ipl` is fine: the arena removes Rockstar's Fame or Shame lobby IPL, which stood where the concourse is now.
 
@@ -968,6 +971,18 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.4.0**: one glazed wall instead of two, and the building's shell closed round the interior. Rockstar's own
+  window wall stood 0.3 - 1 m outside the arena's: doubled mullions, its dark glass and reflections over ours on
+  three sides, its kerb across the doors, and between the two walls a ring with no floor in it (10 cm wide at
+  the main doors, almost a metre on the long sides) and no head over it. Now the old wall's glass, mullions and
+  transoms are gone at concourse level all round; its stone piers stay. Its kerb is rebuilt as one piece - the
+  same face and height outside, its top running in to the arena's glass, flush across all four door groups - so
+  the ring has a floor; a soffit closes it above; and the four stretches where the wall is concrete panels,
+  which were modelled from outside only, have an inside face (one used to look straight through them from the
+  concourse). All of it is in the four replaced `sp1_10_wind` models - exterior geometry, in Rockstar's own
+  materials. From far off the game's low-detail model still shows the old dark glazing.
+  Updating from 1.3.4: stream files only (`stream/vanilla_edits`); restart the server. From 1.3.3 or older,
+  read 1.3.4 below first: delete `mzb_arena/stream/clothes`.
 - **1.3.4**: the shirts are a resource of their own, and optional. A clothing pack takes one of the few places
   the game has for them on each freemode character (about 6 on build 3407, fewer on newer builds). With the
   shirts inside `mzb_arena`, a server that was already out of places crashed every player as they spawned

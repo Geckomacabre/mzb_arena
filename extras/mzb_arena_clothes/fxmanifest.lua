@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'gecko'
 description 'mzb_arena_clothes - the Maze Bank Arena merch stands\' tees and tank tops as clothing for the two freemode characters. Optional, and not for every server: read README.md first'
-version '1.3.4'
+version '1.4.0'
 
 -- The shirts the merch stands of mzb_arena sell: 22 tops (jbib) for each freemode character - 11 tees and 11 tank
 -- tops, a drawable a stand, a texture a tee - in the collections mp_m_mzbmerch and mp_f_mzbmerch (stream/). mzb_arena
