@@ -9,6 +9,8 @@
 --     only, the keys are read here. On a server with vice_hud the HUD draws it instead - its shop panel, its
 --     prompts, its wallet - and the page stays shut ("the screen" below);
 --   * leaving: what you wear is what you kept - a tee you bought or put on - else what you came in with.
+-- The shirts themselves are the optional resource mzb_arena_clothes (a clothing collection for each freemode
+-- character): where it does not run, the tees on the walls are the stand's dressing and nothing here is offered.
 -- Only the freemode characters can wear them. The server decides every purchase; wearing what is owned and taking
 -- it off are this game's own business. After each, the look is saved through illenium-appearance when the server
 -- runs it (Config.MerchShop.save), and the client event mzb_arena:shop:worn (style, tee or false, drawable, texture)
@@ -83,7 +85,10 @@ end
 -- installed, or is one without that cut)
 local function putOn(ped, t, n, c)
     local cut = CUTS[c or t.cut] or CUTS[1]
-    local drawable, texture = (tonumber(t.stand.drawable) or 0) + (tonumber(cut.offset) or 0), n - 1
+    -- (Config.MerchShop.drawableOffset: where the arena's first top is in a collection the pack was merged into)
+    local drawable = (tonumber(t.stand.drawable) or 0) + (tonumber(cut.offset) or 0)
+                     + (tonumber((SC.drawableOffset or {})[t.gender]) or 0)
+    local texture = n - 1
     local pack = (SC.collection or {})[t.gender]
     if SetPedCollectionComponentVariation and pack then
         -- by the pack's name: the drawable is the pack's own number, wherever the game has put the pack
@@ -104,6 +109,18 @@ local function putOn(ped, t, n, c)
     if fit.arms then SetPedComponentVariation(ped, ARMS, fit.arms, 0, 0) end
     if fit.undershirt then SetPedComponentVariation(ped, UNDER, fit.undershirt, 0, 0) end
     return true
+end
+
+-- is the clothing pack on this server? It is a resource of its own (mzb_arena_clothes) and optional. Asked of the
+-- game where it can say - the collection, by its name - else of the pack's resource (Config.MerchShop.pack)
+local function packHere(ped, gender)
+    local pack = (SC.collection or {})[gender]
+    if IsPedCollectionComponentVariationValid and pack then
+        local first = tonumber((SC.drawableOffset or {})[gender]) or 0
+        return IsPedCollectionComponentVariationValid(ped, COMP, pack, first, 0) and true or false
+    end
+    if SC.pack == false then return true end
+    return started(SC.pack or 'mzb_arena_clothes')
 end
 
 local function same(a, b)
@@ -428,7 +445,14 @@ CreateThread(function()
     while true do
         local style = styleNow()
         local stand = SC.enabled ~= false and standOf(style)
-        atStand = stand and #(GetEntityCoords(PlayerPedId()) - centre(style, stand)) < NEAR or false
+        local ped = PlayerPedId()
+        atStand = stand and #(GetEntityCoords(ped) - centre(style, stand)) < NEAR or false
+        -- (without the clothing pack the tees on the walls are dressing: no dot, no prompt, no target. A character
+        -- that is not a freemode one is still told why when it tries)
+        if atStand then
+            local gender = MODELS[GetEntityModel(ped)]
+            if gender and not packHere(ped, gender) then atStand = false end
+        end
         local script = atStand and ((started('ox_target') and 'ox_target') or (started('qb-target') and 'qb-target'))
         local want = script and (script .. ':' .. style) or nil
         if want ~= zonesFor then

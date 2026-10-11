@@ -126,6 +126,11 @@ tried on and bought (see "Trying on and buying the tees").
    add_ace group.admin command.arena allow
    ```
 
+**The shirts are a separate, optional resource.** The merch stands' tees can be tried on, bought and worn only
+with the clothing pack, `mzb_arena_clothes` (a second zip on the release page). It is not part of `mzb_arena`
+because a server that already runs several clothing packs can crash every player by adding one more: read
+The clothing pack, below, before you `ensure` it. Updating from 1.3.0 - 1.3.3: delete `mzb_arena/stream/clothes`.
+
 **Other map packs.** This resource streams its own `sp1_occl_01.ymap`: Rockstar's occlusion for the area, with the
 occluders that would hide the interior through the glass removed. If another resource streams the same file (for
 example `cfx-gabz-mapdata`), `ensure mzb_arena` **after** it. Otherwise the arena's interior can vanish when you look
@@ -549,9 +554,11 @@ the ones you own ticked) and "Not owned" / "Owned" / "Wearing" - or "Not enough 
 Leaving, you wear what you kept: a tee you bought or put on, else what you came in with. One you only tried is off
 again.
 
-- **The shirts** are addon clothing for the two freemode characters, streamed by the resource (`stream/clothes`):
-  the top (component 11), one drawable per stand and a texture per tee, in the collections `mp_m_mzbmerch` and
-  `mp_f_mzbmerch` (`Config.MerchShop.collection`). Any other ped model is told the shirts do not fit it.
+- **The shirts** are addon clothing for the two freemode characters: the top (component 11), a drawable per stand
+  and cut and a texture per tee, in the collections `mp_m_mzbmerch` and `mp_f_mzbmerch`
+  (`Config.MerchShop.collection`). They are **not in this resource** but in the optional `mzb_arena_clothes` (The
+  clothing pack, below). Where the shirts are not there, the tees on the walls are the stand's dressing and
+  nothing is offered at them. Any other ped model is told the shirts do not fit it.
   `Config.MerchShop.fit` is the arms and the undershirt that go on with a tee (check them in game against your
   characters); `firstDrawable` is only for a client build without the collection natives.
 - **The price** is `Config.MerchShop.price` (35), or per stand with `prices = { monster = 40 }`; the money goes
@@ -574,6 +581,33 @@ again.
 - Which tees hang where, and what they are called, is `Config.MerchTees` in `shared/merch_tees.lua`, made with the
   stands (not edited by hand); the swatches are `html/img/tees/<style>.jpg`. `Config.MerchShop.reach` is how close
   you have to be to a tee, `camera` where the try-on camera stands.
+
+### The clothing pack (`mzb_arena_clothes`, optional)
+
+The shirts are 22 tops for each freemode character (11 tees and 11 tank tops, eight looks a top), 27 MB, in a
+resource of their own: `mzb_arena_clothes`, a second zip on the release page (`extras/mzb_arena_clothes` in the
+repository). It is separate, and optional, for one reason: **every clothing pack adds a metadata file (`.ymt`) to
+the freemode character it dresses, and the game has room for only a few of those.** How many depends on the game
+build. The community's measurements
+([docs.gta.clothing](https://docs.gta.clothing/game-mechanics/game-limits-and-crashes)), for each of the two
+characters: about 10 on build 3095, 8 on 3258, 6 on 3407, 5 on 3570, 4 on 3717 and 3 on 3889.
+
+One collection too many and **every player crashes as their character is made**: the client's log ends with
+`Error executing native 0x00a1cadd00108836` (that is `SetPlayerModel`) and a null pointer. The pack that goes over
+is not broken, and neither is the one before it: the server is out of places.
+
+- **Count before you add it.** In all your resources' `stream` folders, count the files named
+  `mp_m_freemode_01_<something>.ymt`, and the same for `mp_f_freemode_01_`. A plain `mp_m_freemode_01.ymt` replaces
+  the game's own and does not count; an `mp_creaturemetadata_<something>.ymt` counts for both characters. This pack
+  is one more for each.
+- **Room to spare:** put `mzb_arena_clothes` beside `mzb_arena` and `ensure mzb_arena_clothes`. Nothing else to set.
+- **No room:** leave it out - the arena, its stands and their seller work without it - or merge its files into a
+  clothing pack you already run (the tools that merge packs renumber the drawables). Then set
+  `Config.MerchShop.collection` to that pack's two collections, `drawableOffset` to the number of tops (jbib) that
+  come before the arena's first in each, and `pack = false`.
+- **Updating from 1.3.0 - 1.3.3:** those versions streamed the shirts from inside `mzb_arena`. Delete
+  `mzb_arena/stream/clothes` (or the whole `mzb_arena` folder before you copy the new one in): left there, the
+  files go on taking the place. The server's console says so at start when it finds them.
 
 ## Slippery ice
 
@@ -923,7 +957,8 @@ Take a line out of the list to remove a prop, or move it.
   afterwards, its command and who may run it. `Config.Races` (`shared/races.lua`): the tracks.
 - `Config.Merch`: the merch seller, which stand a show has (`styleOf`), and each stand's items and prices.
 - `Config.MerchShop`: the tees on the stand's walls: the price, the clothing collections, what goes on with a tee,
-  how close to stand, the try-on camera, whether the look is saved, and who draws the try-on (`hud`).
+  how close to stand, the try-on camera, whether the look is saved, who draws the try-on (`hud`), and where the
+  shirts come from (`pack`, `drawableOffset`: The clothing pack).
 
 ## Notes
 
@@ -933,6 +968,14 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.3.4**: the shirts are a resource of their own, and optional. A clothing pack takes one of the few places
+  the game has for them on each freemode character (about 6 on build 3407, fewer on newer builds). With the
+  shirts inside `mzb_arena`, a server that was already out of places crashed every player as they spawned
+  (`Error executing native 0x00a1cadd00108836`: `SetPlayerModel`). `mzb_arena` adds no clothing now; the shirts
+  are `mzb_arena_clothes` (The clothing pack), and the tees are offered only where they are installed.
+  `Config.MerchShop` gained `pack` and `drawableOffset`.
+  **Updating from 1.3.0 - 1.3.3: delete `mzb_arena/stream/clothes`** (or the whole folder before you copy the
+  new one in). Left there it still streams; the server's console warns when it finds it.
 - **1.3.3**: the try-on and the HUD's wallet. On a server with `vice_hud` the merch stand's try-on is drawn by
   the HUD itself - its shop panel, its prompts, its feed - and the only money on the screen is the HUD's own
   wallet; this resource's page no longer puts a second cash figure in the same corner (`Config.MerchShop.hud`,

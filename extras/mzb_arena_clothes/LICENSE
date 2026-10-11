@@ -1,0 +1,32 @@
+mzb_arena - Maze Bank Arena interior
+Copyright (c) 2026 Gecko (github.com/Geckomacabre). All rights reserved.
+
+This resource is free to use, but it is NOT open source. By downloading or using it you agree to these terms.
+
+YOU MAY
+  1. Run this resource, unmodified or modified for your own use, on your own FiveM servers, including servers that
+     accept donations or sell in-game perks, as long as this resource or any part of it is not what is being sold.
+  2. Change the configuration and scripts for use on your own servers.
+  3. Take and publish screenshots and videos of the resource in use, including monetized videos and streams.
+
+YOU MAY NOT
+  1. Sell, rent, license, or put behind a paywall, subscription, Patreon, Tebex package or any other payment this
+     resource or any part of it, modified or unmodified, alone or bundled with anything else.
+  2. Redistribute, re-upload or mirror this resource or any part of it, modified or unmodified, including in map
+     packs, server packs or "leaks". Link to the official repository instead:
+     https://github.com/Geckomacabre/mzb_arena
+  3. Reuse any part of this resource in another resource or project, free or paid. "Any part" includes, but is not
+     limited to, the models (.ydr), textures and images (.ytd, .png, .jpg), collision (.ybn), map and archetype files
+     (.ymap, .ytyp), the interior layout, the scripts (.lua, .js, .html, .css), the configuration and the
+     documentation, and anything converted, extracted, ported or derived from them.
+  4. Remove or change this license or the copyright notice, or claim this work as your own.
+  5. Escrow, obfuscate or encrypt this resource or any part of it to resell or redistribute it.
+
+Any permission not granted above is reserved by the author. Breaking these terms ends your right to use the
+resource. To ask for any other use, contact the author through the repository.
+
+Grand Theft Auto V and its brands, logos and base-game assets belong to Rockstar Games / Take-Two Interactive. This
+license covers only the author's own work and gives no rights to Rockstar's material.
+
+THE RESOURCE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. THE AUTHOR IS NOT LIABLE FOR ANY CLAIM, DAMAGE OR OTHER
+LIABILITY ARISING FROM ITS USE.
