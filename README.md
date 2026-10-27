@@ -1,5 +1,7 @@
 # mzb_arena: Maze Bank Arena full interior
 
+**Discord:** [discord.gg/C7gE5SHEzH](https://discord.gg/C7gE5SHEzH) - help, bug reports, requests and update news.
+
 A complete, walkable interior for the Maze Bank Arena (Del Perro / La Puerta), built inside the vanilla
 exterior with no changes to the outside. The entire building is open:
 
@@ -1256,6 +1258,11 @@ Take a line out of the list to remove a prop, or move it.
   Basketball is now the Los Santos Panic (purple and gold court with the team's crest) vs the Vice City Narcos, hockey
   the Los Santos Dust Devils vs the Los Santos Kings. The Arena War banners on the outside of the building
   (`xs_arena_banners_ipl`) are removed while the resource runs.
+
+## Discord
+
+Questions, bug reports (a screenshot and `/arenainfo` help most), requests for shows and props, and news of updates:
+**[discord.gg/C7gE5SHEzH](https://discord.gg/C7gE5SHEzH)**.
 
 ## License
 
