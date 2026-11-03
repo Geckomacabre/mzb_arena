@@ -199,7 +199,7 @@ local function curtainPiece(model, p, id, heading)
     FreezeEntityPosition(e, true)
     SetEntityRotation(e, 0.0, 0.0, heading, 2, false)
     SetEntityLodDist(e, 120)
-    ForceRoomForEntity(e, id, `bowl`)
+    MzbPutInRoom(e, id, `bowl`)
     return e
 end
 
@@ -327,9 +327,23 @@ end)
 -- shut leaf's heading, which side is inside the stall, its width): no collision - a body walking into it pushes it
 -- open ahead of it, in or out (it swings both ways: a ped cannot pull a handle), and its closer (a damped spring,
 -- Config.StallSwing) swings it shut behind them. Doors spawn within 45 m of the player and move within 20 m; the
--- Python twin (ar_stalls.push / step) runs the same maths.
-local stalls = {}                  -- index into Config.StallDoors -> { e, a, v }
+-- Python twin (ar_stalls.push / step) runs the same maths. The keypad doors off the offices (Config.SwingDoors) swing
+-- the same way, the game's own leaf in their doorway hidden.
+local stalls = {}                  -- index into swingers -> { e, a, v }
 local SW = Config.StallSwing
+local swingers = {}
+for _, d in ipairs(Config.StallDoors) do swingers[#swingers + 1] = d end
+for _, d in ipairs(Config.SwingDoors or {}) do swingers[#swingers + 1] = d end
+
+local function hideLeaves(on)
+    for _, d in ipairs(Config.SwingDoors or {}) do
+        if d.hide then
+            local x, y, z, h = d.x, d.y, d.z + (d.oz or 0.0), joaat(d.m)
+            if on then CreateModelHide(x, y, z, 0.3, h, true) else RemoveModelHide(x, y, z, 0.3, h, false) end
+        end
+    end
+end
+hideLeaves(true)
 
 local function deleteStalls()
     for _, st in pairs(stalls) do
@@ -344,12 +358,12 @@ end
 
 local function spawnStall(i, d, id)
     local h = loadModel(d.m)
-    local e = CreateObjectNoOffset(h, d.x, d.y, d.z, false, false, false)
+    local e = CreateObjectNoOffset(h, d.x, d.y, d.z + (d.oz or 0.0), false, false, false)
     SetEntityCollision(e, false, false)
     FreezeEntityPosition(e, true)
     SetEntityRotation(e, 0.0, 0.0, d.yaw, 2, false)
     SetEntityLodDist(e, 60)
-    ForceRoomForEntity(e, id, GetHashKey(d.room))
+    MzbPutInRoom(e, id, GetHashKey(d.room))
     SetModelAsNoLongerNeeded(h)
     stalls[i] = { e = e, a = 0.0, v = 0.0 }
 end
@@ -412,7 +426,7 @@ CreateThread(function()
         local id, ready = MzbInterior()
         local p = GetEntityCoords(PlayerPedId())
         if ready then
-            for i, d in ipairs(Config.StallDoors) do
+            for i, d in ipairs(swingers) do
                 local dist = #(p - vector3(d.x, d.y, d.z))
                 if dist < 45.0 and not stalls[i] then
                     spawnStall(i, d, id)
@@ -434,7 +448,7 @@ CreateThread(function()
         local me = GetEntityCoords(PlayerPedId())
         local near = {}
         for i, st in pairs(stalls) do
-            local d = Config.StallDoors[i]
+            local d = swingers[i]
             if math.abs(me.x - d.x) < 20.0 and math.abs(me.y - d.y) < 20.0 and math.abs(me.z - d.z) < 6.0 then
                 near[#near + 1] = i
             end
@@ -449,7 +463,7 @@ CreateThread(function()
             end
             local dt = math.min(GetFrameTime(), 0.05)
             for _, i in ipairs(near) do
-                stepStall(Config.StallDoors[i], stalls[i], peds, dt)
+                stepStall(swingers[i], stalls[i], peds, dt)
             end
             Wait(0)
         end
@@ -486,7 +500,7 @@ CreateThread(function()
                 FreezeEntityPosition(e, true)
                 SetEntityRotation(e, 0.0, 0.0, Config.Screens.heading, 2, false)
                 SetEntityLodDist(e, 500)
-                ForceRoomForEntity(e, id, `bowl`)
+                MzbPutInRoom(e, id, `bowl`)
                 SetModelAsNoLongerNeeded(h)
                 screen = { e = e, model = want }
             end
@@ -502,6 +516,7 @@ AddEventHandler('onResourceStop', function(res)
         deleteShutters()
         deleteCurtains()
         deleteStalls()
+        hideLeaves(false)
         deleteScreens()
     end
 end)

@@ -82,7 +82,7 @@ local function put(i, interior)
     SetEntityHeading(o, p[4])
     FreezeEntityPosition(o, true)
     SetEntityCollision(o, false, false)
-    if roomKey and interior ~= 0 then ForceRoomForEntity(o, interior, roomKey) end
+    if roomKey and interior ~= 0 then MzbPutInRoom(o, interior, roomKey) end
     pieces[i] = o
 end
 

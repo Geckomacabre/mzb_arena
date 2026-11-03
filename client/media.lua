@@ -371,7 +371,7 @@ end
 
 AddEventHandler('mzb_arena:lightsDesk', function()
     SendNUIMessage({ type = 'media', media = S, enabled = M.enabled == true, sets = setNames(), looks = M.looks or {},
-                     feed = FD.enabled ~= false })
+                     feed = FD.enabled ~= false, sound = M.sound or 'speakers' })
 end)
 
 RegisterNUICallback('media', function(data, cb)

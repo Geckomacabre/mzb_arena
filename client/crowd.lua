@@ -145,7 +145,7 @@ local function buildSlots(show)
     -- and the rows the show keeps closed (Config.Crowd.ClosedDepth: the truck show's tarped rows)
     local frontDepth = CC.FrontDepth or 6.2
     local folded = showHas(show, CC.FrontStowedSet) and frontDepth or 0.0
-    local closed = tonumber((CC.ClosedDepth or {})[show]) or 0.0
+    local closed = tonumber(MzbShowAs(CC.ClosedDepth, show)) or 0.0
     local function open(s)
         local d = s.d or math.huge
         return d >= closed and (s[5] ~= 'l' or d >= folded)
@@ -163,7 +163,7 @@ local function buildSlots(show)
         if s[5] == 'l' then there = seated or (back and (s.d or math.huge) >= frontDepth) else there = not masked end
         if there and open(s) then out[#out + 1] = s end
     end
-    for _, s in ipairs((S.floor or {})[show] or {}) do out[#out + 1] = prepare(s) end
+    for _, s in ipairs(MzbShowAs(S.floor, show) or {}) do out[#out + 1] = prepare(s) end
     table.sort(out, function(a, b) return a.key > b.key end)
     return out
 end
@@ -192,7 +192,7 @@ local function makePed(model, x, y, z, h, interior, room)
     FreezeEntityPosition(ped, true)
     if not CC.Collision then SetEntityCollision(ped, false, false) end
     room = room or roomKey
-    if room and interior ~= 0 then ForceRoomForEntity(ped, interior, room) end
+    if room and interior ~= 0 then MzbPutInRoom(ped, interior, room) end
     return ped
 end
 
@@ -333,7 +333,7 @@ local function standProp(s, st, interior, room)
     SetEntityHeading(o, (s[4] + (st[4] or 0.0)) % 360.0)
     FreezeEntityPosition(o, true)
     room = room or roomKey
-    if room and interior ~= 0 then ForceRoomForEntity(o, interior, room) end
+    if room and interior ~= 0 then MzbPutInRoom(o, interior, room) end
     return o
 end
 
@@ -523,7 +523,7 @@ CreateThread(function()
         if present and show ~= slotShow then
             deleteAll()
             slots, slotShow, dirty = buildSlots(show), show, true
-            staffSlots = (Config.CrowdStaff or {})[show] or {}
+            staffSlots = MzbShowAs(Config.CrowdStaff, show) or {}
         end
         if not present or #slots == 0 then
             if next(crowd) or next(staff) or next(con) then deleteAll() end

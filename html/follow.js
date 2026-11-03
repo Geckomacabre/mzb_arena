@@ -5,6 +5,8 @@
 //     at the tempo they keep
 //   * the colours: the picture of the video the sound comes from (a YouTube track, or the screens' video while its
 //     sound comes from the speakers), looked at five times a second for its two or three main colours
+//   * the picture's flashes and brightness, 25 times a second: a strobe or a cut to bright in the video flashes the
+//     rig, a dark scene dims it (1.5.0)
 // The game is told ten times a second and at every hit (lightsFollow). A file has no picture and a pause no beat:
 // the desk's own colours and speed stay for whatever is not there.
 (() => {
@@ -77,6 +79,31 @@
     return me;
   }
 
+  // ---------------------------------------------------------------- the picture's flashes
+  // push(luma, t): the picture's mean brightness (0..1) at t ms, 25 times a second. Answers { flash, bright }: flash
+  // when the picture jumps well over what it has been doing for the last half second (a strobe in the video, a cut
+  // from dark to bright, a white frame), bright = how bright it is against the brightest of the last while (0..1), so
+  // a dark scene dims the rig and a bright one lifts it.
+  function pictureTracker() {
+    const hist = [];
+    let top = 0.05, lastFlash = -1e9, lastT = null;
+    function push(luma, t) {
+      const dt = lastT === null ? 0 : Math.max(0, Math.min(0.5, (t - lastT) / 1000));
+      lastT = t;
+      top = Math.max(luma, top * Math.pow(0.9, dt), 0.05);
+      let flash = false;
+      if (hist.length >= 6) {
+        let m = 0; for (const e of hist) m += e; m /= hist.length;
+        // (and up from the look before: a picture that stays bright after a cut is one flash, not one a look)
+        if (luma > m + 0.12 && luma > m * 1.45 && luma > 0.22 && luma > hist[hist.length - 1] + 0.1 &&
+            t - lastFlash > 160) { flash = true; lastFlash = t; }
+      }
+      hist.push(luma); if (hist.length > 12) hist.shift();
+      return { flash, bright: Math.max(0, Math.min(1, luma / top)) };
+    }
+    return { push };
+  }
+
   // ---------------------------------------------------------------- the picture's colours
   // rgba: the picture, small (RGBA bytes). Answers its main colours as stage light (full, saturated; up to max of
   // them, at least 60 degrees of hue apart), [[255, 255, 255]] for a bright picture without colour, null for a dark
@@ -137,7 +164,7 @@
     return out;
   }
 
-  if (typeof module !== 'undefined' && module.exports) { module.exports = { beatTracker, palette, blend }; return; }
+  if (typeof module !== 'undefined' && module.exports) { module.exports = { beatTracker, pictureTracker, palette, blend }; return; }
 
   // ---------------------------------------------------------------- the page
   const res = typeof GetParentResourceName === 'function' ? GetParentResourceName() : 'mzb_arena';
@@ -153,6 +180,8 @@
   let want = null;          // what the game asked for: { tempo, colour, bpm, config }
   let chain = null;         // the analysers on the music player's graph
   let tracker = null, rev = null, slots = [], picture = 'none', ticks = 0, timer = null, heard = false;
+  let pics = null, seen = null;   // the picture's flashes, and what it last said ({ flash, bright })
+  let section = null;             // (Auto) where the track is, as the game reckons it
 
   const meanSquare = (d) => { let s = 0; for (let i = 0; i < d.length; i++) s += d[i] * d[i]; return s / d.length; };
 
@@ -167,16 +196,23 @@
     return chain;
   }
 
-  function look(video) {
+  // the picture: its brightness every look (25 times a second, for the flashes), its colours every fifth
+  function look(video, colours) {
     if (picture === 'blocked') return;
-    if (!video || !video.videoWidth) { picture = 'none'; slots = []; return; }
+    if (!video || !video.videoWidth) { picture = 'none'; slots = []; seen = null; return; }
     try {
       c2d.drawImage(video, 0, 0, W, H);
-      const p = palette(c2d.getImageData(0, 0, W, H).data, (want.config && want.config.colours) || 3);
-      if (p) slots = blend(slots, p, 0.5);
+      const px = c2d.getImageData(0, 0, W, H).data;
+      let l = 0;
+      for (let i = 0; i < px.length; i += 4) l += 0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2];
+      seen = pics.push(l / (255 * W * H), performance.now());
+      if (colours) {
+        const p = palette(px, (want.config && want.config.colours) || 3);
+        if (p) slots = blend(slots, p, 0.5);
+      }
       picture = 'ok';
     } catch (e) {                       // a browser that will not hand over another site's picture
-      picture = 'blocked'; slots = [];
+      picture = 'blocked'; slots = []; seen = null;
     }
   }
 
@@ -184,20 +220,24 @@
     const tap = window.mzbMusicTap && window.mzbMusicTap();
     if (!tap || !tap.playing) { heard = false; return; }
     if (tap.rev !== rev || !tracker) {                       // another track: count and colours start again
-      rev = tap.rev; slots = []; picture = 'none'; ticks = 0;
+      rev = tap.rev; slots = []; picture = 'none'; ticks = 0; seen = null;
       tracker = beatTracker({ bpm: want.bpm, minBpm: want.config && want.config.minBpm });
+      pics = pictureTracker();
     }
     const c = attach(tap);
     c.aLow.getFloatTimeDomainData(bufL); c.aAll.getFloatTimeDomainData(bufA);
     const r = tracker.push(meanSquare(bufL), meanSquare(bufA), performance.now());
     heard = true;
     ticks++;
-    if (want.colour && ticks % 10 === 1) look(tap.video);
-    if (r.kick || ticks % 5 === 0) {
+    if (want.colour && ticks % 2 === 1) look(tap.video, ticks % 10 === 1);
+    const flash = !!(seen && seen.flash);
+    if (r.kick || flash || ticks % 5 === 0) {
       nui('lightsFollow', { beat: Math.round(tracker.beat * 1000) / 1000, bpm: Math.round(tracker.bpm * 10) / 10, kick: r.kick,
         level: Math.round(tracker.level * 100) / 100,
-        colors: want.colour && slots.length ? slots.map((s) => s.map((v) => Math.round(v))) : null });
+        colors: want.colour && slots.length ? slots.map((s) => s.map((v) => Math.round(v))) : null,
+        flash, bright: want.colour && seen ? Math.round(seen.bright * 100) / 100 : null });
     }
+    if (seen) seen.flash = false;       // told once
   }
 
   // the desk's line under the buttons: what is being followed right now
@@ -208,6 +248,7 @@
     if (!heard || !tracker) { n.textContent = 'no track playing: the desk\'s speed and colours'; return; }
     const parts = [];
     if (want.tempo) parts.push(tracker.found ? Math.round(tracker.bpm) + ' bpm' : 'finding the beat');
+    if (want.auto && section) parts.push('auto: ' + ({ calm: 'calm', groove: 'groove', build: 'build-up', drop: 'the drop' }[section] || section));
     if (want.colour) parts.push(picture === 'ok' ? '' : picture === 'blocked' ? 'the picture cannot be read here: the desk\'s colours' : 'no picture: the desk\'s colours');
     n.textContent = parts.filter(Boolean).join(' · ');
     if (want.colour && picture === 'ok') {
@@ -219,9 +260,13 @@
     }
   }
   setInterval(readout, 500);
+  // (1.5.0) the desk's screen (html/app.js): the music's tempo and beat, while the lights follow its tempo and have it
+  window.mzbFollowNow = () => (want && want.on && want.tempo && heard && tracker && tracker.found
+    ? { bpm: tracker.bpm, beat: tracker.beat } : null);
 
   window.addEventListener('message', (e) => {
     const m = e.data || {};
+    if (m.type === 'followSection') { section = m.section; readout(); return; }
     if (m.type !== 'follow') return;
     want = m;
     if (m.on && !timer) { tracker = null; rev = null; timer = setInterval(step, STEP); }

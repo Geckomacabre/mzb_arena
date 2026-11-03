@@ -1,14 +1,19 @@
 -- mzb_arena - server: the cars a show has standing on its floor (Config.ShowCars: the truck show's six, side by side
 -- on the deck between the jump's lips, there to be driven over).
---   GlobalState.mzbCars = { show = '<the show they stand for>' (nil: none are down), n = how many are down }
+--   GlobalState.mzbCars = { show = '<the show they stand for>' (nil: none are down), n = how many are down,
+--                           ids = their network ids (1.5.0: client/cars.lua) }
 -- They are the game's own vehicles, made here (CreateVehicleServerSetter: OneSync), so every player sees the same
 -- cars in the same state, wrecked or not. This script keeps their handles and takes them away again: when the show
--- changes, when the resource stops, and before fresh ones are put down.
+-- changes, when the resource stops, and before fresh ones are put down. Nothing puts them right in between: they stay
+-- wrecked until staff reset them.
 --   /arenacars            how many are down
 --   /arenacars reset      take them away and put fresh ones down (after the trucks have flattened them)
 --   /arenacars clear      take them away (they come back with reset, or the next time the show comes up)
--- Who may: Config.CarsAccess (an ACE; nil = the light desk's, false = anyone). The desk's Cars buttons (Show tab) and
--- the exports land in the same two functions.
+-- Who may: Config.CarsAccess (an ACE; nil = the light desk's, false = anyone). The desk's CARS keys (the CROWD page),
+-- the /arena menu's Reset the cars (server/main.lua) and the exports land in the same two functions.
+-- (1.5.0) A car is wrecked in the game that owns it - the others are sent where it is and six rough dents, not its
+-- shape - so a driver at the cars asks to own the ones near them (client/cars.lua); each car lets such a request
+-- through whatever the server's sv_filterRequestControl is.
 
 local CARS = type(Config.ShowCars) == 'table' and Config.ShowCars or {}
 local LOCKED = 2                 -- the game's door lock state for "locked": nobody gets in
@@ -31,10 +36,12 @@ local function show() return GlobalState.mzbShow or Config.DefaultShow end
 
 local published = nil
 local function publish()
-    local key = tostring(carsFor) .. '/' .. #cars
+    local ids = {}
+    for _, c in ipairs(cars) do ids[#ids + 1] = c.net end
+    local key = tostring(carsFor) .. '/' .. #cars .. '/' .. table.concat(ids, ',')
     if key == published then return end
     published = key
-    GlobalState.mzbCars = { show = carsFor, n = #cars }
+    GlobalState.mzbCars = { show = carsFor, n = #cars, ids = ids }
 end
 
 local function remove()
@@ -84,7 +91,10 @@ local function put(name, c)
         if veh and veh ~= 0 then
             -- kept when the last player near them walks away: they go with the show, not with whoever was there
             SetEntityOrphanMode(veh, 2)
-            cars[#cars + 1] = { veh = veh, model = model, made = GetGameTimer() }
+            -- (1.5.0) a driver at the cars may ask to own one, whatever sv_filterRequestControl says (client/cars.lua)
+            pcall(SetEntityIgnoreRequestControlFilter, veh, true)
+            local okNet, net = pcall(NetworkGetNetworkIdFromEntity, veh)
+            cars[#cars + 1] = { veh = veh, model = model, made = GetGameTimer(), net = okNet and net or nil }
         end
     end
     carsFor, lastPut = name, GetGameTimer()
@@ -184,15 +194,20 @@ RegisterCommand(Config.CarsCommand or 'arenacars', function(src, args)
     MzbReply(src, 'cars', msg)
 end, false)
 
--- the desk's buttons
+-- a press of the desk's CARS keys or of the /arena menu's Reset the cars (server/main.lua): who may, then the same
+-- two functions as /arenacars. quiet: a refusal goes unanswered (the desk's: only staff have the desk open)
 local throttled = MzbThrottle(500)
-RegisterNetEvent('mzb_arena:cars', function(action)
-    local src = source
-    if throttled(src) or (action ~= 'reset' and action ~= 'clear') or not allowed(src) then return end
+function MzbCarsAction(src, action, quiet)
+    if throttled(src) or (action ~= 'reset' and action ~= 'clear') then return end
+    if not allowed(src) then
+        if not quiet then MzbReply(src, 'cars', 'you are not allowed to run the arena\'s cars') end
+        return
+    end
     local _, msg
     if action == 'reset' then _, msg = reset() else _, msg = clear() end
     MzbReply(src, 'cars', msg)
-end)
+end
+RegisterNetEvent('mzb_arena:cars', function(action) MzbCarsAction(source, action, true) end)
 
 -- other resources: a show script that wants the cars back between two runs
 exports('ResetCars', function() return reset() end)

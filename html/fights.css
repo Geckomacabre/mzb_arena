@@ -28,13 +28,6 @@
 #fh-next { margin: 0 auto; width: max-content; max-width: 100%; font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
   color: #e8eaf0; background: rgba(12, 13, 17, 0.75); border: 1px solid #2a2d38; border-radius: 14px; padding: 5px 14px; }
 
-/* the desk's Fights section */
-#fights .fight-pick { align-items: center; }
-#fights .vs { color: var(--muted); font-size: 12px; font-weight: 800; }
-#fights .row .big { flex: 1; }
-#fight-when button { font-size: 12px; }
-#fight-card { margin: 8px 0 6px; padding-left: 20px; font-size: 12px; color: var(--text); }
-#fight-card:empty { display: none; }
+/* the desk's Fights page: its keys, its fields and the card's small screen are the desk's own (style.css) */
 #fight-card li { padding: 2px 0; }
-#fight-now { text-transform: none; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  display: inline-block; vertical-align: bottom; }
+#fight-clear { width: 100%; }

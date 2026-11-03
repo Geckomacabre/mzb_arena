@@ -88,7 +88,7 @@ local function spawn(p)
     FreezeEntityPosition(ped, true)
     if p.room then                                         -- (a ped the game does not find the room of stays unseen)
         local id = MzbInterior()
-        if id ~= 0 then ForceRoomForEntity(ped, id, GetHashKey(p.room)) end
+        if id ~= 0 then MzbPutInRoom(ped, id, GetHashKey(p.room)) end
     end
     if p.scenario then TaskStartScenarioInPlace(ped, p.scenario, 0, true) end
     p.ped = ped

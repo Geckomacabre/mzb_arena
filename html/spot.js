@@ -15,6 +15,10 @@
     if (!spot) return;
     $('#spot-power').classList.toggle('on', !!spot.on);
     $('#spot-state').textContent = spot.on ? 'ON' : 'OFF';
+    const lamp = $('#groups [data-grp="spot"]');                // (1.5.0) its green dot on the fixture keys
+    if (lamp) lamp.classList.toggle('lit', !!spot.on);
+    const key = $('#fixtures [data-fix="spot"]');                // (1.5.0) and its ON key in LIGHTS' ZONES
+    if (key) key.classList.toggle('on', !!spot.on);
     const who = players.find((p) => p.id === spot.target);
     $('#spot-now').textContent = !spot.on ? 'off'
       : spot.aim === 'player' ? 'following ' + (who ? who.name : '#' + spot.target) : 'aimed by hand';
@@ -46,6 +50,7 @@
   setInterval(refreshPlayers, 2000);
 
   $('#spot-power').onclick = () => send({ on: !(spot && spot.on) });
+  if ($('#fixtures [data-fix="spot"]')) $('#fixtures [data-fix="spot"]').onclick = $('#spot-power').onclick;
   $('#spot-target').onchange = (e) => { if (e.target.value) send({ on: true, aim: 'player', target: +e.target.value }); };
   $('#spot-look').onclick = () => nui('spot', { action: 'look' }).catch(() => {});
   $('#spot-free').onclick = () => nui('spot', { action: 'free' }).catch(() => {});

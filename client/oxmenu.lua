@@ -1,7 +1,8 @@
 -- mzb_arena - client: the arena's menu and notifications through ox_lib, when the server runs it (Config.OxLib).
 -- /arena or /mzb with nothing after it: the server sends mzb_arena:menu and this draws an ox_lib context menu - the
--- shows (the one that is up is marked), the loading dock's doors, the light desk. A pick goes back to the server as
--- mzb_arena:menuPick, which checks the staff ACE itself: the menu decides nothing.
+-- shows (the one that is up is marked), Reset the cars while the show has some (1.5.0), the loading dock's doors, the
+-- light desk. A pick goes back to the server as mzb_arena:menuPick, which checks the staff ACE itself: the menu
+-- decides nothing.
 -- ox_lib is reached through its exports, not @ox_lib/init.lua, so the resource starts without it.
 
 local function oxOn()
@@ -32,6 +33,15 @@ RegisterNetEvent('mzb_arena:menu', function(d)
         shows[#shows + 1] = { title = label, icon = icon, disabled = up,
             description = up and 'The arena is set up for this now' or 'Set the arena up for ' .. label:lower(),
             serverEvent = 'mzb_arena:menuPick', args = { kind = 'show', name = name } }
+    end
+    -- (1.5.0) the show's cars (Config.ShowCars: the truck show's) back as new, while the show that is up has them
+    local up = d.show or Config.DefaultShow
+    if MzbShowHasCars and MzbShowHasCars(up) then
+        local st = GlobalState.mzbCars or {}
+        local n = st.show == up and tonumber(st.n) or 0
+        shows[#shows + 1] = { title = 'Reset the cars', icon = 'car-burst',
+            description = n > 0 and ('The %d on the floor taken away, fresh ones put down'):format(n) or 'Fresh cars put down',
+            serverEvent = 'mzb_arena:menuPick', args = { kind = 'cars', action = 'reset' } }
     end
     shows[#shows + 1] = { title = 'Loading dock doors', icon = 'warehouse', menu = 'mzb_arena_dock', arrow = true,
         description = 'The three roller doors on the loading street' }

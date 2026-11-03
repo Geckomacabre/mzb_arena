@@ -45,7 +45,7 @@ local function put(p, interior)
     if p.ground then PlaceObjectOnGroundProperly(o) end
     FreezeEntityPosition(o, true)
     local room = p.room or defaultRoom
-    if room and interior ~= 0 then ForceRoomForEntity(o, interior, GetHashKey(room)) end
+    if room and interior ~= 0 then MzbPutInRoom(o, interior, GetHashKey(room)) end
     made[#made + 1] = o
 end
 

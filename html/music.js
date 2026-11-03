@@ -76,7 +76,7 @@
     // balance), then a limiter that only works on the peaks a loud track would otherwise clip
     const boost = ctx.createGain(), limit = ctx.createDynamicsCompressor();
     boost.gain.value = boostOf();
-    limit.threshold.value = -4; limit.knee.value = 3; limit.ratio.value = 20;
+    limit.threshold.value = -1.5; limit.knee.value = 2; limit.ratio.value = 20;
     limit.attack.value = 0.002; limit.release.value = 0.12;
     zone.connect(master); own.connect(master); master.connect(boost); boost.connect(limit); limit.connect(ctx.destination);
     g = { mono, meter, house, own, zone, master, boost, walls, dry, wet, echoOut, sp: [] };
@@ -426,7 +426,8 @@
     if (m.type === 'musicDesk') {
       if (m.music) desk = m.music;
       if (m.mine !== undefined) mine = m.mine;
-      if (m.enabled !== undefined) { $('#music').classList.toggle('hidden', !m.enabled); $('#q-mus').classList.toggle('hidden', !m.enabled); }
+      if (m.enabled !== undefined) { $('#music').classList.toggle('hidden', !m.enabled); $('#q-mus').classList.toggle('hidden', !m.enabled);
+        ['#q-mus-keys', '#strip-master'].forEach((s) => $(s).classList.toggle('hidden', !m.enabled)); }
       renderDesk();
       return;
     }

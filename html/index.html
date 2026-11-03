@@ -9,265 +9,483 @@
 <link rel="stylesheet" href="shop.css">
 </head>
 <body>
+<!-- (1.5.0) the desk, drawn as a piece of show equipment: a badge strip, an amber screen (the look, the tempo, what is
+     on the screens and in the speakers, and a line that says what the control under the pointer does), page keys,
+     rubber keys with LED windows, tape labels on the playbacks, and a fader wing - LIGHTS with BLACKOUT, SPEED with
+     TAP, HAZE, FOG with BURST, MASTER (the music's volume) with MUTE, and GO -->
 <div id="desk" class="hidden" role="dialog" aria-label="Arena light desk">
   <div id="deskhead">
-    <header>
-      <div class="brand">
-        <span class="dot" id="live-dot"></span>
-        <div>
-          <h1>LIGHT DESK</h1>
-          <p>Maze Bank Arena &middot; <span id="show-name">wrestling</span></p>
+    <div class="badge">
+      <span class="led" id="live-dot" title="SHOW - lit while the show lights are on"></span>
+      <b class="brand">MAZE BANK ARENA</b>
+      <span class="model">SHOW CONTROL&ensp;SC-7</span>
+      <button class="exit" id="close" title="EXIT - close the desk (Esc)">EXIT</button>
+    </div>
+    <div class="headmain">
+      <div class="bezel">
+        <div class="screen" id="lcd" title="The screen - the look on now, the tempo, the sound-to-light mode, what is on the screens and in the speakers">
+          <div class="ln"><b id="show-name">wrestling</b><span class="lbl">LOOK</span><b class="look" id="lcd-look">-</b><span class="rt"><b id="lcd-bpm">120</b><span class="lbl">BPM</span><b id="lcd-sync">OFF</b></span></div>
+          <div class="ln" id="q-scr"><span class="lbl">SCREENS</span><span class="v" id="q-scr-now">off</span></div>
+          <div class="ln" id="q-mus"><span class="lbl">MUSIC</span><span class="v" id="q-mus-now">off</span></div>
+          <div class="ln help" id="help"><span id="help-text"></span></div>
         </div>
       </div>
-      <button class="close" id="close" title="Close (Esc)">&times;</button>
-    </header>
-    <section class="row top">
-      <button class="big toggle" id="power">SHOW LIGHTS <b id="power-state">OFF</b></button>
-      <button class="big toggle" id="ring" title="The washes over the ring / cage / stage, white, on their own aim">RING LIGHTS <b id="ring-state">OFF</b></button>
-      <button class="big danger" data-preset="blackout">BLACKOUT</button>
-    </section>
-    <div id="nowbar">
-      <div class="now" id="q-scr" title="The screens: what is on, and the way out">
-        <b>SCREENS</b><span id="q-scr-now">off</span>
-        <button class="mini" id="q-scr-fade">Fade</button><button class="mini" id="q-scr-off">Off</button>
-      </div>
-      <div class="now" id="q-mus" title="The music: what is on, and the way out">
-        <b>MUSIC</b><span id="q-mus-now">off</span>
-        <button class="mini" id="q-mus-fade">Fade</button><button class="mini" id="q-mus-stop">Stop</button>
+      <div class="soft">
+        <div class="softrow" id="q-scr-keys"><span class="silk">SCREENS</span>
+          <button id="q-scr-fade" title="SCREENS FADE - the picture fades to black, then off">FADE</button>
+          <button id="q-scr-off" title="SCREENS OFF - the screens go dark">OFF</button></div>
+        <div class="softrow" id="q-mus-keys"><span class="silk">MUSIC</span>
+          <button id="q-mus-fade" title="MUSIC FADE - the music fades out, then stops">FADE</button>
+          <button id="q-mus-stop" title="MUSIC STOP - the music stops">STOP</button></div>
       </div>
     </div>
     <nav id="tabs">
-      <button data-tab="show" title="The looks, the pyro, the crowd (key 1)">Show</button>
-      <button data-tab="lights" title="The rig: effect, movement, colours, aim, the house, the followspot (key 2)">Lights</button>
-      <button data-tab="media" title="The screens and the music (key 3)">Screens &amp; music</button>
-      <button data-tab="fights" title="The fight card (key 4)">Fights</button>
+      <button data-tab="lights" title="LIGHTS - the looks, RANDOM, the zones (each group of lights on / off, where the beams point), sound to light, one colour for every light (key 1)">LIGHTS</button>
+      <button data-tab="fx" title="PYRO / FOG - the pyro with its ARM key, the haze and the fog machines (key 2)">PYRO / FOG</button>
+      <button data-tab="media" title="MEDIA - what plays on the screens and from the speakers (key 3)">MEDIA</button>
+      <button data-tab="crowd" title="CROWD - the crowd, the show's cars (key 4)">CROWD</button>
+      <button data-tab="fights" title="FIGHTS - the fight card (key 5)">FIGHTS</button>
+      <button data-tab="cues" title="CUES - the show's cue list; GO fires the next (key 6)">CUES</button>
+      <button data-tab="advanced" title="ADVANCED - each group of lights on its own (key 7)">ADVANCED</button>
     </nav>
   </div>
 
-  <div class="pane" data-pane="show">
-    <section>
-      <h2>Presets</h2>
-      <div class="grid presets" id="presets"></div>
+  <div id="panes">
+  <!-- LIGHTS: the simple desk -->
+  <div class="pane" data-pane="lights">
+    <section class="mod" id="looks">
+      <h2>PLAYBACK <small id="presets-kind"></small></h2>
+      <div class="pbgrid" id="presets"></div>
+      <div class="pbgrid more hidden" id="presets-more"></div>
+      <div class="keys pbfoot">
+        <button class="rnd" id="random" title="RANDOM - a new look on every light at once (numpad *)">RANDOM</button>
+        <button id="presets-all" title="ALL LOOKS - every look the desk has, for any show">ALL LOOKS</button>
+      </div>
     </section>
-    <section id="pyro" class="ext hidden">
-      <h2>Pyro <small id="pyro-now"></small></h2>
-      <div class="row pyro-opts">
-        <div class="seg" id="pyro-size" title="How big the next cue goes off">
-          <button data-size="small">Small</button>
-          <button data-size="normal" class="active">Normal</button>
-          <button data-size="big">Big</button>
+    <section class="mod" id="zones-sec">
+      <h2>ZONES</h2>
+      <div class="zrow">
+        <span class="silk zlab">ON</span>
+        <div class="keys" id="fixtures" title="ON - each group of lights on or off. The LED: on">
+          <button data-fix="beams" title="BEAMS - the moving heads, on / off (numpad .)">BEAMS</button>
+          <button data-fix="ring" title="RING - the washes over the ring, the cage or the stage, on / off">RING</button>
+          <button data-fix="bars" title="BARS - the LED bars round the bowl and on the stage, on / off">BARS</button>
+          <button data-fix="lasers" title="LASERS - the stage's lasers, on / off">LASERS</button>
+          <button data-fix="house" title="HOUSE - the arena's own lights in the roof: on as the show has them / off">HOUSE</button>
+          <button data-fix="spot" title="SPOT - the followspot, on / off (who it follows: ADVANCED, SPOT)">SPOT</button>
         </div>
-        <div class="swatches" id="pyro-colour" title="The colour of the next cue, where its effect takes one (sparks, comets, bursts, smoke)"></div>
+      </div>
+      <div class="zrow">
+        <span class="silk zlab">AIM</span>
+        <div class="keys" id="zones" title="AIM - where the beams point. Two or three lit and the lights take turns between them">
+          <button data-zone="floor" title="FLOOR - the beams on the event floor">FLOOR</button>
+          <button data-zone="stage" title="STAGE - the beams on the stage, the ring or the cage">STAGE</button>
+          <button data-zone="crowd" title="CROWD - the beams out over the seats">CROWD</button>
+        </div>
+      </div>
+    </section>
+    <div class="modrow">
+      <section class="mod" id="sync-sec">
+        <h2>SOUND TO LIGHT</h2>
+        <div class="keys" id="sync">
+          <button data-sync="auto" title="AUTO - the music runs the lights: its beat, its video's colours, and looks it picks itself (calm, groove, build-up, the drop)">AUTO</button>
+          <button data-sync="beat" title="BEAT - your look, on the music's beat">BEAT</button>
+          <button data-sync="manual" title="MANUAL - your look at the SPEED fader's tempo, the music ignored">MANUAL</button>
+        </div>
+        <p class="note" id="follow-now"></p>
+      </section>
+      <section class="mod" id="colour-sec">
+        <h2>COLOUR</h2>
+        <div class="pads" id="all-colours"></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- PYRO / FOG -->
+  <div class="pane" data-pane="fx">
+    <section class="mod hidden" id="pyro">
+      <h2>PYROTECHNICS <small id="pyro-now"></small></h2>
+      <div class="arm" id="pyro-armbox">
+        <button class="keyswitch" id="pyro-arm" title="ARM - the key: SAFE and nothing fires, ARMED and the cues fire (/arenapyro arm | safe)"><span></span></button>
+        <div class="armtext"><b id="pyro-arm-state">ARMED</b><small id="pyro-arm-hint">the cues below fire</small></div>
+        <span class="armlamp" id="pyro-lamp"></span>
+      </div>
+      <div class="pyro-opts">
+        <div class="keys" id="pyro-size" title="SIZE - how big the next cue goes off">
+          <button data-size="small">SMALL</button>
+          <button data-size="normal" class="active">NORMAL</button>
+          <button data-size="big">BIG</button>
+        </div>
+        <div class="pads mini" id="pyro-colour" title="COLOUR - the next cue's colour, where its effect takes one (sparks, comets, bursts, smoke)"></div>
       </div>
       <div id="pyro-cues" title="Fire a cue: everyone in the arena sees it (/arenapyro)"></div>
     </section>
-    <section id="cars" class="ext hidden">
-      <h2>Cars <small id="cars-now">none down</small></h2>
-      <div class="row">
-        <button class="big" id="cars-reset" title="Take the show's cars away and put fresh ones down, for everyone (/arenacars reset)">FRESH CARS</button>
-        <button class="big danger" id="cars-clear" title="Take the show's cars away (/arenacars clear)">CLEAR CARS</button>
+    <section class="mod" id="atmo">
+      <h2>ATMOSPHERE</h2>
+      <h3>HAZE</h3>
+      <div class="keys" id="haze-steps">
+        <button data-haze="0" title="HAZE OFF - it clears slowly">OFF</button>
+        <button data-haze="25" title="HAZE LIGHT - the beams just show">LIGHT</button>
+        <button data-haze="50" title="HAZE MEDIUM">MEDIUM</button>
+        <button data-haze="80" title="HAZE THICK - a concert's">THICK</button>
+        <button data-haze="100" title="HAZE FULL - as thick as it goes">FULL</button>
       </div>
-    </section>
-    <section id="crowd-sec">
-      <h2>Crowd <small>you see up to <b id="crowd-mine-val">140</b> people</small></h2>
-      <div class="row">
-        <button class="big toggle" id="crowd" title="Bring the crowd in / send it home (for everyone)">CROWD <b id="crowd-state">OUT</b></button>
-        <div class="seg" id="crowd-moods"></div>
+      <h3>FOG MACHINES</h3>
+      <div class="keys" id="fog-steps">
+        <button data-fog="off" title="FOG OFF - the machines off">OFF</button>
+        <button data-fog="30" title="FOG LOW - a little at a time">LOW</button>
+        <button data-fog="60" title="FOG MEDIUM - a steady flow">MEDIUM</button>
+        <button data-fog="100" title="FOG FULL - flat out">FULL</button>
       </div>
-      <div class="seg" id="crowd-litter" title="What the crowd leaves in the rows and on the floor (for everyone)">
-        <button data-litter="clean">Clean</button>
-        <button data-litter="some">Some litter</button>
-        <button data-litter="trashed">Trashed</button>
-      </div>
-      <button class="mini toggle" id="crowd-staff" title="The staff and the press who come in with the crowd: security, photographers, camera crews, officials (for everyone)">STAFF &amp; PRESS <b id="crowd-staff-state">ON</b></button>
-      <input type="range" id="crowd-mine" min="0" max="220" step="10" value="140"
-             title="How many crowd peds you see: yours alone, saved on your PC">
-    </section>
-  </div>
-
-  <div class="pane" data-pane="lights">
-    <section>
-      <h2>Effect</h2>
-      <div class="grid modes" id="modes">
-        <button data-mode="static"><i>&#9679;</i>Static</button>
-        <button data-mode="chase"><i>&#10148;</i>Chase</button>
-        <button data-mode="strobe"><i>&#9889;</i>Strobe</button>
-        <button data-mode="pulse"><i>&#9678;</i>Pulse</button>
-        <button data-mode="rainbow"><i>&#9728;</i>Rainbow</button>
-        <button data-mode="fade"><i>&#9680;</i>Fade</button>
-        <button data-mode="wave"><i>&#8767;</i>Wave</button>
-        <button data-mode="flash"><i>&#10041;</i>Flash</button>
-        <button data-mode="alternate"><i>&#8693;</i>Alternate</button>
-        <button data-mode="bounce"><i>&#8596;</i>Bounce</button>
-        <button data-mode="twinkle"><i>&#10022;</i>Twinkle</button>
-        <button data-mode="random"><i>&#9670;</i>Random</button>
-        <button data-mode="lightning"><i>&#9735;</i>Lightning</button>
-        <button data-mode="fire"><i>&#9832;</i>Fire</button>
-        <button data-mode="police"><i>&#9650;</i>Police</button>
-      </div>
-    </section>
-    <section>
-      <h2>Movement</h2>
-      <div class="seg" id="moves">
-        <button data-move="none">Still</button>
-        <button data-move="sweep">Sweep</button>
-        <button data-move="ballyhoo">Ballyhoo</button>
-        <button data-move="fan">Fan</button>
-        <button data-move="nod">Nod</button>
-        <button data-move="cross">Cross</button>
-      </div>
-    </section>
-    <section>
-      <h2>Colours <small>pick a slot, then a colour</small></h2>
-      <div class="slots" id="slots">
-        <button class="slot" data-slot="0"><span></span>A</button>
-        <button class="slot" data-slot="1"><span></span>B</button>
-        <button class="slot" data-slot="2"><span></span>C</button>
-        <label class="custom" title="Any colour for the active slot">
-          <input type="color" id="picker" value="#ffffff"> custom
-        </label>
-        <button class="mini" id="clear-slot" title="Empty slots B / C">&minus; slot</button>
-      </div>
-      <div class="palette" id="palette"></div>
-    </section>
-    <section class="row sliders">
-      <div class="slider">
-        <h2>Speed <b id="bpm-val">120</b> bpm</h2>
-        <input type="range" id="bpm" min="30" max="240" step="1" value="120">
-        <button class="mini wide" id="tap">TAP</button>
-      </div>
-      <div class="slider">
-        <h2>Intensity <b id="int-val">80</b>%</h2>
-        <input type="range" id="intensity" min="0" max="100" step="1" value="80">
-      </div>
-    </section>
-    <section>
-      <h2>Aim <small>one or more: the fixtures take turns</small></h2>
-      <div class="seg" id="focus">
-        <button data-focus="floor">Floor</button>
-        <button data-focus="stage">Stage</button>
-        <button data-focus="crowd">Crowd</button>
-      </div>
-    </section>
-    <section id="follow-sec">
-      <h2>Follow the music <small id="follow-now"></small></h2>
-      <div class="seg" id="follow" title="The effects run on the beat of what is playing and / or in the colours of its video, instead of Speed and the colour slots">
-        <button data-follow="off">Off</button>
-        <button data-follow="both">Colour + tempo</button>
-        <button data-follow="tempo">Tempo</button>
-        <button data-follow="colour">Colour</button>
-      </div>
-    </section>
-    <section>
-      <h2>House lights</h2>
-      <div class="seg" id="house">
-        <button data-house="show">Show</button>
-        <button data-house="full">Full</button>
-        <button data-house="dim">Dim</button>
-        <button data-house="off">Off</button>
-      </div>
-    </section>
-    <section class="row ringrow" title="The ring / cage / stage lights">
-      <label class="custom" title="One colour for all the ring lights"><input type="color" id="ring-color" value="#fff6ec"> ring colour</label>
-      <button class="mini" id="ring-own" title="Each ring light in its own colour again">own colours</button>
-      <div class="slider inline"><h2>Ring level <b id="ring-level-val">100</b>%</h2>
-        <input type="range" id="ring-level" min="0" max="100" step="1" value="100"></div>
-    </section>
-    <section id="spot" class="ext">
-      <h2>Followspot <small id="spot-now">off</small></h2>
-      <div class="row">
-        <button class="big toggle" id="spot-power">FOLLOWSPOT <b id="spot-state">OFF</b></button>
-      </div>
-      <div class="urlrow" style="margin-top:6px">
-        <select id="spot-target" title="Follow a player in the arena"><option value="">Follow a player...</option></select>
-        <button class="mini" id="spot-look" title="Follow whoever is under your crosshair">LOOKED AT</button>
-        <button class="mini" id="spot-free" title="Aim by hand with your camera (closes the desk; the key releases it)">FREE AIM</button>
-      </div>
-      <div class="row sliders">
-        <div class="slider inline">
-          <h2>Size <b id="spot-size-val">5</b></h2>
-          <input type="range" id="spot-size" min="2" max="15" step="0.5" value="5">
-        </div>
-        <div class="slider inline">
-          <h2>Intensity <b id="spot-int-val">100</b>%</h2>
-          <input type="range" id="spot-int" min="0" max="100" step="1" value="100">
-        </div>
-        <label class="custom" title="The spot's colour"><input type="color" id="spot-color" value="#fff8eb"></label>
+      <h3>FOG BURST</h3>
+      <div class="keys" id="fog-bursts">
+        <button data-burst="3" title="BURST 3 S - the machines flat out for 3 seconds">3 S</button>
+        <button data-burst="8" title="BURST 8 S - the machines flat out for 8 seconds">8 S</button>
+        <button data-burst="15" title="BURST 15 S - the machines flat out for 15 seconds">15 S</button>
       </div>
     </section>
   </div>
 
+  <!-- MEDIA -->
   <div class="pane" data-pane="media">
-    <section id="screens" class="ext">
-      <h2>Screens <small id="scr-now">off</small></h2>
+    <section class="mod ext" id="screens">
+      <h2>SCREENS <small id="scr-now">off</small></h2>
       <div class="urlrow">
         <input type="text" id="scr-url" maxlength="4000" placeholder="YouTube link, or picture URL(s)" spellcheck="false">
-        <button class="mini" id="scr-play">PLAY</button>
-        <button class="mini" id="scr-loop" disabled title="Loop the video that is on: at its end it starts again for everyone, instead of the screens going off (/arenascreen loop)">LOOP</button>
+        <button id="scr-play" title="PLAY - the link on the screens">PLAY</button>
+        <button id="scr-loop" disabled title="LOOP - the video starts again at its end, for everyone (/arenascreen loop)">LOOP</button>
       </div>
-      <div class="seg">
-        <button id="scr-pause">Pause</button>
-        <button id="scr-fade" title="Fade the picture to black (and a video's sound with it), then off">Fade out</button>
-        <button id="scr-stop" title="Off: the screens go dark">Off</button>
-        <button id="scr-own" title="The show's own graphics on the screens (nothing of ours: another media script can have them)">Own graphics</button>
-        <button id="scr-cam" title="Your own view of the game, live on the screens: you are the camera (/arenascreen look; another player's view: /arenascreen look <id>). Off ends it">My camera</button>
+      <div class="keys">
+        <button id="scr-pause" title="PAUSE - the video holds">PAUSE</button>
+        <button id="scr-fade" title="FADE - the picture fades to black (and a video's sound with it), then off">FADE</button>
+        <button id="scr-stop" title="OFF - the screens go dark">OFF</button>
+        <button id="scr-own" title="OWN - the show's own graphics on the screens">OWN</button>
+        <button id="scr-cam" title="CAMERA - your own view of the game, live on the screens (/arenascreen look). OFF ends it">CAMERA</button>
       </div>
-      <div class="seg sets" id="scr-looks" title="Looks drawn in step with the light desk"></div>
-      <div class="seg sets" id="scr-sets" title="The arena's picture sets"></div>
-      <div class="slider inline">
-        <h2>Volume <b id="scr-vol-val">60</b>%</h2>
-        <input type="range" id="scr-vol" min="0" max="100" step="1" value="60">
+      <div class="keys sets" id="scr-looks" title="Looks drawn in step with the lights"></div>
+      <div class="keys sets" id="scr-sets" title="The arena's picture sets"></div>
+      <div class="hslider" id="scr-vol-row" title="SCREEN VOLUME - the video's own sound (Config.Media.sound = 'screen')">
+        <span class="silk">VOLUME</span><input type="range" id="scr-vol" min="0" max="100" step="1" value="60"><b class="val" id="scr-vol-val">60</b>
       </div>
     </section>
-    <section id="music" class="ext">
-      <h2>Music <small id="mus-now">off</small></h2>
+    <section class="mod ext" id="music">
+      <h2>MUSIC <small id="mus-now">off</small></h2>
       <div class="urlrow">
         <input type="text" id="mus-url" maxlength="500" placeholder="Audio file, stream or YouTube link" spellcheck="false">
-        <button class="mini" id="mus-play">PLAY</button>
-        <button class="mini" id="mus-loop" disabled title="Loop the track that is playing: at its end it starts again for everyone (/arenamusic loop)">LOOP</button>
+        <button id="mus-play" title="PLAY - the link from the speakers">PLAY</button>
+        <button id="mus-loop" disabled title="LOOP - the track starts again at its end, for everyone (/arenamusic loop)">LOOP</button>
       </div>
-      <div class="seg">
-        <button id="mus-pause">Pause</button>
-        <button id="mus-fade" title="Fade the music out, then stop">Fade out</button>
-        <button id="mus-stop">Stop</button>
+      <div class="keys">
+        <button id="mus-pause" title="PAUSE - the track holds">PAUSE</button>
+        <button id="mus-fade" title="FADE - the music fades out, then stops">FADE</button>
+        <button id="mus-stop" title="STOP - the music stops">STOP</button>
       </div>
-      <div class="row sliders">
-        <div class="slider inline">
-          <h2>Volume <b id="mus-vol-val">70</b>%</h2>
-          <input type="range" id="mus-vol" min="0" max="100" step="1" value="70">
-        </div>
-        <div class="slider inline" title="Your own level, for you only (/arenamusic mine)">
-          <h2>Mine <b id="mus-mine-val">100</b>%</h2>
-          <input type="range" id="mus-mine" min="0" max="100" step="1" value="100">
-        </div>
+      <div class="hslider" title="MINE - your own level, for you only (/arenamusic mine). The volume for everyone is the MASTER fader">
+        <span class="silk">MINE</span><input type="range" id="mus-mine" min="0" max="100" step="1" value="100"><b class="val" id="mus-mine-val">100</b>
       </div>
     </section>
   </div>
 
+  <!-- CROWD -->
+  <div class="pane" data-pane="crowd">
+    <section class="mod" id="crowd-sec">
+      <h2>CROWD</h2>
+      <div class="keys">
+        <button class="toggle" id="crowd" title="CROWD - bring the crowd in, or send it home (for everyone)">CROWD <b id="crowd-state">OUT</b></button>
+        <button class="toggle" id="crowd-staff" title="STAFF &amp; PRESS - security, photographers, camera crews and officials with the crowd (for everyone)">STAFF <b id="crowd-staff-state">ON</b></button>
+      </div>
+      <h3>MOOD</h3>
+      <div class="keys" id="crowd-moods" title="MOOD - how the crowd behaves, for everyone in the seats"></div>
+      <h3>LITTER</h3>
+      <div class="keys" id="crowd-litter" title="LITTER - what the crowd leaves in the rows and on the floor (for everyone)">
+        <button data-litter="clean">CLEAN</button>
+        <button data-litter="some">SOME</button>
+        <button data-litter="trashed">TRASHED</button>
+      </div>
+      <div class="hslider" title="YOU SEE - how many crowd people you see: yours alone, saved on your PC">
+        <span class="silk">YOU SEE</span><input type="range" id="crowd-mine" min="0" max="220" step="10" value="140"><b class="val" id="crowd-mine-val">140</b>
+      </div>
+    </section>
+    <section class="mod ext hidden" id="cars">
+      <h2>CARS <small id="cars-now">none down</small></h2>
+      <div class="keys">
+        <button id="cars-reset" title="RESET CARS - the wrecked cars taken away and fresh ones put down, for everyone (/arenacars reset, the /arena menu)">RESET CARS</button>
+        <button class="danger" id="cars-clear" title="CLEAR CARS - the show's cars taken away (/arenacars clear)">CLEAR CARS</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- FIGHTS -->
   <div class="pane" data-pane="fights">
-    <section id="fights" class="ext">
-      <h2>Fights <small id="fight-now">no bout on</small></h2>
+    <section class="mod ext" id="fights">
+      <h2>FIGHT CARD <small id="fight-now">no bout on</small></h2>
       <div class="urlrow fight-pick">
-        <select id="fight-red" title="The red corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
-        <span class="vs">vs</span>
-        <select id="fight-blue" title="The blue corner: an NPC or a player in the arena"><option value="npc">NPC</option></select>
+        <select id="fight-red" title="RED CORNER - an NPC or a player in the arena"><option value="npc">NPC</option></select>
+        <span class="vs">VS</span>
+        <select id="fight-blue" title="BLUE CORNER - an NPC or a player in the arena"><option value="npc">NPC</option></select>
       </div>
-      <div class="seg" id="fight-when" title="When the bout goes on: next on the card, or at a time">
-        <button data-in="0" class="active">Next</button>
-        <button data-in="1">In 1 min</button>
-        <button data-in="5">In 5 min</button>
-        <button data-in="15">In 15 min</button>
+      <div class="keys" id="fight-when" title="WHEN - next on the card, or at a time">
+        <button data-in="0" class="active">NEXT</button>
+        <button data-in="1">1 MIN</button>
+        <button data-in="5">5 MIN</button>
+        <button data-in="15">15 MIN</button>
       </div>
-      <div class="row" style="margin-top:6px">
-        <button class="big" id="fight-add">ADD BOUT</button>
-        <button class="big danger" id="fight-stop" disabled>STOP BOUT</button>
+      <div class="keys">
+        <button id="fight-add" title="ADD BOUT - put the bout on the card">ADD BOUT</button>
+        <button class="danger" id="fight-stop" disabled title="STOP BOUT - end the bout that is on">STOP BOUT</button>
       </div>
       <ol id="fight-card"></ol>
-      <button class="mini" id="fight-clear" disabled>Clear the card</button>
+      <button id="fight-clear" disabled title="CLEAR - the card emptied">CLEAR CARD</button>
     </section>
   </div>
 
-  <footer>Everyone in the bowl sees the same show &middot; <kbd>1</kbd>-<kbd>4</kbd> the tabs &middot; <kbd>Esc</kbd> closes</footer>
+  <!-- CUES: the show's cue list (html/cues.js, server/cues.lua) -->
+  <div class="pane" data-pane="cues">
+    <section class="mod" id="cues-sec">
+      <h2><span id="cues-title">Cues</span> <small id="cues-now">nothing fired yet</small></h2>
+      <div class="keys">
+        <button class="go" id="cue-go" title="GO - fire the next cue (numpad + or Enter, or GO on the wing)">GO <small id="cue-next"></small></button>
+        <button id="cue-back" title="BACK - fire the cue before (numpad -)">BACK</button>
+        <button class="toggle" id="cue-auto" title="AUTO NEXT - when a cue's track or video ends, the next one starts">AUTO NEXT <b id="cue-auto-state">OFF</b></button>
+      </div>
+      <ol id="cue-list"></ol>
+      <div class="cue-form">
+        <input type="text" id="cue-name" maxlength="60" placeholder="Name" spellcheck="false">
+        <input type="text" id="cue-link" maxlength="500" placeholder="YouTube link or audio file (optional)" spellcheck="false">
+        <div class="row">
+          <select id="cue-preset" title="LOOK - the light look the cue brings"></select>
+          <select id="cue-pyro" title="PYRO - the pyro the cue fires"></select>
+          <label class="check" title="ON THE SCREENS - the link's picture on the screens, its sound from the speakers (else the music player alone)"><input type="checkbox" id="cue-screens" checked> SCREENS</label>
+          <button id="cue-add" title="ADD - the cue onto the list">ADD</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ADVANCED: each group of lights on its own (html/console.js switches the groups) -->
+  <div class="pane" data-pane="advanced">
+    <section class="mod" id="groups-sec">
+      <h2>FIXTURES</h2>
+      <div class="keys" id="groups">
+        <button data-grp="beams" title="BEAMS - the moving heads over the floor, the stage and the crowd. The LED: on">BEAMS</button>
+        <button data-grp="ring" title="RING - the washes over the ring, the cage or the stage. The LED: on">RING</button>
+        <button data-grp="bars" title="BARS - the LED bars under the roof, along the upper ledge, on the stage. The LED: on">BARS</button>
+        <button data-grp="lasers" title="LASERS - the stage's lasers. The LED: on">LASERS</button>
+        <button data-grp="house" title="HOUSE - the arena's own lights in the roof. The LED: not off">HOUSE</button>
+        <button data-grp="spot" title="SPOT - the followspot, one beam on one player. The LED: on">SPOT</button>
+      </div>
+    </section>
+
+    <section class="mod grp" data-grp="beams" id="beams-sec">
+      <h2>BEAMS</h2>
+      <div class="gm">
+        <button class="toggle" id="power" title="BEAMS ON - the moving heads on / off (numpad .)">ON</button>
+        <div class="hslider" title="BEAMS LEVEL - how bright the beams are, under the LIGHTS fader"><span class="silk">LEVEL</span><input type="range" id="intensity" min="0" max="100" step="1" value="80"><b class="val" id="int-val">80</b></div>
+      </div>
+      <h3>EFFECT</h3>
+      <div class="keys k5" id="modes">
+        <button data-mode="static" title="STATIC - steady, each light in a colour slot's colour">STATIC</button>
+        <button data-mode="chase" title="CHASE - every fourth light on, the run stepping round on the beat">CHASE</button>
+        <button data-mode="strobe" title="STROBE - fast flashes (the server caps how fast)">STROBE</button>
+        <button data-mode="pulse" title="PULSE - the rig swells and dips on the beat">PULSE</button>
+        <button data-mode="rainbow" title="RAINBOW - every colour rolling round the rig">RAINBOW</button>
+        <button data-mode="fade" title="FADE - a slow crossfade through the colour slots">FADE</button>
+        <button data-mode="wave" title="WAVE - a band of light rolling round the rig">WAVE</button>
+        <button data-mode="flash" title="FLASH - the whole rig hits on the beat and dies away">FLASH</button>
+        <button data-mode="alternate" title="ALTERNATE - every other light, swapping on the beat">ALTERNATE</button>
+        <button data-mode="bounce" title="BOUNCE - a block of light running end to end and back">BOUNCE</button>
+        <button data-mode="twinkle" title="TWINKLE - the rig low, single lights sparkling">TWINKLE</button>
+        <button data-mode="random" title="SCATTER - lights picked at random in the slots' colours, every beat">SCATTER</button>
+        <button data-mode="lightning" title="LIGHTNING - dark, then ragged white flickers">LIGHTNING</button>
+        <button data-mode="fire" title="FIRE - warm and flickering">FIRE</button>
+        <button data-mode="police" title="POLICE - red and blue, flashing">POLICE</button>
+      </div>
+      <h3>MOVEMENT</h3>
+      <div class="keys" id="moves">
+        <button data-move="none" title="STILL - the heads hold their aim">STILL</button>
+        <button data-move="sweep" title="SWEEP - the beams swing side to side">SWEEP</button>
+        <button data-move="ballyhoo" title="BALLYHOO - wide loops over the crowd, every beam its own">BALLYHOO</button>
+        <button data-move="fan" title="FAN - the beams spread out and close in">FAN</button>
+        <button data-move="nod" title="NOD - the beams tip up and down">NOD</button>
+        <button data-move="cross" title="CROSS - the two sides cross over and back">CROSS</button>
+        <button data-move="random" title="ROAM - every beam to a place of its own, every two beats">ROAM</button>
+      </div>
+      <h3>AIM</h3>
+      <div class="keys" id="focus">
+        <button data-focus="floor" title="FLOOR - the event floor (pick two or three and they take turns)">FLOOR</button>
+        <button data-focus="stage" title="STAGE - the stage, the ring or the cage">STAGE</button>
+        <button data-focus="crowd" title="CROWD - out over the seats">CROWD</button>
+      </div>
+      <h3>COLOUR</h3>
+      <div class="slots" id="slots">
+        <button class="slot" data-slot="0" title="SLOT A - the first colour: pick the slot, then a colour"><span></span>A</button>
+        <button class="slot" data-slot="1" title="SLOT B - a second colour (empty: one colour only)"><span></span>B</button>
+        <button class="slot" data-slot="2" title="SLOT C - a third colour"><span></span>C</button>
+        <button id="clear-slot" title="CLEAR SLOT - the last slot (B or C) emptied">CLEAR</button>
+        <label class="custom" title="ANY COLOUR - any colour for the slot that is picked"><input type="color" id="picker" value="#ffffff"><span class="silk">ANY</span></label>
+      </div>
+      <div class="pads" id="palette"></div>
+      <div id="gobo-sec">
+        <h3>GOBO</h3>
+        <div class="keys" id="gobos" title="GOBO - a shape cut into each beam, cast on the floor and the crowd">
+          <button data-gobo="none" title="GOBO NONE - plain beams">NONE</button>
+          <button data-gobo="stars" title="GOBO STARS">STARS</button>
+          <button data-gobo="dots" title="GOBO DOTS">DOTS</button>
+          <button data-gobo="rings" title="GOBO RINGS">RINGS</button>
+          <button data-gobo="breakup" title="GOBO BREAKUP - leaves and light">BREAKUP</button>
+          <button data-gobo="bars" title="GOBO BARS - stripes">BARS</button>
+        </div>
+      </div>
+      <div id="follow-sec">
+        <h3>SOUND TO LIGHT</h3>
+        <div class="keys" id="follow">
+          <button data-follow="off" title="OFF - the desk's own speed and colours">OFF</button>
+          <button data-follow="both" title="BEAT + COLOUR - the music's tempo and the video's colours">BEAT+COL</button>
+          <button data-follow="tempo" title="BEAT - the music's tempo, the desk's colours">BEAT</button>
+          <button data-follow="colour" title="COLOUR - the video's colours, the desk's speed">COLOUR</button>
+          <button data-follow="auto" title="AUTO - tempo, colours, and looks picked from the music">AUTO</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="mod grp" data-grp="ring" id="ring-sec">
+      <h2>RING</h2>
+      <div class="gm">
+        <button class="toggle" id="ring" title="RING ON - the ring / cage / stage washes on / off">ON</button>
+        <div class="hslider" title="RING LEVEL - how bright the washes are, under the LIGHTS fader"><span class="silk">LEVEL</span><input type="range" id="ring-level" min="0" max="100" step="1" value="100"><b class="val" id="ring-level-val">100</b></div>
+      </div>
+      <h3>COLOUR</h3>
+      <div class="slots">
+        <button id="ring-own" title="OWN COLOURS - each ring light in the colour the build gave it">OWN COLOURS</button>
+        <label class="custom" title="ANY COLOUR - one colour for all the ring lights"><input type="color" id="ring-color" value="#fff6ec"><span class="silk">ANY</span></label>
+      </div>
+      <div class="pads" id="ring-palette"></div>
+    </section>
+
+    <section class="mod grp" data-grp="bars" id="bars-sec">
+      <h2>BARS</h2>
+      <div class="gm">
+        <button class="toggle" id="bars" title="BARS ON - the LED bars on / off">ON</button>
+        <div class="hslider" title="BARS LEVEL - how bright the bars are, under the LIGHTS fader"><span class="silk">LEVEL</span><input type="range" id="bars-level" min="0" max="100" step="1" value="100"><b class="val" id="bars-level-val">100</b></div>
+      </div>
+      <h3>MODE</h3>
+      <div class="keys" id="bar-modes">
+        <button data-bmode="video" title="VIDEO - the colours of the picture on the screens, white on its flashes">VIDEO</button>
+        <button data-bmode="steady" title="STEADY - the colours round the bowl, still">STEADY</button>
+        <button data-bmode="chase" title="CHASE - the colours run round the bowl on the beat">CHASE</button>
+        <button data-bmode="pulse" title="PULSE - all of them on the beat">PULSE</button>
+      </div>
+      <h3>WHERE</h3>
+      <div class="keys" id="bar-where">
+        <button data-bwhere="all" title="ALL - the rafters, the ledges and the stage">ALL</button>
+        <button data-bwhere="rafters" title="RAFTERS - under the roof's trusses">RAFTERS</button>
+        <button data-bwhere="ledges" title="LEDGES - along the upper tier's ledge">LEDGES</button>
+        <button data-bwhere="stage" title="STAGE - the ramp's edges, the lip, the walkway, and the trusses of the rig over the ring or the cage">STAGE</button>
+      </div>
+      <h3>COLOUR</h3>
+      <div class="keys" id="bar-cols">
+        <button data-bcol="desk" title="DESK - the beams' colour slots">DESK</button>
+        <button data-bcol="green" data-rgb="20,255,60">GREEN</button>
+        <button data-bcol="red" data-rgb="255,24,24">RED</button>
+        <button data-bcol="blue" data-rgb="20,60,255">BLUE</button>
+        <button data-bcol="cyan" data-rgb="0,230,255">CYAN</button>
+        <button data-bcol="magenta" data-rgb="255,20,200">MAGENTA</button>
+        <button data-bcol="white" data-rgb="255,255,255">WHITE</button>
+      </div>
+    </section>
+
+    <section class="mod grp hidden" data-grp="lasers" id="lasers-sec">
+      <h2>LASERS</h2>
+      <div class="gm">
+        <button class="toggle" id="lasers" title="LASERS ON - the stage's lasers on / off (/arenalights lasers)">ON</button>
+      </div>
+      <h3>PATTERN</h3>
+      <div class="keys" id="laser-pats">
+        <button data-laser="fan" title="FAN - spread across, still">FAN</button>
+        <button data-laser="sweep" title="SWEEP - the fan swings side to side">SWEEP</button>
+        <button data-laser="tunnel" title="TUNNEL - a turning cone over the crowd">TUNNEL</button>
+        <button data-laser="scan" title="SCAN - up and down on the beat">SCAN</button>
+        <button data-laser="chase" title="CHASE - one beam at a time">CHASE</button>
+      </div>
+      <h3>COLOUR</h3>
+      <div class="keys" id="laser-cols">
+        <button data-lcol="desk" title="DESK - the beams' colour slots">DESK</button>
+        <button data-lcol="green" data-rgb="20,255,60">GREEN</button>
+        <button data-lcol="red" data-rgb="255,24,24">RED</button>
+        <button data-lcol="blue" data-rgb="20,60,255">BLUE</button>
+        <button data-lcol="cyan" data-rgb="0,230,255">CYAN</button>
+        <button data-lcol="magenta" data-rgb="255,20,200">MAGENTA</button>
+        <button data-lcol="white" data-rgb="255,255,255">WHITE</button>
+      </div>
+    </section>
+
+    <section class="mod grp" data-grp="house" id="house-sec">
+      <h2>HOUSE LIGHTS</h2>
+      <div class="keys" id="house">
+        <button data-house="show" title="SHOW - as the show has them">SHOW</button>
+        <button data-house="full" title="FULL - all the way up, for walking in and out">FULL</button>
+        <button data-house="dim" title="DIM - low, the bowl just visible">DIM</button>
+        <button data-house="off" title="OFF - only the show lights">OFF</button>
+      </div>
+    </section>
+
+    <section class="mod grp" data-grp="spot" id="spot">
+      <h2>FOLLOWSPOT <small id="spot-now">off</small></h2>
+      <div class="gm">
+        <button class="toggle" id="spot-power" title="FOLLOWSPOT - on / off">FOLLOWSPOT <b id="spot-state">OFF</b></button>
+      </div>
+      <div class="urlrow">
+        <select id="spot-target" title="FOLLOW - a player in the arena"><option value="">Follow a player...</option></select>
+        <button id="spot-look" title="LOOKED AT - follow whoever is under your crosshair">LOOKED AT</button>
+        <button id="spot-free" title="FREE AIM - aim by hand with your camera (closes the desk; the key lets go)">FREE AIM</button>
+      </div>
+      <div class="hslider" title="SIZE - how wide the spot is"><span class="silk">SIZE</span><input type="range" id="spot-size" min="2" max="15" step="0.5" value="5"><b class="val" id="spot-size-val">5</b></div>
+      <div class="hslider" title="LEVEL - how bright the spot is"><span class="silk">LEVEL</span><input type="range" id="spot-int" min="0" max="100" step="1" value="100"><b class="val" id="spot-int-val">100</b>
+        <label class="custom" title="COLOUR - the spot's colour"><input type="color" id="spot-color" value="#fff8eb"></label></div>
+    </section>
+  </div>
+  </div>
+
+  <!-- the fader wing: a strip per fader - its level on a small screen, the fader on its scale, its name, a key -->
+  <div id="wing">
+    <div class="bank">
+      <div class="strip" id="strip-lights" title="LIGHTS - how bright every light is, all at once. BLACKOUT: everything dark, the house lights too; press it again, or a look, and it is back (numpad 0)">
+        <div class="scrib"><b id="gm-val">100</b></div>
+        <div class="fader"><input type="range" id="gm" min="0" max="100" step="1" value="100"></div>
+        <span class="silk">LIGHTS</span>
+        <button class="bo" id="bo">BLACKOUT</button>
+      </div>
+      <div class="strip" id="strip-speed" title="SPEED - how fast the effects run, in beats a minute. TAP: tap it on the beat (its LED blinks on the beat). In AUTO and BEAT the music sets the speed">
+        <div class="scrib"><b id="bpm-val">120</b></div>
+        <div class="fader"><input type="range" id="bpm" min="30" max="240" step="1" value="120"></div>
+        <span class="silk">SPEED</span>
+        <button id="tap">TAP</button>
+      </div>
+      <div class="strip" id="strip-haze" title="HAZE - mist in the air, so the beams show. It fills in and clears slowly. ON: off, or back to where it was">
+        <div class="scrib"><b id="haze-val">0</b></div>
+        <div class="fader"><input type="range" id="haze-level" min="0" max="100" step="1" value="0"></div>
+        <span class="silk">HAZE</span>
+        <button class="toggle" id="haze">ON</button>
+      </div>
+      <div class="strip" id="strip-fog" title="FOG - the fog machines at the stage: up for more, down to nothing for off. BURST: flat out for a few seconds">
+        <div class="scrib"><b id="fog-val">0</b></div>
+        <div class="fader"><input type="range" id="fog-level" min="0" max="100" step="1" value="0"></div>
+        <span class="silk">FOG</span>
+        <button id="fog-burst">BURST</button>
+      </div>
+      <div class="strip master" id="strip-master" title="MASTER - the music's volume, for everyone: what comes from the speakers. MUTE: silence; press it again and the level is back">
+        <div class="scrib"><b id="mus-vol-val">70</b></div>
+        <div class="fader"><input type="range" id="mus-vol" min="0" max="100" step="1" value="70"></div>
+        <span class="silk">MASTER<small id="mus-vol-note"></small></span>
+        <button id="mute">MUTE</button>
+      </div>
+    </div>
+    <div class="masters">
+      <div class="scrib next" title="NEXT - the cue GO fires"><small>NEXT</small><b id="go-next">no cues</b></div>
+      <button class="go" id="go" title="GO - the cue list's next cue: its track, its look, its pyro (numpad + or Enter)" disabled>GO</button>
+      <button id="go-back" title="BACK - the cue before (numpad -)" disabled>BACK</button>
+    </div>
+  </div>
 </div>
 <!-- the fight bar (html/fights.js): everyone in the arena sees it while a bout is on, the desk open or not -->
 <div id="fight-hud" class="hidden">
@@ -311,7 +529,8 @@
 <script src="shop.js"></script>
 <script src="pyro.js"></script>
 <script src="cars.js"></script>
-<script src="fold.js"></script>
+<script src="cues.js"></script>
+<script src="console.js"></script>
 <script src="tabs.js"></script>
 </body>
 </html>

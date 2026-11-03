@@ -1,7 +1,8 @@
-// mzb_arena - the desk's Cars section (Show tab): the real cars a show has standing on its floor (Config.ShowCars: the
-// truck show's, there to be driven over). It is only there while the show that is up has cars (client/cars.lua says
-// so when the desk opens, when the show changes and when the cars do). A press goes to the server, which checks who
-// pressed and puts fresh cars down, or takes them away, for everyone.
+// mzb_arena - the desk's CARS section (the CROWD page): the real cars a show has standing on its floor
+// (Config.ShowCars: the truck show's, there to be driven over - they stay wrecked until reset). It is only there while
+// the show that is up has cars (client/cars.lua says so when the desk opens, when the show changes and when the cars
+// do). A press goes to the server, which checks who pressed and puts fresh cars down (RESET CARS), or takes them away
+// (CLEAR CARS), for everyone.
 (() => {
   const res = typeof GetParentResourceName === 'function' ? GetParentResourceName() : 'mzb_arena';
   const nui = (name, body) =>
