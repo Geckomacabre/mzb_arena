@@ -20,6 +20,18 @@ Config.DockReach = 5.0            -- m from the door's middle, on foot
 Config.DockReachVehicle = 10.0    -- m, at the wheel
 Config.DockCooldown = 2.0         -- s between two presses on one door
 
+-- the two keypad doors off the arena offices (the production control room under its ON AIR light, the security
+-- control room): the game would not open the casino's keypad door the build put in them, so that leaf is hidden
+-- (`hide`) and a scripted copy swings in its place, pushed open and shut like the toilet stalls' doors
+-- (client/main.lua, Config.StallSwing). Hinge at the floor (x, y, z), the model's origin oz above it; the shut leaf
+-- runs along the yaw; s = -1: "in" is into the room
+Config.SwingDoors = {
+    { x = -286.069, y = -2009.361, z = 19.550, oz = 1.149, yaw = -40.00, s = -1, w = 1.01,
+      m = 'ch_prop_ch_service_door_03b', hide = true, room = 'admin', i = 1.45, o = 1.45 },     -- security control
+    { x = -276.436, y = -2017.561, z = 19.550, oz = 1.149, yaw = -40.00, s = -1, w = 1.01,
+      m = 'ch_prop_ch_service_door_03b', hide = true, room = 'admin', i = 1.45, o = 1.45 },     -- production (ON AIR)
+}
+
 -- show modes: which interior entity sets each one turns on (every set named anywhere here is managed)
 -- (the build's ar_site.SHOWS says the same - keep them in step)
 -- mzb_set_low_nw_seated / _stowed: the stage end's telescopic lower sections - seated, or stowed into stacks with a
@@ -42,6 +54,10 @@ Config.Shows = {
                   'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
                   'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated',
                   'mzb_set_merch_concert' },                             -- end-stage concert, standing floor
+    dj        = { 'mzb_set_nw_deck', 'mzb_set_dj_stage', 'mzb_set_dj_rig', 'mzb_set_dj_floor',
+                  'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
+                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_arena' },                               -- (1.5.0) the DJ show: the booth on the end stage
     hockey    = { 'mzb_set_hockey', 'mzb_set_hockey_board', 'mzb_set_house_lights',
                   'mzb_set_low_nw_seated', 'mzb_set_low_front_seated',
                   'mzb_set_merch_hockey' },                              -- the ice rink, boards and glass
@@ -51,10 +67,10 @@ Config.Shows = {
     tennis    = { 'mzb_set_tennis', 'mzb_set_tennis_board', 'mzb_set_house_lights',
                   'mzb_set_low_nw_seated', 'mzb_set_low_front_seated',
                   'mzb_set_merch_tennis' },                              -- the hard court, the umpire's chair
-    mma       = { 'mzb_set_nw_deck', 'mzb_set_mma_stage', 'mzb_set_mma_cage', 'mzb_set_mma_floor',
-                  'mzb_set_mma_rig', 'mzb_set_mask_nw', 'mzb_set_house_lights_dim',
-                  'mzb_set_low_nw_stowed', 'mzb_set_low_front_seated',
-                  'mzb_set_merch_mma' },                                 -- fight night: the cage, end stage
+    mma       = { 'mzb_set_mma_cage', 'mzb_set_mma_floor', 'mzb_set_mma_rig', 'mzb_set_mma_walkout',
+                  'mzb_set_house_lights_dim', 'mzb_set_low_nw_seated', 'mzb_set_low_front_seated',
+                  'mzb_set_merch_mma' },                                 -- fight night: the cage under its grid, no
+                                                                         -- stage (1.5.0): a curtain in every exit
     -- the bigger floor's shows (the front rows folded back all round; no stage, no ring, no floor chairs). floor is
     -- the big floor with nothing on it and the house lights up: for an event of your own (a car show, a drift night)
     floor     = { 'mzb_set_house_lights',
@@ -79,6 +95,16 @@ Config.Shows = {
                   'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
                   'mzb_set_merch_skatepark' },                           -- the skate park: park course and vert ramp
 }
+-- (1.5.0) a show that stands on another show's staging takes that show's entry in a per-show table that does not
+-- name it: the crowd's places on the floor and its staff, the pyro's units, the stage's own lights, the screens'
+-- model. The DJ show is the concert's deck, roof and standing floor with the DJ's booth, LED wall and lasers
+Config.ShowAs = { dj = 'concert' }
+function MzbShowAs(t, show)
+    if type(t) ~= 'table' then return nil end
+    local v = t[show]
+    if v == nil and Config.ShowAs and Config.ShowAs[show] then v = t[Config.ShowAs[show]] end
+    return v
+end
 -- What the scripts look up per show - the screens' model, the light rig and its aim, the speakers, the screens'
 -- artwork - a show without an entry of its own takes from the empty house: the centre-hung board and the roof's
 -- house lights (client/interior.lua: MzbShowEntry). The big-floor shows rely on that, and so can a show of yours.
@@ -98,6 +124,7 @@ Config.ShowAliases = {
     ice = 'hockey',
     hoops = 'basketball', bball = 'basketball',
     gig = 'concert', band = 'concert', music = 'concert',
+    rave = 'dj', edm = 'dj', club = 'dj', decks = 'dj', bassbeach = 'dj',
     empty = 'house', off = 'house', clear = 'house',
     bigfloor = 'floor', open = 'floor', openfloor = 'floor',
     monstertrucks = 'monster', trucks = 'monster',
@@ -120,6 +147,7 @@ Config.OxLib = 'auto'
 -- the menu's names and icons (Font Awesome) for the shows; a show that is not here gets its own name
 Config.ShowLabels = {
     house = { 'Empty house', 'building' }, wrestling = { 'Wrestling', 'hand-fist' }, concert = { 'Concert', 'music' },
+    dj = { 'DJ show', 'compact-disc' },
     mma = { 'MMA', 'shield-halved' }, hockey = { 'Hockey', 'hockey-puck' }, basketball = { 'Basketball', 'basketball' },
     tennis = { 'Tennis', 'table-tennis-paddle-ball' }, floor = { 'Open floor', 'expand' },
     monster = { 'Monster trucks', 'truck-monster' }, motocross = { 'Arenacross', 'motorcycle' },
@@ -138,20 +166,86 @@ Config.LightCommand = 'arenalights'
 Config.LightDeskKey = ''               -- a key that opens the desk (e.g. 'F6'); '' = none until a player binds one in
                                        -- the game's settings (Key Bindings > FiveM > "Maze Bank Arena: open the desk")
 Config.LightAccess = 'command.arena'   -- who may run the lights: an ACE (default: the arena's staff ACE), false = anyone
-Config.LightMaxFixtures = 40           -- spot lights drawn per frame at most (the show rigs have 24 to 38, up to 48 with
-                                       -- Config.LightRigExtra; the roof's house lights are the ones left out)
+Config.LightMaxFixtures = 64           -- spot lights drawn per frame at most (the show rigs have 36 to 49 since 1.5.0,
+                                       -- every head and wash on the stages, up to 59 with Config.LightRigExtra; the
+                                       -- roof's house lights are the ones left out first). Lower it on weak PCs
 Config.LightLensGlow = true            -- a small glow at each fixture's lens, so the rig itself flashes
+-- (1.5.0) the beams: every fixture is drawn as FiveM's own script light with its volume - the beam shows in the
+-- air, in the desk's colour and level, moving where the desk aims it and flashing with the music (the beams the
+-- build bakes into a stage cannot move or change colour). max = beams a frame (the rest light the floor without
+-- one); volume = how strong the beam is in the air, size = how wide its haze, intensity = the light's strength per
+-- unit of Config.LightBrightness, exponent = how fast it falls off; type / flags = the game's spot light with its
+-- volume drawn (2 / 4096). enabled = false: lit spots only, as before 1.5.0 (a game without these natives gets that)
+Config.LightBeams = { enabled = true, max = 48, volume = 1.0, size = 1.0, edge = 1.0, intensity = 0.25,
+                      exponent = 16.0, type = 2, flags = 4096 }
+-- (1.5.0) the gobos (the desk's Gobo, /arenalights gobo <name|off>): a pattern every beam projects onto the floor and
+-- the crowd, turning `spin` half turns a beat; from the texture dictionary txd (stream/interior/mzb_tx_gobos.ytd,
+-- made by mzb_geo/py/gobos.py). flag: the light's texture projection (with the beams' own flags)
+Config.LightGobos = { enabled = true, txd = 'mzb_tx_gobos', list = { 'stars', 'dots', 'rings', 'breakup', 'bars' },
+                      spin = 0.125, flag = 32 }
+-- (1.5.0) the lasers (the desk's Lasers, /arenalights lasers <on|off|fan|sweep|tunnel|scan|chase|desk|colour>): from
+-- each laser unit of the show `beams` thin beams in a pattern on the beat (the music's when the lights follow it),
+-- in the desk's colour slots or one colour. spread / tilt: the fan's width and how far up it points (degrees);
+-- width: a beam's cone (degrees); volume: how bright it is in the air; max: beams a frame. units[show]: { x, y, z,
+-- dx, dy, dz } where a unit stands and the way it faces (world space); a unit is not one of the desk's beams too.
+-- The DJ stage's four units on its lip (the build's laser boxes)
+Config.Lasers = {
+    enabled = true, beams = 6, spread = 50.0, tilt = 6.0, width = 0.6, range = 70.0, volume = 3.0, size = 0.3,
+    intensity = 2.0, exponent = 2.0, max = 24,
+    units = {
+        dj = { { -345.372, -1961.109, 21.170, 0.798, -0.567, 0.201 }, { -341.901, -1956.972, 21.170, 0.766, -0.611, 0.202 },
+               { -338.816, -1953.295, 21.170, 0.734, -0.648, 0.202 }, { -335.345, -1949.158, 21.170, 0.697, -0.688, 0.201 } },
+    },
+}
+-- (1.5.0) the bar lights (the desk's Bars, /arenalights bars ...): LED strips under the roof's trusses (rafters) and
+-- along the top of the upper tier's front ledge (ledges) - shared/bar_lights.lua has where (Config.BarStrips, from the
+-- build). A zone of their own: on or off whatever the show lights do. Modes: video (the colours of the picture on the
+-- screens, its flashes and its dark scenes - also when the rig does not follow it), steady (the desk's colour slots
+-- round the bowl), chase (the colours running round the bowl on the beat), pulse (all of them on the beat); one
+-- colour instead of the slots. width: a strip's width (m); glow / glowRange: the light it casts round it (a light
+-- every `glowEvery` m of strip, at most `maxGlow` a frame); chase: how many times round per 8 beats.
+Config.LightBars = {
+    enabled = true, width = 0.07, glow = 3.0, glowRange = 4.5, glowEvery = 6.0, maxGlow = 40, chase = 1.0,
+    tail = 0.18,                       -- chase: how much of the way round is lit behind the head (0 .. 1)
+    idle = 0.06,                       -- chase / pulse: how bright the unlit part stays (0 = dark)
+}
+-- (1.5.0) the atmosphere (the desk's Haze and Fog, /arenalights haze | fog): Rockstar's own dry ice from the
+-- nightclubs (scr_ba_club). The haze: its clouds (scr_ba_club_smoke) hung over the floor and the bowl, grown with
+-- their FILL to the desk's level over `fill` s, faded with their FADE over `fade` s when it goes to 0 - it is what
+-- makes the beams show. The fog machines: scr_ba_club_smoke_machine (the clubs' machines, at their scale 5) at each
+-- stage's flame units (Config.Pyro.units: the ramp's head, the lip), blowing towards the middle of the floor, on
+-- while the desk has them on at their output, or for a burst of `burst` s. clouds: { u, v, h, scale } in the
+-- arena's frame (m from its middle along its long axis and across, m over the event floor). Each player's game
+-- draws them while they are within `range` m. yaw: turns the machines' jets if they blow the wrong way (unseen).
+Config.Fog = {
+    enabled = true, range = 160.0, fill = 10.0, fade = 8.0, burst = 8.0, tint = { 0.82, 0.84, 0.88 },
+    machineScale = 5.0, machineFrom = 'flames', yaw = 0.0,
+    clouds = {
+        { -20.0, -7.0, 1.2, 2.0 }, { -20.0, 7.0, 1.2, 2.0 }, { -7.0, -7.0, 1.2, 2.0 }, { -7.0, 7.0, 1.2, 2.0 },
+        { 7.0, -7.0, 1.2, 2.0 }, { 7.0, 7.0, 1.2, 2.0 }, { 20.0, -7.0, 1.2, 2.0 }, { 20.0, 7.0, 1.2, 2.0 },
+        { -14.0, 0.0, 8.0, 2.8 }, { 0.0, 0.0, 8.0, 2.8 }, { 14.0, 0.0, 8.0, 2.8 },
+        { 0.0, 24.0, 10.0, 2.8 }, { 0.0, -24.0, 10.0, 2.8 }, { 34.0, 0.0, 10.0, 2.8 }, { -34.0, 0.0, 10.0, 2.8 },
+    },
+}
 Config.LightBrightness = 12.0          -- DrawSpotLight brightness at full intensity
 Config.LightHardness = 0.0             -- DrawSpotLight roundness (0 = soft edge)
 Config.LightFalloff = 1.0              -- DrawSpotLight falloff
 Config.LightCone = { 9.0, 20.0, 14.0 } -- the beam's radius per fixture group: moving heads, washes, house (roof)
 Config.LightSpread = 6.0               -- m: how far apart the spots land round the aim point
+Config.LightRandomBeats = 2            -- (1.5.0) the Random movement: beats between two places of a beam
 Config.LightMaxStrobeHz = 8.0          -- flashes per second at most in strobe mode (0 turns strobe into a pulse)
 -- the rooms the show is drawn in (players elsewhere in the building don't pay for it)
 Config.LightRooms = { bowl = true, concourse = true, tunnel = true, backstage = true }
+-- (1.5.0) the bowl in the dark (client/lights.lua): under the desk's BLACKOUT, and with the house lights OFF, a time
+-- cycle modifier over the bowl's own (mzb_arena_dark, data/mzb_timecycle.xml) takes away what still lights it with
+-- every lamp out - the room's fill (mzb_arena_int's artificial ambient lights every surface with no lamp at all), the
+-- light the game keeps on every ped, and the picture brightening as the eye gets used to the dark. blackout / houseOff:
+-- how much of it (0 .. 1); rooms: where the camera has to be. Another resource's modifier is left alone.
+Config.LightDark = { enabled = true, modifier = 'mzb_arena_dark', blackout = 1.0, houseOff = 0.75, rooms = { bowl = true } }
 Config.LightDefault = { on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120,
                         intensity = 0.8, focus = 'floor', ring = true, ringLevel = 1.0, house = 'show', ringv = 2,
-                        follow = 'off' }
+                        follow = 'auto',    -- (1.5.0) the lights follow the music (Auto) unless the desk switches it off
+                        master = 1.0 }      -- (1.5.0) the desk's Grand Master: every light's level over its own
 -- the lights follow the music (the desk's "Follow the music", /arenalights follow <off|on|tempo|colour>). Each
 -- player's own game listens to the track it is playing (html/follow.js, on the music player's sound: the kick drum's
 -- hits make the beat) and looks at the picture of the video it comes from (a YouTube track, or the screens' video
@@ -160,11 +254,35 @@ Config.LightDefault = { on = false, mode = 'static', move = 'none', colors = { {
 -- follow - no track, a pause, a file without a picture - the desk's own speed and colours stay.
 Config.LightFollow = {
     enabled = true,
-    punch = 0.35,                -- 0..1: how far the rig dips between two hits (0: only the effect shows the beat)
+    punch = 0.6,                 -- 0..1: how far the rig dips between two hits (0: only the effect shows the beat)
+    hit = 0.35,                  -- how far over full a hit throws the rig, for a moment (0: just back to full)
     dynamics = 0.25,             -- 0..1: how far a quiet passage dims the rig
+    -- the video's own picture (with colour followed): a flash in it - a strobe, a cut to bright, a white frame - flashes
+    -- the rig over full (flash) and towards white (flashWhite, 0..1); picture = 0..1, how far a dark scene dims it
+    flash = 0.8,
+    flashWhite = 0.5,
+    picture = 0.35,
     colours = 3,                 -- colour slots taken from the picture at most (1-3)
     minBpm = 80,                 -- the tempo found is kept in minBpm .. twice that (a 70 bpm song runs at 140)
     sensitivity = 1.0,           -- over 1: softer hits count as the beat too; under 1: only the hard ones
+}
+-- (1.5.0) Auto (the desk's Follow > Auto, /arenalights follow auto): colour and tempo as Both, and the looks chosen
+-- from the music by where the track is - calm (no kicks, quiet), groove (a steady kick), build-up (the kicks gone or
+-- racing while it gets louder: strobe after strobeAfter beats, the level climbing) and the drop (the kicks back
+-- hard after a build-up or a calm, flash for 4 beats then `after`, for dropBeats). A look: an effect (mode), a
+-- movement (move, or moves: one each 16 beats), a level (times the desk's Intensity) and an aim (focus)
+Config.LightAuto = {
+    quiet = 0.55,                -- under this (0..1, against the track's loudest of late) a passage is quiet
+    rise = 0.15,                 -- this much louder than 3.5 s ago is a build-up
+    roll = 3.2,                  -- hits a second over this (a snare roll, a riser) are a build-up too
+    strobeAfter = 16,
+    dropBeats = 16,
+    looks = {
+        calm   = { mode = 'fade', move = 'nod', level = 0.55, focus = { 'stage' } },
+        groove = { mode = 'chase', moves = { 'sweep', 'random', 'cross', 'fan' }, level = 0.85, focus = { 'floor', 'crowd' } },
+        build  = { mode = 'twinkle', late = 'strobe', move = 'fan', level = 0.6, focus = { 'floor' } },
+        drop   = { mode = 'flash', after = 'alternate', move = 'random', level = 1.0, focus = { 'floor', 'crowd' } },
+    },
 }
 -- the ring lights (the desk's RING LIGHTS button and its colour / level, /arenalights ring ...): the wrestling ring's,
 -- the MMA cage's and the concert stage's own lights (Config.RingLights, shared/rig_lights.lua: until 1.1.0 they were
@@ -184,13 +302,27 @@ Config.LightColors = {
     amber = { 255, 170, 0 }, yellow = { 255, 230, 20 }, green = { 20, 255, 60 }, cyan = { 0, 230, 255 },
     blue = { 20, 60, 255 }, purple = { 140, 30, 255 }, magenta = { 255, 20, 200 }, pink = { 255, 90, 150 },
 }
+-- (1.5.0) the desk's RANDOM (/arenalights random, numpad *): a new look on every light at once, picked from these -
+-- effects and movements that suit any music, colours that go together (Config.LightColors names), the aims, the bars'
+-- modes, the lasers' patterns, and how often the beams get a gobo. The ring washes and the tempo stay as they are
+Config.LightRandom = {
+    modes = { 'chase', 'pulse', 'wave', 'flash', 'alternate', 'bounce', 'twinkle', 'random', 'fade', 'rainbow' },
+    moves = { 'sweep', 'ballyhoo', 'fan', 'nod', 'cross', 'random' },
+    colours = { { 'red', 'blue' }, { 'magenta', 'cyan' }, { 'purple', 'amber' }, { 'blue', 'cyan' }, { 'red', 'white' },
+                { 'orange', 'purple' }, { 'green', 'blue' }, { 'pink', 'purple', 'cyan' }, { 'red', 'amber', 'yellow' },
+                { 'blue', 'white' }, { 'magenta', 'blue' }, { 'cyan', 'green' } },
+    focus = { { 'floor' }, { 'crowd' }, { 'floor', 'crowd' }, { 'stage', 'crowd' }, { 'floor', 'stage' } },
+    bars = { 'chase', 'pulse', 'steady' },
+    lasers = { 'fan', 'sweep', 'tunnel', 'scan', 'chase' },
+    gobo = 0.35,
+}
 -- one-touch looks (the desk's preset buttons, /arenalights preset <name>); nil fields keep what is set. mood = the
 -- crowd's mood that goes with the look (Config.CrowdMoods; Config.CrowdPresetMoods = false: looks leave the crowd be);
 -- screen = the video screens' look with it (Config.Media.looks, or 'off' = dark, 'own' = the show's own graphics;
 -- only while the screens show a look or nothing)
 Config.LightPresets = {
     walkin    = { label = 'Walk-in',   on = true,  mode = 'pulse', move = 'none',    colors = { { 20, 60, 255 }, { 140, 30, 255 } }, bpm = 50,  focus = 'crowd', house = 'dim', mood = 'doors', screen = 'show' },
-    entrance  = { label = 'Entrance',  on = true,  mode = 'sweep', move = 'none',    colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 128, focus = 'stage', house = 'off', mood = 'peak', screen = 'pulse' },
+    entrance  = { label = 'Entrance',  on = true,  mode = 'sweep', move = 'none',    colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 128, focus = 'stage', house = 'off', mood = 'peak', screen = 'pulse', haze = 0.4, fogBurst = 5 },
     goal      = { label = 'Goal!',     on = true,  mode = 'strobe', move = 'none',   colors = { { 255, 24, 24 }, { 255, 255, 255 } }, bpm = 150, focus = 'floor', house = 'off', mood = 'cheer', screen = 'colour' },
     concert   = { label = 'Concert',   on = true,  mode = 'chase', move = 'none',    colors = { { 255, 20, 200 }, { 0, 230, 255 }, { 255, 255, 255 } }, bpm = 124, focus = 'stage', house = 'off', mood = 'show', screen = 'stripes' },
     party     = { label = 'Party',     on = true,  mode = 'rainbow', move = 'none',  bpm = 128, focus = 'floor', house = 'off', mood = 'peak', screen = 'bars' },
@@ -199,15 +331,87 @@ Config.LightPresets = {
     tv        = { label = 'TV ring',   on = false, ring = true, house = 'dim' },
     storm     = { label = 'Storm',     on = true,  mode = 'lightning', move = 'none', colors = { { 20, 60, 255 } }, bpm = 90, focus = { 'floor', 'crowd' }, house = 'off', screen = 'colour' },
     inferno   = { label = 'Inferno',   on = true,  mode = 'fire',     move = 'nod', bpm = 70, focus = { 'stage', 'crowd' }, house = 'off', screen = 'waves' },
-    hype      = { label = 'Hype',      on = true,  mode = 'flash',    move = 'fan', colors = { { 255, 255, 255 }, { 255, 170, 0 } }, bpm = 128, focus = { 'floor', 'crowd' }, house = 'off', mood = 'peak', screen = 'bars' },
+    hype      = { label = 'Hype',      on = true,  mode = 'flash',    move = 'fan', colors = { { 255, 255, 255 }, { 255, 170, 0 } }, bpm = 128, focus = { 'floor', 'crowd' }, house = 'off', mood = 'peak', screen = 'bars', bars = { on = true, mode = 'chase' } },
     houseup   = { label = 'House up',  on = false, house = 'full', mood = 'cheer' },
-    blackout  = { label = 'Blackout',  on = false, ring = false, house = 'off', screen = 'off' },
-    reset     = { label = 'Reset',     on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120, intensity = 0.8, focus = 'floor', ring = false, house = 'show', follow = 'off', screen = 'own' },
+    blackout  = { label = 'Blackout',  on = false, ring = false, house = 'off', screen = 'off', lasers = { on = false }, bars = { on = false } },
+    reset     = { label = 'Reset',     on = false, mode = 'static', move = 'none', colors = { { 255, 255, 255 } }, bpm = 120, intensity = 0.8, focus = 'floor', ring = false, house = 'show', follow = 'auto', screen = 'own', lasers = { on = false }, gobo = false, bars = { on = false }, haze = 0, fog = { on = false }, master = 1.0, bo = false },
+    -- (1.5.0) the looks of the shows' own running orders (Config.LightPresetsByKind)
+    intros    = { label = 'Intros',    on = true,  mode = 'static', move = 'sweep',  colors = { { 255, 255, 255 }, { 20, 60, 255 } }, bpm = 60, focus = { 'stage', 'floor' }, house = 'off', mood = 'show', screen = 'show', haze = 0.35 },
+    finisher  = { label = 'Finisher',  on = true,  mode = 'strobe', move = 'cross',  colors = { { 255, 255, 255 }, { 255, 24, 24 } }, bpm = 160, focus = { 'floor', 'crowd' }, house = 'off', mood = 'peak', screen = 'colour' },
+    winner    = { label = 'Winner',    on = true,  mode = 'chase',  move = 'fan',    colors = { { 255, 170, 0 }, { 255, 255, 255 } }, bpm = 110, focus = { 'floor', 'crowd' }, house = 'dim', mood = 'cheer', screen = 'waves' },
+    intro     = { label = 'Intro',     on = true,  mode = 'fade',   move = 'nod',    colors = { { 20, 60, 255 }, { 140, 30, 255 } }, bpm = 60, focus = 'stage', house = 'off', mood = 'show', screen = 'show', haze = 0.5 },
+    verse     = { label = 'Verse',     on = true,  mode = 'wave',   move = 'nod',    colors = { { 255, 196, 120 }, { 255, 20, 200 } }, bpm = 90, focus = 'stage', house = 'off', mood = 'show', screen = 'waves', follow = 'tempo', haze = 0.4 },
+    chorus    = { label = 'Chorus',    on = true,  mode = 'chase',  move = 'fan',    colors = { { 255, 20, 200 }, { 0, 230, 255 }, { 255, 255, 255 } }, bpm = 128, focus = { 'stage', 'crowd' }, house = 'off', mood = 'peak', screen = 'bars', follow = 'tempo', bars = { on = true, mode = 'chase' }, haze = 0.4 },
+    ballad    = { label = 'Ballad',    on = true,  mode = 'static', move = 'sweep',  colors = { { 255, 196, 120 } }, bpm = 40, intensity = 0.5, focus = 'stage', house = 'dim', mood = 'show', screen = 'show', follow = 'off', haze = 0.6 },
+    drop      = { label = 'Drop',      on = true,  mode = 'strobe', move = 'cross',  colors = { { 255, 255, 255 }, { 0, 230, 255 } }, bpm = 128, intensity = 1.0, focus = { 'floor', 'crowd' }, house = 'off', mood = 'peak', screen = 'colour', follow = 'tempo', lasers = { on = true, pattern = 'tunnel' }, bars = { on = true, mode = 'video' }, haze = 0.6, fogBurst = 6 },
+    encore    = { label = 'Encore',    on = true,  mode = 'rainbow', move = 'fan',   bpm = 120, focus = { 'stage', 'crowd' }, house = 'off', mood = 'cheer', screen = 'stripes', follow = 'tempo', bars = { on = true, mode = 'chase' }, haze = 0.4 },
+    warmup    = { label = 'Warm-up',   on = true,  mode = 'pulse',  move = 'nod',    colors = { { 140, 30, 255 }, { 20, 60, 255 } }, bpm = 118, focus = { 'floor', 'crowd' }, house = 'dim', mood = 'doors', screen = 'waves', follow = 'tempo', lasers = { on = true, pattern = 'fan' }, haze = 0.3 },
+    build     = { label = 'Build-up',  on = true,  mode = 'twinkle', move = 'fan',   colors = { { 255, 255, 255 }, { 140, 30, 255 } }, bpm = 140, focus = 'floor', house = 'off', mood = 'show', screen = 'stripes', follow = 'tempo', lasers = { on = true, pattern = 'scan' }, haze = 0.5 },
+    visuals   = { label = 'Visuals',   on = true, mode = 'alternate', move = 'cross', bpm = 128, focus = { 'floor', 'crowd' }, house = 'off', mood = 'peak', follow = 'both', lasers = { on = true, pattern = 'sweep' }, bars = { on = true, mode = 'video' }, haze = 0.5 },
+    lineup    = { label = 'Line-ups',  on = true,  mode = 'chase',  move = 'sweep',  colors = { { 255, 24, 24 }, { 255, 255, 255 }, { 20, 60, 255 } }, bpm = 100, focus = 'floor', house = 'off', mood = 'show', screen = 'pulse' },
+    gameon    = { label = 'Game on',   on = false, house = 'full', mood = 'show', screen = 'own', follow = 'off' },
+    timeout   = { label = 'Time-out',  on = true,  mode = 'pulse',  move = 'none',   colors = { { 255, 170, 0 }, { 255, 20, 200 } }, bpm = 100, focus = 'crowd', house = 'dim', mood = 'cheer', screen = 'bars' },
+    raceon    = { label = 'Racing',    on = false, house = 'full', mood = 'show', screen = 'own', follow = 'off' },
+    freestyle = { label = 'Freestyle', on = true,  mode = 'alternate', move = 'ballyhoo', colors = { { 255, 110, 0 }, { 255, 255, 255 } }, bpm = 120, focus = 'floor', house = 'dim', mood = 'peak', screen = 'bars' },
+    crush     = { label = 'Crush!',    on = true,  mode = 'flash',  move = 'fan',    colors = { { 255, 110, 0 }, { 255, 24, 24 } }, bpm = 140, focus = 'floor', house = 'dim', mood = 'peak', screen = 'colour' },
+    grid      = { label = 'Grid',      on = true, mode = 'static', move = 'none',  colors = { { 255, 24, 24 } }, bpm = 60, focus = 'floor', house = 'dim', mood = 'show', screen = 'colour' },
+    green     = { label = 'Green flag', on = true, mode = 'flash',  move = 'none',   colors = { { 20, 255, 60 } }, bpm = 150, focus = { 'floor', 'crowd' }, house = 'full', mood = 'cheer', screen = 'colour' },
+    caution   = { label = 'Caution',   on = true,  mode = 'pulse',  move = 'none',   colors = { { 255, 230, 20 } }, bpm = 90, focus = 'floor', house = 'full', screen = 'colour' },
+    chequered = { label = 'Chequered', on = true,  mode = 'alternate', move = 'none', colors = { { 255, 255, 255 } }, bpm = 200, focus = 'floor', house = 'full', mood = 'cheer', screen = 'stripes' },
+    session   = { label = 'Session',   on = true,  mode = 'wave',   move = 'sweep',  colors = { { 0, 230, 255 }, { 255, 20, 200 } }, bpm = 110, focus = { 'floor', 'crowd' }, house = 'dim', mood = 'show', screen = 'waves', follow = 'tempo' },
+    besttrick = { label = 'Best trick', on = true, mode = 'strobe', move = 'cross',  colors = { { 255, 255, 255 }, { 255, 230, 20 } }, bpm = 150, focus = 'floor', house = 'dim', mood = 'peak', screen = 'colour' },
 }
+-- every look, in the order the full list shows them (/arenalights preset, the desk's "All looks")
 Config.LightPresetOrder = { 'walkin', 'entrance', 'goal', 'concert', 'party', 'fight', 'police', 'tv', 'storm', 'inferno',
-                            'hype', 'houseup', 'blackout', 'reset' }
--- the interior's house light sets the desk's house buttons switch (full / dim; off = neither)
+                            'hype', 'houseup', 'blackout', 'reset',
+                            'intros', 'finisher', 'winner', 'intro', 'verse', 'chorus', 'ballad', 'drop', 'encore',
+                            'warmup', 'build', 'visuals', 'lineup', 'gameon', 'timeout', 'raceon', 'freestyle', 'crush',
+                            'grid', 'green', 'caution', 'chequered', 'session', 'besttrick' }
+-- (1.5.0) the desk's Presets follow the show: each kind of show has its own running order of looks, in order, and
+-- the desk changes with the show while it is open. The rest stay a click away under "All looks". A show that is not
+-- named here (the empty house, the open floor, a show of your own) gets Config.LightPresetOrder.
+Config.ShowKinds = { wrestling = 'fight', mma = 'fight', concert = 'concert', dj = 'dj', hockey = 'sport',
+                     basketball = 'sport', tennis = 'sport', monster = 'motor', motocross = 'motor', karting = 'race',
+                     sprint = 'race', oval = 'race', skatepark = 'skate' }
+Config.LightPresetsByKind = {
+    fight   = { label = 'Fight night', 'walkin', 'entrance', 'intros', 'fight', 'finisher', 'winner', 'tv', 'inferno', 'hype', 'houseup', 'reset' },
+    concert = { label = 'Concert', 'walkin', 'intro', 'verse', 'chorus', 'ballad', 'drop', 'encore', 'concert', 'storm', 'inferno', 'houseup', 'reset' },
+    dj      = { label = 'DJ set', 'walkin', 'warmup', 'build', 'drop', 'visuals', 'party', 'hype', 'storm', 'ballad', 'houseup', 'reset' },
+    sport   = { label = 'Game day', 'walkin', 'lineup', 'gameon', 'goal', 'timeout', 'police', 'hype', 'winner', 'houseup', 'reset' },
+    motor   = { label = 'Motor show', 'walkin', 'lineup', 'raceon', 'freestyle', 'crush', 'winner', 'hype', 'storm', 'houseup', 'reset' },
+    race    = { label = 'Race day', 'walkin', 'grid', 'green', 'raceon', 'caution', 'chequered', 'winner', 'hype', 'houseup', 'reset' },
+    skate   = { label = 'Skate jam', 'walkin', 'session', 'besttrick', 'party', 'hype', 'winner', 'houseup', 'reset' },
+}
+-- (1.5.0) the desk's cue lists (the Cues tab, /arenacue, server/cues.lua): a list per kind of show
+-- (Config.ShowKinds), kept on the server. A cue: a name, a YouTube link or an audio file (on the screens with its
+-- sound from the speakers, or the music alone), a light look, a pyro cue. GO (the numpad's + / Enter) fires the next;
+-- a set list with Auto next goes on when a track ends. kinds: what the tab is called for that kind of show, what a
+-- cue is called, the look a new cue gets, whether Auto next starts on, whether the pyro is offered
+Config.Cues = {
+    command = 'arenacue',
+    access = nil,                -- an ACE, false = anyone, nil = the light desk's (Config.LightAccess)
+    max = 60,                    -- cues in a list at most
+    kinds = {
+        fight   = { title = 'Entrances', item = 'Wrestler or fighter', preset = 'entrance', auto = false, pyro = true },
+        concert = { title = 'Set list', item = 'Song', preset = '', auto = true, pyro = true },
+        dj      = { title = 'Set list', item = 'Track', preset = '', auto = true, pyro = true },
+        sport   = { title = 'Game cues', item = 'Cue (line-ups, goal song, half time ...)', preset = '', auto = false, pyro = false },
+        motor   = { title = 'Run of show', item = 'Cue (driver intro, heat ...)', preset = '', auto = false, pyro = false },
+        race    = { title = 'Run of show', item = 'Cue (grid, podium ...)', preset = '', auto = false, pyro = false },
+        default = { title = 'Cues', item = 'Cue', preset = '', auto = false, pyro = true },
+    },
+}
+-- the interior's house light sets (full / dim): a show's list names one as its own house level. (1.5.0) They stay
+-- off in the interior - switching an entity set rebuilds it, and the arena vanished for a few frames at every look -
+-- and client/lights.lua draws their lights instead (shared/house_lights.lua), at the desk's house setting: the show's
+-- own, full, dimmed or off (BLACKOUT: off), fading over HouseLightFade s. HouseLightScale: times the build's
+-- brightness (1 = as they were baked).
 Config.HouseSets = { full = 'mzb_set_house_lights', dim = 'mzb_set_house_lights_dim' }
+Config.HouseLightFade = 1.5
+Config.HouseLightScale = 1.0
+-- (1.5.0) sets still in the interior that no show uses any more: switched off wherever a game still has one on (a
+-- resource restarted without the players reconnecting). The MMA show's stage and LED wall went on 2026-10-29.
+Config.RetiredSets = { 'mzb_set_mma_stage' }
 
 -- ------------------------------------------------------------------ the hockey rink's ice (client/ice.lua)
 -- On foot the rink is slippery while the hockey show is up: you keep your momentum (glide, overshoot, drift through
@@ -252,8 +456,8 @@ Config.Media = {
     -- browser's own sound, which is not placed in the room (the same in both ears
     -- wherever you stand; the two settings below are its level); 'off' = videos are silent
     sound = 'speakers',
-    volume = 0.6,                -- 'screen' only: the video's loudness at 100% on the desk, in the bowl
-    defaultVolume = 60,          -- 'screen' only: the desk's volume a new video starts at (0-100)
+    volume = 0.9,                -- 'screen' only: the video's loudness at 100% on the desk, in the bowl
+    defaultVolume = 80,          -- 'screen' only: the desk's volume a new video starts at (0-100)
     -- a new video starts this many seconds after the Play: every player's game has it loaded by then, so it starts
     -- at its start for all of them together (0: at once - the first second or so is lost while it loads)
     leadIn = 2.5,
@@ -266,7 +470,8 @@ Config.Media = {
     -- a video that stops takes the show lights out with it: faded out with the picture (Fade out), or over
     -- lightsFade seconds when it is switched off or comes to its end (0 = cut). A video that has ended is switched
     -- off: the screens go to Off instead of sitting on its last frame (a looped one starts again: the screens stay
-    -- on and the lights as they are). false: the lights are left as they are
+    -- on and the lights as they are). false: the lights are left as they are. (1.5.0) The next video or track brings
+    -- them back on as its sound begins (server/lights.lua: also whenever the desk is on AUTO)
     lightsOut = true,
     lightsFade = 2.0,
     -- Off (the desk's button, /arenascreen off, a blackout) makes the screens dark: a black picture over the show's
@@ -294,6 +499,7 @@ Config.Media = {
         wrestling = { 'img/sapw_tron.jpg', 'img/sapw_live.jpg', 'img/sapw_neon.jpg', 'img/sapw_banner.jpg',
                       'img/arena_coming_up.jpg', 'img/arena_sprunk.jpg' },
         concert = { 'img/sirens_poster.jpg', 'img/sirens_live.jpg', 'img/arena_coming_up.jpg', 'img/arena_ecola.jpg' },
+        dj = { 'img/bassbeach_wall.jpg', 'img/arena_coming_up.jpg', 'img/arena_sprunk.jpg' },
         mma = { 'img/safc_wall.jpg', 'img/safc_live.jpg', 'img/arena_coming_up.jpg', 'img/arena_fame.jpg' },
         hockey = { 'img/hockey_live.jpg', 'img/arena_welcome.jpg', 'img/arena_coming_up.jpg', 'img/arena_sprunk.jpg' },
         basketball = { 'img/basketball_live.jpg', 'img/arena_welcome.jpg', 'img/arena_coming_up.jpg', 'img/arena_ecola.jpg' },
@@ -308,10 +514,11 @@ Config.Media = {
     -- a look's artwork and title per show; a show that is not named here (the big-floor shows: there is no artwork
     -- for them yet) gets the house's
     backdrops = { wrestling = 'img/sapw_tron.jpg', concert = 'img/sirens_poster.jpg', mma = 'img/safc_wall.jpg',
+                  dj = 'img/bassbeach_wall.jpg',
                   hockey = 'img/hockey_live.jpg', basketball = 'img/basketball_live.jpg', tennis = 'img/tennis_live.jpg',
                   house = 'img/arena_welcome.jpg' },
     logos = { wrestling = 'img/sapw_neon.jpg' },   -- the logo over a look (its black is see-through); else the title
-    titles = { wrestling = 'SAPW', concert = 'SIRENS OF SAN ANDREAS', mma = 'SAFC', hockey = 'DUST DEVILS',
+    titles = { wrestling = 'SAPW', concert = 'SIRENS OF SAN ANDREAS', mma = 'SAFC', hockey = 'DUST DEVILS', dj = 'BASS BEACH',
                basketball = 'LOS SANTOS PANIC', tennis = 'MAZE BANK OPEN', house = 'MAZE BANK ARENA' },
     -- a camera feed: a player's own view of the game, live on the screens (/arenascreen look = yours, /arenascreen
     -- look <player id> = theirs, the desk's "My camera"; /arenascreen look off, which the player whose view it is may
@@ -352,13 +559,14 @@ Config.Music = {
     enabled = true,
     command = 'arenamusic',
     access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
-    volume = 0.8,                -- the loudness at 100% on the desk, next to a speaker
+    volume = 1.0,                -- the loudness at 100% on the desk, next to a speaker (0.8 before 1.5.0)
     -- how many times louder the whole of it is turned up after the speakers, the walls, the reverb and the echo (so
-    -- their balance stays as it is): 1 = as before the setting, 2 = twice the level (+6 dB), 3 = +9.5 dB. A limiter
-    -- behind it holds the loudest peaks, so a hot track gets denser instead of crackling. The screens' video sound
-    -- goes the same way (Config.Media.sound = 'speakers')
-    boost = 2.0,
-    defaultVolume = 70,          -- the desk's volume (0-100) when the resource starts
+    -- their balance stays as it is): 1 = the level of 1.1.1, 2 = twice that (+6 dB), 2.5 = +8 dB, 3 = +9.5 dB. A
+    -- limiter behind it holds the loudest peaks, so a hot track gets denser instead of crackling. The screens' video
+    -- sound goes the same way (Config.Media.sound = 'speakers'). (1.5.0: 2.5, the desk at 85 and the speakers
+    -- carrying further - about +8 dB in the upper tier against 1.4)
+    boost = 2.5,
+    defaultVolume = 85,          -- the desk's volume (0-100) when the resource starts
     range = 200.0,               -- m from the arena's middle: the audio is loaded only this close
     resync = 30,                 -- s between two position checks (a drifting player seeks back)
     -- a new track starts this many seconds after the Play: every player's game has it loaded by then, so nobody
@@ -369,8 +577,8 @@ Config.Music = {
     -- for the one that is playing. A stream has no end to start again from
     loop = false,
     fade = 3.0,                  -- s a fade-out takes (the desk's Fade out; /arenamusic fade [seconds])
-    refDistance = 12.0,          -- m from a speaker at which its level starts to fall
-    rolloff = 0.7,               -- how fast it falls past that (1 = halved at twice the distance; less = gentler)
+    refDistance = 16.0,          -- m from a speaker at which its level starts to fall
+    rolloff = 0.6,               -- how fast it falls past that (1 = halved at twice the distance; less = gentler)
     panning = 'HRTF',            -- 'HRTF' (left / right / behind, best on headphones) or 'equalpower' (left / right)
     -- the arena's sound on top of the speakers: a reverb (its length, the gap before it starts) and one echo off the
     -- far end (its delay, how much of it comes round again, its level). echo = false: the reverb only
@@ -405,16 +613,21 @@ Config.Music = {
     -- (the big-floor shows: floor, monster, motocross, karting, sprint, oval, skatepark) plays from the house's: the
     -- centre-hung board
     speakers = {
-        wrestling = { vector3(-335.059, -1969.540, 30.75), vector3(-323.370, -1979.349, 30.75),      -- the line arrays
-                      vector3(-313.561, -1967.660, 30.75), vector3(-325.250, -1957.851, 30.75) },    -- under the ring truss
-        mma = { vector3(-335.059, -1969.540, 28.75), vector3(-323.370, -1979.349, 28.75),
-                vector3(-313.561, -1967.660, 28.75), vector3(-325.250, -1957.851, 28.75) },
+        wrestling = { vector3(-334.720, -1969.511, 30.75), vector3(-323.399, -1979.010, 30.75),      -- the line arrays
+                      vector3(-313.900, -1967.689, 30.75), vector3(-325.221, -1958.190, 30.75) },    -- under the halo
+        mma = { vector3(-333.524, -1969.406, 28.75), vector3(-323.504, -1977.814, 28.75),             -- under the grid's
+                vector3(-315.096, -1967.794, 28.75), vector3(-325.116, -1959.386, 28.75) },           -- corners
         concert = { vector3(-347.541, -1966.338, 29.70), vector3(-330.572, -1946.115, 29.70),         -- the PA hangs
                     { vector3(-345.294, -1962.415, 19.88), 0.3 }, { vector3(-343.044, -1959.734, 19.88), 0.3 },   -- the subs
                     { vector3(-340.794, -1957.053, 19.88), 0.3 }, { vector3(-338.544, -1954.372, 19.88), 0.3 },   -- under the
                     { vector3(-336.295, -1951.690, 19.88), 0.3 }, { vector3(-334.045, -1949.009, 19.88), 0.3 },   -- stage's lip
                     { vector3(-347.811, -1955.381, 21.95), 0.2 }, { vector3(-341.525, -1947.889, 21.75), 0.2 },   -- the band's
                     { vector3(-338.650, -1945.863, 21.45), 0.2 } },                                               -- backline
+        dj = { vector3(-347.541, -1966.338, 29.70), vector3(-330.572, -1946.115, 29.70),              -- the PA hangs
+               { vector3(-345.294, -1962.415, 19.88), 0.3 }, { vector3(-343.044, -1959.734, 19.88), 0.3 },   -- the subs
+               { vector3(-340.794, -1957.053, 19.88), 0.3 }, { vector3(-338.544, -1954.372, 19.88), 0.3 },   -- under the
+               { vector3(-336.295, -1951.690, 19.88), 0.3 }, { vector3(-334.045, -1949.009, 19.88), 0.3 },   -- stage's lip
+               { vector3(-343.221, -1955.278, 23.30), 0.2 }, { vector3(-340.714, -1952.290, 23.30), 0.2 } }, -- the DJ's monitors
         hockey = { vector3(-324.310, -1968.600, 33.0) },                                              -- the centre-hung board
         basketball = { vector3(-324.310, -1968.600, 33.0) },
         tennis = { vector3(-324.310, -1968.600, 33.0) },
@@ -486,12 +699,7 @@ Config.LightRigExtra = {
         { -342.299, -1949.589, 21.350, 0.231, -0.194, 0.954, 4 },
         { -340.370, -1947.291, 21.350, 0.231, -0.194, 0.954, 4 },
     },
-    mma = {
-        { -348.084, -1956.484, 21.350, 0.231, -0.194, 0.954, 4 },    -- floor beams, back of the stage
-        { -346.156, -1954.186, 21.350, 0.231, -0.194, 0.954, 4 },
-        { -342.299, -1949.589, 21.350, 0.231, -0.194, 0.954, 4 },
-        { -340.370, -1947.291, 21.350, 0.231, -0.194, 0.954, 4 },
-    },
+    -- (1.5.0: the MMA show's four floor beams went with its stage)
 }
 
 -- the ramp lights: small fixtures along the wrestling ramp's two top edges (on its LED strips), each grazing across
@@ -718,8 +926,9 @@ Config.Fights = {
 }
 
 -- ------------------------------------------------------------------ pyro (client/pyro.lua, server/pyro.lua)
--- The pyro of the shows with a stage (wrestling, concert, MMA), fired from the desk's Pyro section or
--- /arenapyro <cue | list> [small | big] [colour]: flames, sparks, comets and smoke from the stage's lip, sparks and
+-- The pyro of the shows with a stage (wrestling, concert) and of the MMA walkout (its event tunnel, 1.5.0), fired from
+-- the desk's Pyro section or /arenapyro <cue | list> [small | big] [colour]: flames, sparks, comets and smoke from the
+-- stage's lip (MMA: the tunnel's mouth and notch), sparks and
 -- flames down the ramp and on the ring posts (the cage's posts), fireworks, a waterfall and a rain of sparks from
 -- overhead, confetti and money over the ring. Every player in the arena sees a cue at the same moment; it is the
 -- game's own particle effects (no damage, no fire). A cue is a list of steps:
@@ -786,34 +995,37 @@ Config.Pyro = {
                          vector3(-330.588, -1969.859, 30.00), vector3(-324.160, -1962.199, 30.00),
                          vector3(-344.637, -1959.376, 31.50), vector3(-336.923, -1950.184, 31.50) },
         },
+        -- (1.5.0) no stage: the walkout from the event tunnel - flames either side of its mouth (the fog machines
+        -- too, Config.Fog.machineFrom), a gauntlet in its open notch, sparks falling from its lintel in front of the
+        -- curtain (truss), the runner's two edges to the cage (ramp), bursts and confetti over the runner
         mma = {
-            flames = { vector3(-343.198, -1957.973, 21.15), vector3(-338.056, -1951.844, 21.15) },   -- either side of the walkway's head
-            mortars = { vector3(-347.339, -1963.375, 21.15), vector3(-333.455, -1946.828, 21.15),
-                        vector3(-345.796, -1961.536, 21.15), vector3(-334.998, -1948.667, 21.15),
-                        vector3(-344.254, -1959.698, 21.15), vector3(-336.540, -1950.505, 21.15),
-                        vector3(-342.711, -1957.859, 21.15), vector3(-338.083, -1952.344, 21.15) },
-            ramp = { vector3(-339.414, -1957.819, 19.60), vector3(-337.550, -1955.598, 19.60),
-                     vector3(-337.805, -1959.169, 19.60), vector3(-335.941, -1956.948, 19.60),
-                     vector3(-336.196, -1960.519, 19.60), vector3(-334.332, -1958.297, 19.60),
-                     vector3(-334.588, -1961.869, 19.60), vector3(-332.724, -1959.647, 19.60),
-                     vector3(-332.979, -1963.219, 19.60), vector3(-331.115, -1960.997, 19.60),
-                     vector3(-331.370, -1964.568, 19.60), vector3(-329.506, -1962.347, 19.60) },   -- the walkway's two edges, from the stage to the cage
+            flames = { vector3(-348.978, -1951.948, 19.60), vector3(-344.992, -1947.199, 19.60) },   -- either side of the tunnel's mouth
+            mortars = { vector3(-349.889, -1950.857, 19.60), vector3(-346.225, -1946.490, 19.60),
+                        vector3(-351.575, -1949.443, 19.60), vector3(-347.911, -1945.076, 19.60),
+                        vector3(-353.260, -1948.029, 19.60), vector3(-349.596, -1943.662, 19.60),
+                        vector3(-354.945, -1946.614, 19.60), vector3(-351.281, -1942.248, 19.60) },   -- along the notch's walls
+            ramp = { vector3(-346.691, -1951.713, 19.60), vector3(-344.827, -1949.491, 19.60),
+                     vector3(-343.780, -1954.155, 19.60), vector3(-341.916, -1951.934, 19.60),
+                     vector3(-340.869, -1956.598, 19.60), vector3(-339.005, -1954.376, 19.60),
+                     vector3(-337.958, -1959.040, 19.60), vector3(-336.094, -1956.819, 19.60),
+                     vector3(-335.047, -1961.483, 19.60), vector3(-333.183, -1959.262, 19.60),
+                     vector3(-332.136, -1963.926, 19.60), vector3(-330.272, -1961.704, 19.60) },   -- the runner's two edges, from the tunnel to the cage
             posts = { vector3(-319.513, -1970.113, 22.70), vector3(-319.848, -1966.277, 22.70),
                       vector3(-322.797, -1963.803, 22.70), vector3(-326.633, -1964.138, 22.70),
                       vector3(-329.107, -1967.087, 22.70), vector3(-328.772, -1970.923, 22.70),
                       vector3(-325.823, -1973.397, 22.70), vector3(-321.987, -1973.062, 22.70) },   -- the cage's posts
-            over = { vector3(-346.429, -1959.178, 28.55), vector3(-341.929, -1953.816, 28.55),
-                     vector3(-337.430, -1948.454, 28.55) },
-            truss = { vector3(-347.714, -1960.710, 28.55), vector3(-345.786, -1958.412, 28.55),
-                      vector3(-343.857, -1956.114, 28.55), vector3(-341.929, -1953.816, 28.55),
-                      vector3(-340.001, -1951.518, 28.55), vector3(-338.072, -1949.220, 28.55),
-                      vector3(-336.144, -1946.921, 28.55) },
+            over = { vector3(-342.695, -1953.173, 28.55), vector3(-338.099, -1957.030, 28.55),
+                     vector3(-333.503, -1960.887, 28.55) },   -- over the runner
+            truss = { vector3(-355.693, -1946.183, 24.05), vector3(-355.050, -1945.417, 24.05),
+                      vector3(-354.407, -1944.651, 24.05), vector3(-353.764, -1943.885, 24.05),
+                      vector3(-353.122, -1943.119, 24.05), vector3(-352.479, -1942.353, 24.05),
+                      vector3(-351.836, -1941.587, 24.05) },   -- the event tunnel's lintel, in front of its curtain
             above = { vector3(-328.536, -1968.970, 28.55), vector3(-324.680, -1964.374, 28.55),
                       vector3(-323.940, -1972.826, 28.55), vector3(-320.084, -1968.230, 28.55),
                       vector3(-324.310, -1968.600, 28.55) },   -- over the cage
             confetti = { vector3(-328.536, -1968.970, 28.55), vector3(-324.680, -1964.374, 28.55),
                          vector3(-323.940, -1972.826, 28.55), vector3(-320.084, -1968.230, 28.55),
-                         vector3(-344.637, -1959.376, 26.05), vector3(-336.923, -1950.184, 26.05) },
+                         vector3(-341.163, -1954.459, 28.55), vector3(-335.035, -1959.601, 28.55) },
         },
     },
     effects = {
@@ -829,18 +1041,23 @@ Config.Pyro = {
         crackle  = { asset = 'proj_xmas_firework', name = 'scr_firework_xmas_repeat_burst_rgw', scale = 0.3, light = { 255, 240, 220 } },
         sparkler = { asset = 'scr_ih_club', name = 'scr_ih_club_sparkler', scale = 2.5, loop = 5.0, light = { 255, 230, 180 } },
         smoke    = { asset = 'scr_ba_club', name = 'scr_ba_club_smoke_machine', scale = 1.2, loop = 3.0 },
+        -- (1.5.0) a CO2 jet: the clubs' fog machine pointed straight up (rot: x, y, z deg) for a short blast (unseen:
+        -- if it blows sideways, turn rot)
+        co2      = { asset = 'scr_ba_club', name = 'scr_ba_club_smoke_machine', scale = 3.5, loop = 0.9, rot = { 90.0, 0.0, 0.0 } },
         puff     = { asset = 'scr_rcbarry2', name = 'scr_clown_appears', scale = 1.0 },
         confetti = { asset = 'scr_xs_celebration', name = 'scr_xs_confetti_burst', scale = 1.6 },
         money    = { asset = 'scr_xs_celebration', name = 'scr_xs_money_rain', scale = 1.2, loop = 6.0 },
     },
     -- the desk's buttons, in this order (a new group starts where the cues' group changes)
-    order = { 'flames', 'firewall', 'blueflames', 'longburn', 'gerbs', 'chase', 'sweep', 'smoke',
+    order = { 'flames', 'firewall', 'flamechase', 'blueflames', 'longburn', 'gerbs', 'chase', 'sweep', 'smoke',
+              'co2', 'co2line', 'co2chase',
               'ramp', 'rampfire', 'posts', 'postfire', 'sparklers',
               'burst', 'shells', 'crackle', 'waterfall', 'sparkrain', 'puffs', 'confetti', 'money',
-              'entrance', 'bighit', 'rapid', 'winner', 'inferno', 'finale' },
+              'entrance', 'bighit', 'drop', 'rapid', 'winner', 'inferno', 'finale' },
     cues = {
         flames     = { label = 'Flames',      group = 'Stage', steps = { { units = 'flames', fx = 'flame' } } },
         firewall   = { label = 'Fire wall',   group = 'Stage', steps = { { units = 'mortars', fx = 'flame', scale = 0.8 } } },
+        flamechase = { label = 'Flame chase', group = 'Stage', steps = { { units = 'mortars', fx = 'flame', scale = 0.6, loop = 0.6, stagger = 0.12 } } },
         blueflames = { label = 'Blue flames', group = 'Stage', steps = { { units = 'flames', fx = 'blue' } } },
         longburn   = { label = 'Long burn',   group = 'Stage', steps = { { units = 'flames', fx = 'longburn' } } },
         gerbs      = { label = 'Sparks',      group = 'Stage', steps = { { units = 'mortars', fx = 'gerb' } } },
@@ -848,6 +1065,9 @@ Config.Pyro = {
         sweep      = { label = 'Sweep',       group = 'Stage', steps = { { units = 'mortars', fx = 'comet', stagger = 0.1,
                                                                          pick = { 1, 3, 5, 7, 8, 6, 4, 2 } } } },   -- one end to the other
         smoke      = { label = 'Smoke',       group = 'Stage', steps = { { units = 'flames', fx = 'smoke' } } },
+        co2        = { label = 'CO2 jets',    group = 'Stage', steps = { { units = 'flames', fx = 'co2' } } },
+        co2line    = { label = 'CO2 line',    group = 'Stage', steps = { { units = 'mortars', fx = 'co2', scale = 0.8 } } },
+        co2chase   = { label = 'CO2 chase',   group = 'Stage', steps = { { units = 'mortars', fx = 'co2', scale = 0.8, stagger = 0.12 } } },
         ramp       = { label = 'Ramp sparks', group = 'Ramp and ring', steps = { { units = 'ramp', fx = 'gerb', stagger = 0.09 } } },
         rampfire   = { label = 'Ramp flames', group = 'Ramp and ring', steps = { { units = 'ramp', fx = 'flame', scale = 0.5, loop = 1.0, stagger = 0.09 } } },
         posts      = { label = 'Post sparks', group = 'Ramp and ring', steps = { { units = 'posts', fx = 'gerb' } } },
@@ -870,6 +1090,9 @@ Config.Pyro = {
         bighit     = { label = 'Big hit',     group = 'Sequences',
                        steps = { { units = 'flames', fx = 'flame' }, { units = 'mortars', fx = 'comet' },
                                  { units = 'over', fx = 'burst' } } },
+        drop       = { label = 'The drop',    group = 'Sequences',     -- (1.5.0) CO2 on the hit, flames, then the bursts
+                       steps = { { units = 'mortars', fx = 'co2', scale = 0.9 }, { units = 'flames', fx = 'flame', at = 0.15 },
+                                 { units = 'over', fx = 'burst', at = 0.4, stagger = 0.12 } } },
         rapid      = { label = 'Rapid fire',  group = 'Sequences',
                        steps = { { units = 'mortars', fx = 'comet', stagger = 0.07 },
                                  { units = 'mortars', fx = 'comet', stagger = 0.07, at = 0.7, reverse = true },
@@ -933,8 +1156,8 @@ Config.StowedProps = {
 -- ------------------------------------------------------------------ cars on the floor (server/cars.lua)
 -- Real cars for a show to wreck: the game's own vehicles, made by the server (so every player sees the same cars in
 -- the same state) - out of the box the truck show's six, side by side on the deck between the jump's two lips. They
--- come with their show and go with it. Staff put fresh ones down after the trucks have flattened them with
--- /arenacars reset and take them away with /arenacars clear, or with the Cars buttons on the desk's Show tab.
+-- come with their show and go with it, and stay wrecked until staff put fresh ones down - /arenacars reset, the /arena
+-- menu's Reset the cars, the RESET CARS key on the desk's CROWD page - or take them away (/arenacars clear, CLEAR CARS).
 --   models  a model per spot is picked at random (no two the same while the list is long enough)
 --   spots   where they stand: vector4(x, y, z, heading). z is where the car's middle goes, about half a metre over
 --           the surface it stands on: a car is made just over the floor and settles onto it (made any lower, its
@@ -944,6 +1167,8 @@ Config.StowedProps = {
 --   range   m from the arena's middle: the cars are put down once a player is this close (80 unless said) - see
 --           server/cars.lua for why not before
 --   delay   s between the show coming up and its cars (4 unless said): the players' games set the jump up first
+--   grab    m: (1.5.0) a driver this close to a car asks to own it, so it is crushed in their game - a car is wrecked
+--           only in the game that owns it, the others see six rough dents (20 unless said; client/cars.lua)
 -- Config.ShowCars = false, or no entry for a show: no cars.
 Config.CarsCommand = 'arenacars'
 Config.CarsAccess = nil                -- who may reset and clear them: an ACE, false = anyone, nil = the same as the
@@ -954,7 +1179,7 @@ Config.ShowCars = {
         spots = { vector4(-328.715, -1964.904, 21.250, 320.0), vector4(-326.953, -1966.382, 21.250, 140.0),
                   vector4(-325.191, -1967.861, 21.250, 320.0), vector4(-323.429, -1969.339, 21.250, 140.0),
                   vector4(-321.667, -1970.818, 21.250, 320.0), vector4(-319.905, -1972.296, 21.250, 140.0) },
-        locked = true,
+        locked = true, grab = 20.0,
     },
 }
 
@@ -1068,12 +1293,12 @@ Config.Race = {
 -- snippet); one that does not is not sold and the money goes back.
 Config.Merch = {
     enabled = true,
-    ped = { model = 'a_f_y_hipster_02', coords = vector4(-277.83, -2033.38, 28.95, 320.0), scenario = 'WORLD_HUMAN_STAND_IMPATIENT' },
+    ped = { model = 'a_f_y_hipster_02', coords = vector4(-273.63, -2032.27, 28.95, 230.0), scenario = 'WORLD_HUMAN_STAND_IMPATIENT' },
     distance = 2.2,
     -- what a stand sells, by the stand's style (a show's style: see styleOf). item = the inventory item's name
     styleOf = { wrestling = 'wrestling', concert = 'concert', mma = 'mma', hockey = 'hockey', basketball = 'basketball',
                 tennis = 'tennis', monster = 'monster', karting = 'racing', sprint = 'racing', oval = 'racing',
-                skatepark = 'skatepark', motocross = 'motocross', house = 'arena', floor = 'arena' },
+                skatepark = 'skatepark', motocross = 'motocross', house = 'arena', floor = 'arena', dj = 'arena' },
     -- the stand's name per style (the menu's title); a show that is not in styleOf has the arena's stand
     titles = { wrestling = 'SAPW', concert = 'Sirens of San Andreas - The Neon Coast Tour', mma = 'SAFC - Vespucci Vengeance',
                hockey = 'Los Santos Blizzard', basketball = 'LS Panic', tennis = 'Maze Bank Open', monster = 'Monster Mayhem',

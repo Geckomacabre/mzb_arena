@@ -53,20 +53,19 @@ for _, sets in pairs(Config.Shows) do
     for _, s in ipairs(sets) do managed[s] = true end
 end
 for _, s in pairs(Config.HouseSets or {}) do managed[s] = true end
+for _, s in ipairs(Config.RetiredSets or {}) do managed[s] = true end    -- (always off: a game that still had one on)
 
--- the sets a show wants on, with the light desk's house buttons (client/lights.lua): the show's own house light set,
--- or full / dimmed / off
+-- the sets a show wants on - never the house light sets (client/lights.lua draws the house lights at the desk's
+-- house setting: the show's own, full, dimmed or off)
 local function wanted(name)
     local sets = Config.Shows[name]
     if not sets then return nil end
     local on = {}
     for _, s in ipairs(sets) do on[s] = true end
-    local house = (GlobalState.mzbLights or {}).house or 'show'
-    local hs = Config.HouseSets or {}
-    if house ~= 'show' then
-        for _, s in pairs(hs) do on[s] = nil end
-        if hs[house] then on[hs[house]] = true end
-    end
+    -- (1.5.0) the house light sets stay off: their lights are drawn by client/lights.lua (shared/house_lights.lua), so
+    -- the house going up, down or out - a look, BLACKOUT, the HOUSE key - no longer has the interior rebuilt (the
+    -- whole arena vanished for a few frames and faded back in). A show's list still names its own house level.
+    for _, s in pairs(Config.HouseSets or {}) do on[s] = nil end
     -- sets another resource asked to have left out (the server's HideSets export: it brings a ring or a stage of
     -- its own and ours would stand in it)
     for _, s in ipairs(GlobalState.mzbHideSets or {}) do on[s] = nil end
@@ -85,16 +84,140 @@ local function matches(id, on)
     return true
 end
 
-local function set(id, on)
+-- What this resource puts into the arena's rooms (the crowd and the staff, props, litter, the curtains, the doors,
+-- the screens), with the room each one is in. An entity set only shows or goes with a refresh of the interior, and
+-- Rockstar's own scripts refresh with players inside and leave the rooms to the game - so the refresh is left alone.
+-- (1.5.0's first build forced the player's room and the camera's in the same frame as the refresh and let the camera
+-- go half a second later: the camera was then left outside the arena it stood in, "everything around me goes
+-- invisible" until noclip.) For a few seconds after a refresh, once the interior is ready again, whatever the refresh
+-- left out of its room is put back the way Rockstar's scripts do it: our things and the player with
+-- FORCE_ROOM_FOR_ENTITY; the camera with SET_ROOM_FOR_GAME_VIEWPORT_BY_KEY and the player's room and, if that does
+-- not take, a cut to a copy of the game's camera for one frame and back (what noclip's camera does). Whenever
+-- anything had to be put back, F8 (and the client's log) says what.
+local placed = {}                  -- entity -> { room key, model }
+function MzbPutInRoom(e, interior, room)
+    ForceRoomForEntity(e, interior, room)
+    placed[e] = { room, GetEntityModel(e) }
+end
+
+-- the refresh being looked after: the interior, when it was asked for and until when it is looked after, the
+-- player's room then and where the player stood in it, and whether the camera was in one of the arena's rooms.
+-- Only what goes out of its room within LOST_MS of a refresh is the refresh's doing: one who walks out of a door
+-- later on is outside, and is left there.
+local GUARD_MS, LOST_MS = 4000, 1500
+local guard = { id = 0, t0 = 0, till = 0, room = 0, at = nil, cam = false, running = false }
+
+-- a room of the interior proper: not 0, not a key it does not have, not its limbo (room 0)
+local function aRoom(id, key)
+    return key ~= 0 and GetInteriorRoomIndexByHash(id, key) > 0
+end
+
+-- the camera cut to a copy of itself for one frame and back: the game then looks for the camera's room again. Only
+-- from the game's own camera: a script's camera (the merch stand's try-on, another resource's) is not ours to drop.
+local function recut()
+    if not IsGameplayCamRendering() then return false end
+    local p, r = GetFinalRenderedCamCoord(), GetFinalRenderedCamRot(2)
+    local c = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
+    SetCamCoord(c, p.x, p.y, p.z)
+    SetCamRot(c, r.x, r.y, r.z, 2)
+    SetCamFov(c, GetGameplayCamFov())
+    RenderScriptCams(true, false, 0, true, false)
+    Wait(0)
+    RenderScriptCams(false, false, 0, true, false)
+    DestroyCam(c, false)
+    return true
+end
+
+local function lookAfter()
+    local did, nextThings, camTries, cut, lost, camLost = {}, 0, 0, false, false, false
+    while GetGameTimer() < guard.till do
+        Wait(0)
+        local id, now, ped = guard.id, GetGameTimer(), PlayerPedId()
+        local room = GetInteriorFromEntity(ped) == id and GetRoomKeyFromEntity(ped) or 0
+        local view = GetInteriorFromPrimaryView() == id and GetRoomKeyForGameViewport() or 0
+        if now - guard.t0 < LOST_MS then
+            if aRoom(id, guard.room) and not aRoom(id, room) then lost = true end
+            if guard.cam and not aRoom(id, view) then camLost = true end
+        end
+        if IsInteriorReady(id) then
+            if now >= nextThings then
+                nextThings = now + 250
+                for e, p in pairs(placed) do
+                    -- (a handle can be another entity's by now: only the same model is put back)
+                    if not DoesEntityExist(e) or GetEntityModel(e) ~= p[2] then
+                        placed[e] = nil
+                    elseif GetInteriorFromEntity(e) ~= id then
+                        ForceRoomForEntity(e, id, p[1])
+                        did.things = (did.things or 0) + 1
+                    end
+                end
+            end
+            -- the player, where it stood (one that has walked off meanwhile is left to the game)
+            if lost and not aRoom(id, room) and guard.at and #(GetEntityCoords(ped) - guard.at) < 2.0 then
+                local veh = GetVehiclePedIsIn(ped, false)
+                if veh ~= 0 then ForceRoomForEntity(veh, id, guard.room) end
+                ForceRoomForEntity(ped, id, guard.room)
+                did.player = true
+                room = guard.room
+            end
+            if camLost and aRoom(id, room) and not aRoom(id, view) then
+                camTries = camTries + 1
+                if camTries <= 10 then
+                    -- SET_ROOM_FOR_GAME_VIEWPORT_BY_KEY: FiveM's Lua has no name for it (N_0x405dc2aef6af95b9)
+                    Citizen.InvokeNative(0x405DC2AEF6AF95B9, room)
+                    did.camera = 'its room'
+                elseif not cut then
+                    cut = true
+                    if recut() then did.camera = 'a cut' end
+                end
+            end
+        end
+    end
+    local id, ped = guard.id, PlayerPedId()
+    local still = lost and not (GetInteriorFromEntity(ped) == id and aRoom(id, GetRoomKeyFromEntity(ped))) and 'the player'
+        or camLost and not (GetInteriorFromPrimaryView() == id and aRoom(id, GetRoomKeyForGameViewport())) and 'the camera'
+    if did.things or did.player or did.camera or still then
+        print(('[mzb_arena] interior refresh: put back %d placed things%s%s%s'):format(did.things or 0,
+            did.player and ', the player' or '', did.camera and (', the camera (%s)'):format(did.camera) or '',
+            still and (' - %s is still out of the arena\'s rooms: walk through a doorway or use /arenareset'):format(still) or ''))
+    end
+    guard.room, guard.at, guard.cam = 0, nil, false
+end
+
+local function refresh(id)
+    -- (a refresh within another's few seconds goes on with what was seen before the first: by now the player may be
+    -- out of the room)
+    local ped = PlayerPedId()
+    local room = GetInteriorFromEntity(ped) == id and GetRoomKeyFromEntity(ped) or 0
+    if aRoom(id, room) then guard.room, guard.at = room, GetEntityCoords(ped) end
+    if GetInteriorFromPrimaryView() == id and aRoom(id, GetRoomKeyForGameViewport()) then guard.cam = true end
+    RefreshInterior(id)
+    guard.id, guard.t0 = id, GetGameTimer()
+    guard.till = guard.t0 + GUARD_MS
+    if not guard.running then
+        guard.running = true
+        CreateThread(function()
+            local ok, err = pcall(lookAfter)
+            guard.running = false
+            if not ok then print('[mzb_arena] interior refresh: ' .. tostring(err)) end
+        end)
+    end
+end
+
+-- an interior's sets as the show wants them; refreshed when one changed (or when asked: a newly ready interior)
+local function set(id, on, force)
+    local changed = force == true
     for s in pairs(managed) do
         local a = isOn(id, s)
         if on[s] and not a then
             ActivateInteriorEntitySet(id, s)
+            changed = true
         elseif a and not on[s] then
             DeactivateInteriorEntitySet(id, s)
+            changed = true
         end
     end
-    RefreshInterior(id)
+    if changed then refresh(id) end
 end
 
 local function applyShow(name)
@@ -135,7 +258,7 @@ CreateThread(function()
             if id ~= done or show ~= lastShow then tries = 0 end
             local ok = matches(id, on)
             if id ~= done or (not ok and tries < 3) then
-                set(id, on)
+                set(id, on, id ~= done)
                 done = id
                 if matches(id, on) then
                     tries = 0
@@ -160,7 +283,7 @@ end)
 -- screened, lit and heard as the empty house is: the centre-hung board and the roof's house lights.
 function MzbShowEntry(t, show)
     if type(t) ~= 'table' then return nil end
-    local v = t[show]
+    local v = MzbShowAs(t, show)                    -- (or the show it stands in for: Config.ShowAs)
     if v == nil then v = t.house end
     return v
 end

@@ -51,8 +51,15 @@
     const m = e.data || {};
     if (m.type !== 'media') return;
     if (m.media) media = m.media;
-    if (m.enabled !== undefined) { $('#screens').classList.toggle('hidden', !m.enabled); $('#q-scr').classList.toggle('hidden', !m.enabled); }
+    if (m.enabled !== undefined) { $('#screens').classList.toggle('hidden', !m.enabled); $('#q-scr').classList.toggle('hidden', !m.enabled); $('#q-scr-keys').classList.toggle('hidden', !m.enabled); }
     if (m.feed !== undefined) $('#scr-cam').classList.toggle('hidden', !m.feed);
+    // (1.5.0) a video's sound comes from the arena's speakers through the music player unless Config.Media.sound is
+    // 'screen': then the screens' own volume is the one, else the music's (and the screens' slider is not shown)
+    if (m.sound !== undefined) {
+      const own = m.sound === 'screen';
+      $('#scr-vol-row').classList.toggle('hidden', !own);
+      $('#mus-vol-note').textContent = m.sound === 'speakers' ? 'music and video' : '';
+    }
     if (m.looks) {
       const box = $('#scr-looks');
       box.innerHTML = '';

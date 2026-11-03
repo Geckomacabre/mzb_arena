@@ -7,6 +7,8 @@
 
 local FS = Config.FollowSpot or {}
 local S = GlobalState.mzbSpot
+local dark = (GlobalState.mzbLights or {}).bo == true      -- (1.5.0) the light desk's BLACKOUT takes the spot out too
+AddStateBagChangeHandler('mzbLights', 'global', function(_, _, value) dark = type(value) == 'table' and value.bo == true end)
 local goal = nil                      -- where the beam should be (vector3)
 local cur = nil                       -- where it is (it glides to goal)
 local grabbing = false
@@ -91,7 +93,7 @@ local visible = { bowl = true, near = true }
 
 CreateThread(function()
     while true do
-        if FS.enabled and S and S.on and visible[MzbListener.zone] then
+        if FS.enabled and S and S.on and not dark and visible[MzbListener.zone] then
             if S.aim == 'player' then
                 local ped = pedOf(S.target)
                 if ped ~= 0 and DoesEntityExist(ped) then

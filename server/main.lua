@@ -86,6 +86,7 @@ local function switchShow(src, typed)
     end
     lastSwitch = now
     GlobalState.mzbShow = show
+    if MzbCuesShow then MzbCuesShow(show) end                     -- (server/cues.lua: the show's own cue list)
     local who = src == 0 and 'console' or (GetPlayerName(src) or ('player ' .. src))
     print(('[mzb_arena] %s switched the show to %s'):format(who, show))
     if Config.AnnounceSwitch then
@@ -168,6 +169,8 @@ RegisterNetEvent('mzb_arena:menuPick', function(d)
         if which ~= 'a' and which ~= 'b' and which ~= 'c' and which ~= 'all' then return end
         local action = (d.action == 'open' or d.action == 'close') and d.action or 'toggle'
         dock(src, which, action)
+    elseif d.kind == 'cars' and MzbCarsAction then
+        MzbCarsAction(src, d.action)                  -- (1.5.0) Reset the cars (server/cars.lua checks its own ACE too)
     end
 end)
 
@@ -214,6 +217,7 @@ exports('SetShow', function(name)
     local show = resolveShow(name)
     if not show then return false end
     GlobalState.mzbShow = show
+    if MzbCuesShow then MzbCuesShow(show) end
     return true
 end)
 exports('GetShow', function() return GlobalState.mzbShow end)

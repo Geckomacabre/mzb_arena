@@ -36,20 +36,23 @@ local function setOff(fx, p, step, k, rgb)
     if not asset(fx.asset) then return end
     local z = p.z + (fx.up or 0.0)
     local scale = (fx.scale or 1.0) * (step.scale or 1.0) * k
-    local rx = step.down and 180.0 or 0.0
+    local rot = fx.rot or { 0.0, 0.0, 0.0 }                      -- (1.5.0) an effect's own turn: the CO2 jet points up
+    local rx, ry, rz = step.down and 180.0 or rot[1], rot[2] or 0.0, rot[3] or 0.0
     local tint = fx.tint and rgb or nil
     local loop = step.loop or fx.loop
     UseParticleFxAsset(fx.asset)
     if loop then
-        local h = StartParticleFxLoopedAtCoord(fx.name, p.x, p.y, z, rx, 0.0, 0.0, scale, false, false, false, false)
-        if tint then SetParticleFxLoopedColour(h, tint[1] / 255.0, tint[2] / 255.0, tint[3] / 255.0, false) end
+        -- (1.5.0) local only (the last argument): every player near fires the cue in their own game, so sent over
+        -- the network each flame went off once more for every other player, and each start / colour / stop was an event
+        local h = StartParticleFxLoopedAtCoord(fx.name, p.x, p.y, z, rx, ry, rz, scale, false, false, false, true)
+        if tint then SetParticleFxLoopedColour(h, tint[1] / 255.0, tint[2] / 255.0, tint[3] / 255.0, true) end
         loops[h] = true
         SetTimeout(math.floor(loop * 1000), function()
-            if loops[h] then StopParticleFxLooped(h, false); loops[h] = nil end
+            if loops[h] then StopParticleFxLooped(h, true); loops[h] = nil end
         end)
     else
         if tint then SetParticleFxNonLoopedColour(tint[1] / 255.0, tint[2] / 255.0, tint[3] / 255.0) end
-        StartParticleFxNonLoopedAtCoord(fx.name, p.x, p.y, z, rx, 0.0, 0.0, scale, false, false, false)
+        StartParticleFxNonLoopedAtCoord(fx.name, p.x, p.y, z, rx, ry, rz, scale, false, false, false)
     end
     local lc = tint or fx.light
     if lc then
@@ -77,7 +80,7 @@ end
 
 -- the cues the show's units can fire, in the desk's order (the same rule as the server's)
 local function cuesFor(show)
-    local units, out = (PY.units or {})[show], {}
+    local units, out = MzbShowAs(PY.units, show), {}
     if not units then return out end
     for _, name in ipairs(PY.order or {}) do
         local c = (PY.cues or {})[name]
@@ -92,7 +95,7 @@ end
 
 RegisterNetEvent('mzb_arena:pyroFire', function(name, show, opts)
     local cue = type(name) == 'string' and (PY.cues or {})[name]
-    local units = (PY.units or {})[show]
+    local units = MzbShowAs(PY.units, show)
     if not cue or not units or not near() then return end
     opts = type(opts) == 'table' and opts or {}
     local k = tonumber((PY.sizes or {})[opts.size]) or 1.0
@@ -134,10 +137,17 @@ local function deskUpdate()
     local colours = {}
     for name, c in pairs(Config.LightColors or {}) do colours[#colours + 1] = { name = name, rgb = c } end
     table.sort(colours, function(a, b) return a.name < b.name end)
-    SendNUIMessage({ type = 'pyroDesk', cues = cuesFor(GlobalState.mzbShow or Config.DefaultShow), colours = colours })
+    SendNUIMessage({ type = 'pyroDesk', cues = cuesFor(GlobalState.mzbShow or Config.DefaultShow), colours = colours,
+                     safe = GlobalState.mzbPyroSafe == true })
 end
 AddEventHandler('mzb_arena:lightsDesk', deskUpdate)
 AddStateBagChangeHandler('mzbShow', 'global', function() SetTimeout(0, deskUpdate) end)
+AddStateBagChangeHandler('mzbPyroSafe', 'global', function() SetTimeout(0, deskUpdate) end)   -- (1.5.0) ARM / SAFE
+
+RegisterNUICallback('pyroArm', function(data, cb)
+    cb('ok')
+    if type(data) == 'table' then TriggerServerEvent('mzb_arena:pyroArm', data.armed == true) end
+end)
 
 RegisterNUICallback('pyro', function(data, cb)
     cb('ok')
@@ -155,6 +165,6 @@ end)
 
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
-    for h in pairs(loops) do StopParticleFxLooped(h, false) end
+    for h in pairs(loops) do StopParticleFxLooped(h, true) end
     TriggerEvent('chat:removeSuggestion', '/' .. (PY.command or 'arenapyro'))
 end)

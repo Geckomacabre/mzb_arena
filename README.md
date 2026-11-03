@@ -35,12 +35,13 @@ exterior with no changes to the outside. The entire building is open:
 
 | Show | What you get |
 |---|---|
-| `wrestling` | A 20 ft wrestling ring (round posts, turnbuckles, ropes, printed skirt, steel steps), entrance stage with titantron, ramp, pyro, a walk-through entrance curtain that moves when peds pass, the Gorilla position, commentary and timekeeper desks, ~1,200 floor chairs, a lighting rig and PA |
+| `wrestling` | A 20 ft wrestling ring (round posts, turnbuckles, ropes, printed skirt, steel steps), entrance stage with titantron, ramp, pyro, a walk-through entrance curtain that moves when peds pass, the Gorilla position, commentary and timekeeper desks, ~1,200 floor chairs, a halo over the ring (a 20 m ring of lighting truss with moving heads and washes) and PA |
 | `concert` | End stage with an LED wall, a full band backline (a detailed drum kit on a skirted riser, two guitar stacks, an 8x10 bass rig, a 2x12 combo, pedalboards, boom mics, a guitar vault and flight cases in the wings), a ground-support roof with moving heads, PA hangs, side screens, a general-admission floor with a photo pit barricade and a FOH mix riser |
 | `hockey` | A 56 x 26 m ice rink (slippery: vehicles slide and players glide on it, see below): printed ice with the Maze Bank centre logo, dasher boards with a kick plate and GTA sponsor ads, glass on stanchions (taller at the ends), protective netting over the end glass, goals with nets, open player benches with doors onto the ice and glass behind them, the penalty and timekeeper boxes, the resurfacer's gate at the far end, and the board's hockey score |
 | `basketball` | A printed hardwood court with its run-off, portable basket stanchions (padded base, glass backboard, rim and net, shot clock), team benches, the scorer's table with an LED front, about 1,150 floor seats (courtside rows on both sides, the ends seated to the walls) and the board's basketball score |
 | `tennis` | A hard court with its run-off, the net and posts, the umpire's chair, players' chairs, line judges, sponsor boards behind the baselines, about 1,300 floor seats along both sides and at both ends, and the board's tennis score |
-| `mma` | Fight night: a UFC-size octagon (9.1 m, the canvas 1.2 m up, a 1.8 m black chain-link fence, padded posts, two gates with steps and handrails, a printed canvas), the end stage with an LED wall and a walkway, a ring of cageside press and officials' tables with monitors, about 1,450 floor seats in rows out to the floor's edges, a lighting rig with moving heads and four line-array PA hangs over the cage, and the house dimmed |
+| `mma` | Fight night: a UFC-size octagon (9.1 m, the canvas 1.2 m up, a 1.8 m black chain-link fence, padded posts, two gates with steps and handrails, a printed canvas), no stage - the stage end seated, the fighters walking out of the event tunnel along a black runner, a split curtain inside each of the bowl's four floor exits - a ring of cageside press and officials' tables with monitors, about 1,750 floor seats in rows out to the floor's edges, a fight night's lighting grid over the cage (a square with a cross, two wings off each corner sloping down, moving heads, washes and TV lights, four line-array PA hangs), and the house dimmed |
+| `dj` | **BASS BEACH with DJ KAYLO** on the concert's end stage: a 20 m LED wall and LED columns, a DJ riser with an LED front and on it GTA's own nightclub DJ booth (Rockstar's CDJs, mixer and DJ wedges, set up as in the After Hours club), a ground truss of moving heads, CO2 jets and lasers along the lip, a truss halo over the booth, the standing floor with its barricade and the mixing position |
 | `house` | The empty arena with the house lights up |
 | `monster` | **Monster trucks**, on the bigger floor: clay over the whole floor with the trucks' wheel tracks in it, a chalked oval lane, a jump of clay in the middle (two long ramps and two short ones up to a deck, their ridden faces painted) on the line from the event tunnel to the vehicle tunnel, the game's own traffic drums and half-buried marker tyres at the turns, tyre walls at the tunnel mouths, hay bales in the corners, the safety crew's kit, a sponsor wall round the floor, tarps over the first rows left out - and six real cars on the deck to be flattened (see [Cars to crush](#cars-to-crush-ace-commandarena)). Nothing stands in a lane. Bring your own trucks |
 | `motocross` | **Arenacross**, on the bigger floor: 257 m of dirt over the whole floor in four lanes joined by bermed 180-degree turns - a start straight with a gate, a triple and a tabletop, a whoops section and a double, a big tabletop and rollers, the finish table under a gantry - with the bikes' ruts in it, hay bales on the corners, marker drums, tyre walls at the tunnel mouths and a banner wall of sponsors (two of the boards are for a mud club from out of state) |
@@ -217,36 +218,71 @@ show, and the only ones for hockey, basketball, tennis, the bigger floor's shows
 in the bowl sees the same show at the same moment.
 
 `/arenalights` opens the desk (or a key: bind "Maze Bank Arena: open the desk" in the game's Key Bindings > FiveM,
-or set `Config.LightDeskKey`). Its head stays put: show lights on / off, the ring lights, blackout, and what is on
-the screens and in the speakers with a **Fade** and an **Off / Stop** beside each. Under it, four tabs (keys `1`-`4`,
-the last one used is remembered):
+or set `Config.LightDeskKey`). Since 1.5.0 it is drawn as a piece of show equipment, simple first:
 
-- **Show**: the presets, the pyro, the truck show's cars, the crowd - what gets pressed during a show.
-- **Lights**: the effect, the movement, up to three colours from a palette or a colour picker, the speed in BPM
-  (with a tap button), intensity, the aim, follow the music, the house lights (the show's setting, full, dimmed,
-  off), the ring lights' colour and level, the followspot.
-- **Screens & music**: the screens' and the music player's sections (below).
-- **Fights**: the card.
+- **The screen** (amber, in its bezel): the show, the look on now, the tempo, the sound-to-light mode, what is on
+  the screens and in the speakers - with **FADE** and **OFF / STOP** keys beside it for each - and a last line that
+  says what the control under the pointer does (the game's browser shows no tooltips).
+- **The page keys** under it (keys `1`-`7`, the last one used is remembered).
+- **The fader wing** along the bottom, on every page: **LIGHTS** (how bright every light is, all at once) with
+  **BLACKOUT** under it (everything dark at once - the house lights, the followspot and the bowl's own fill light
+  too, the look kept - press it again, or any look, and it is back), **SPEED** with **TAP** (its LED blinks on the beat; in AUTO and BEAT the music sets the speed),
+  **HAZE**, **FOG** (up for more, down to nothing for off) with **BURST**, **MASTER** - the music's volume for
+  everyone, as on a mixer - with **MUTE**, and **GO** / **BACK** for the cue list with the next cue on a small
+  screen over them. Faders drag, and the wing's take the mouse wheel.
 
-A section's title still folds it away, and the desk remembers. A look is built from independent parts, as on a
-lighting console:
+The pages:
+
+- **LIGHTS**, the simple desk: the show's looks as playback keys in their running order, their names on masking
+  tape over them, the live one's LED green; **RANDOM** (a new look on every light at once - the beams' effect,
+  movement, aim, colours and pattern, the ring washes' colour, the bars, the lasers; the server picks, so everyone
+  sees the same, from `Config.LightRandom`); **ZONES** - **ON**: **BEAMS**, **RING**, **BARS**, **LASERS**, **HOUSE**
+  and **SPOT**, each group of lights on or off (green while on; a show without lasers or ring lights has no key for
+  them), and **AIM**: **FLOOR**, **STAGE**, **CROWD**, where the beams point, two or three lit and they take turns;
+  **SOUND TO LIGHT** - **AUTO** (the music runs the lights: its beat, its
+  video's colours, and looks it picks itself), **BEAT** (your look, on the music's beat), **MANUAL** (your look at the
+  SPEED fader's tempo); and **COLOUR**: every light in one colour (the beams, the ring, the bars, the lasers). A look,
+  RANDOM, a colour or an effect pressed while AUTO is on takes over: the lights keep the music's beat and do what you
+  pressed.
+- **PYRO / FOG**: the pyro with its ARM key (below) and the atmosphere - the haze's level, the fog machines, bursts.
+- **MEDIA**: the screens' and the music player's sections (below; the music's volume for everyone is the MASTER
+  fader, MINE your own).
+- **CROWD**: the crowd, and the truck show's cars.
+- **FIGHTS**: the card. **CUES**: the cue list.
+- **ADVANCED**, each group of lights on its own, as a console's programmer: pick **BEAMS**, **RING**, **BARS**,
+  **LASERS**, **HOUSE** or **SPOT** (the picked one's LED amber, a green dot on each while it is on), then its ON key
+  and level and the rest - the effect, the movement, up to three colours from a palette or a colour picker, the aim,
+  the gobo, how it follows the music; the ring lights' colour; the bars' mode, where and colour; the lasers' pattern
+  and colour; the house lights (the show's setting, full, dimmed, off); the followspot.
+
+A look is built from independent parts, as on a lighting console (ADVANCED):
 
 - **Effect** (the colour and level of each fixture): static, chase, strobe, pulse, rainbow, fade (a slow crossfade
   through the colours), wave (a band of light rolling round the rig), flash (the whole rig hits on the beat and dies
   away), alternate (every other fixture, swapping on the beat), bounce (a block of light running end to end), twinkle,
-  random, lightning (dark, with ragged white flickers), fire (warm flicker) and police.
+  scatter (`random`: lights picked at random each beat), lightning (dark, with ragged white flickers), fire (warm
+  flicker) and police.
 - **Movement** (where the beams go, with any effect): still, sweep, ballyhoo, fan (the spots open out and close in),
-  nod (tilting out to the stands and back) and cross (pairs swinging across each other).
+  nod (tilting out to the stands and back), cross (pairs swinging across each other) and roam (`random`, 1.5.0: every beam
+  glides to a place of its own every two beats, `Config.LightRandomBeats` - the same places for every player, and on
+  the music's beat when the lights follow it).
 - **Aim**: floor, stage, crowd - or several at once (the fixtures take turns), e.g. floor and crowd.
-- **Ring lights**: the ring truss's, the cage truss's and the concert rig's own lights (they light the ring, the cage
+- **Ring lights**: the wrestling halo's, the MMA grid's and the concert rig's own lights (they light the ring, the cage
   and the stage, with the show lights on or off - TV lighting for the match while the rest of the rig runs the
   show), and the glow off the video wall onto the stage. They are on by default, each in the colour the build gave
   it; the desk turns them off, gives them all one colour, or sets their level.
 - **The stage's trusses** (wrestling): their thirteen moving heads are show lights like the rest of the rig - the
   desk's colours, effects and movement, dark while the show lights are off. (Until 1.1.2 they were part of the stage
   model: always on, in red, white and blue.)
-- **Presets**: walk-in, entrance, goal, concert, party, fight, police, TV ring, storm, inferno, hype, house up,
-  blackout, reset.
+- **Presets**, in the show's own running order (since 1.5.0; the desk changes with the show while it is open):
+  fight night (wrestling, MMA): walk-in, entrance, intros, fight, finisher, winner, TV ring, inferno, hype, house up;
+  concert: walk-in, intro, verse, chorus, ballad, drop, encore, concert, storm, inferno; DJ set: walk-in, warm-up,
+  build-up, drop, visuals (the video's colours), party, hype, storm, ballad; game day (hockey, basketball, tennis):
+  walk-in, line-ups, game on, goal, time-out, police, hype, winner; motor show (monster trucks, arenacross): line-ups,
+  racing, freestyle, crush, winner; race day (the kart circuits): grid, green flag, racing, caution, chequered,
+  winner; skate jam: session, best trick, party, hype, winner. Every show ends with house up and reset, BLACKOUT is
+  under the LIGHTS fader, and ALL LOOKS opens every other look. The empty house and the open floor get the full list.
+  `Config.ShowKinds` says which kind a show is, `Config.LightPresetsByKind` what each kind offers.
 
 It also runs from chat:
 
@@ -261,8 +297,13 @@ It also runs from chat:
 /arenalights ring color red           (one colour for all of them; ring own = each its own colour again)
 /arenalights ring level 60            (0-100)
 /arenalights bpm 128 | intensity 80 | house dim
-/arenalights follow on                (off | on | tempo | colour: the lights follow the music)
+/arenalights follow on                (off | on | tempo | colour | auto: the lights follow the music)
 /arenalights preset storm
+/arenalights random                   (a new look on every light)
+/arenalights master 60                (the LIGHTS fader: the lights' master, 0-100)
+/arenalights bo                       (BLACKOUT: dark, the house lights, the spot and the bowl's fill too, the look kept; again and it is back - bo on | off)
+/arenalights haze 50 | haze off       (the haze over the floor and up the bowl)
+/arenalights fog on | off | 60 | burst 8   (the fog machines at the stage: on, off, their output, a burst of 8 s)
 ```
 
 The interior's own (baked) lights can't change colour in GTA; the house buttons switch them between full, dimmed and
@@ -276,7 +317,8 @@ Each player's own game listens to the track (the kick drum's hits make the beat;
 looks at the video's picture five times a second for its two or three main colours - a YouTube track's video, or the
 screens' video while its sound comes from the speakers. A file has no picture and a pause no beat: the desk's own
 colours and speed stay for whatever is not there. `Config.LightFollow` has how hard the rig hits the beat (`punch`),
-how far quiet passages dim it, and how soft a hit still counts (`sensitivity`).
+how far quiet passages dim it, and how soft a hit still counts (`sensitivity`). It is on by default, as Auto
+(`Config.LightDefault.follow`; the Reset look puts it back): the Follow buttons switch it to Off or another way.
 
 ## The crowd (ACE `command.arena`)
 
@@ -624,8 +666,8 @@ often.
 ## Video on the screens (pmms and other TV scripts)
 
 Every show's screens are one object on one render target, **`mzb_screens`**, so a single media player drives them
-all: the titantron with its lower panels and wings (wrestling), the LED wall and the side screens (concert), the LED
-wall (MMA), and the centre-hung board's four faces (every show). The picture and sound come from one source. With
+all: the titantron with its lower panels and wings (wrestling), the LED wall and the side screens (concert), and the
+centre-hung board's four faces (every show; MMA has only these since its stage went, 1.5.0). The picture and sound come from one source. With
 nothing playing, the screens are clear and the show's own graphics show through.
 
 The object sits at the centre of the arena floor. There is one model per show:
@@ -634,8 +676,7 @@ The object sits at the centre of the arena floor. There is one model per show:
 |---|---|
 | `wrestling` | `mzb_screens_wrestling` |
 | `concert` | `mzb_screens_concert` |
-| `mma` | `mzb_screens_mma` |
-| `hockey`, `basketball`, `tennis`, `house`, and every other show (`floor`, `monster`, `motocross`, `karting`, `sprint`, `oval`, `skatepark`, a show of your own) | `mzb_screens_board` |
+| `mma`, `hockey`, `basketball`, `tennis`, `house`, and every other show (`floor`, `monster`, `motocross`, `karting`, `sprint`, `oval`, `skatepark`, a show of your own) | `mzb_screens_board` |
 
 **pmms:** add these to `Config.models` in pmms' `config.lua`, then stand in the bowl, open pmms and pick the arena
 screens:
@@ -684,7 +725,9 @@ is how the arena starts. `Config.Media.offBlack = false` makes Off the show's ow
 **A video that stops takes the show lights with it** (`Config.Media.lightsOut`): they fade out with the picture
 (**Fade out**), or over `lightsFade` seconds (2) when the video is switched off or comes to its end. A video that
 has ended is switched off - the screens go to Off instead of sitting on its last frame. Pictures, looks and camera
-feeds leave the lights alone.
+feeds leave the lights alone. **And the next song brings them back** (1.5.0): a video or a music track that starts
+switches the show lights on the moment its sound begins - when the desk is on AUTO, or after the last video took them
+out (whatever the sound-to-light is). Lights that staff switched off themselves stay off unless the desk is on AUTO.
 
 **Loop** (the desk's **LOOP** beside Play, `/arenascreen loop [on|off]`): a looped video that comes to its end starts
 again from its beginning, for every player together and after the same lead-in as a new video (the screens are dark
@@ -764,7 +807,7 @@ xsound). Paste a link in the desk's **Music** section or use chat; every player 
 | `/arenamusic mine <0-100>` | **your own** level, for you only, kept between sessions (anyone; also the desk's "Mine" slider) |
 
 **How it sounds.** Every speaker of the show that is up is its own source in the world (`Config.Music.speakers`): the
-line arrays under the ring truss for wrestling and MMA; the two PA hangs, the subs under the stage's lip and the
+line arrays under the wrestling halo and the MMA grid; the two PA hangs, the subs under the stage's lip and the
 band's backline for the concert; the centre-hung board otherwise; and in every show the production control room's
 monitors, heard in that room. You hear each one from where it is: louder as you walk up to it, from the side it is
 on as you turn, behind you when it is behind you. On top comes the arena: a reverb and an echo off the far end
@@ -774,9 +817,11 @@ muffled and quieter but still from where the speakers are; fainter elsewhere in 
 from the arena (`Config.Music.range`) the track is not even loaded.
 
 **How loud.** `Config.Music.boost` turns the whole of it up after the speakers, the walls, the reverb and the echo, so
-their balance stays as it is: `1` is the level of v1.1.1, `2` (the default) twice that (+6 dB), `3` is +9.5 dB. A
-limiter behind it holds the loudest peaks. The screens' video sound goes the same way. Each player still sets their
-own share with `/arenamusic mine <0-100>`.
+their balance stays as it is: `1` is the level of v1.1.1, `2` twice that (+6 dB), `2.5` (the default since 1.5.0)
++8 dB, `3` is +9.5 dB. A limiter behind it holds the loudest peaks just under full scale. How far the speakers carry
+is `refDistance` (m before the level starts to fall) and `rolloff` (how fast it falls past that); with 1.5.0's 16 m and
+0.6 the upper tier gets about 3 dB more than before. The screens' video sound goes the same way. Each player still sets
+their own share with `/arenamusic mine <0-100>`.
 
 **Nothing is played "flat", and nothing else is needed.** For a YouTube link the page runs a hidden YouTube player
 and takes that player's sound into its own sound graph, where the speakers, the walls and the arena are (the player
@@ -839,7 +884,7 @@ The light desk runs fixtures of your own on top of the build's rig: `Config.Ligh
 and effect. Out of the box it adds, at the stage end: moving heads half way between the build's heads on the
 wrestling stage trusses, washes on the concert's wash bar, and four floor beams along the back of the stage end
 (wrestling, concert, MMA), either side of the middle, shooting up and out over the floor. `Config.LightMaxFixtures`
-is 40: the roof's house lights are the ones left out when a rig has more. Move or remove any of them to taste.
+is 64 (1.5.0): the roof's house lights are the ones left out when a rig has more. Move or remove any of them to taste.
 
 **Ramp lights** (`Config.RampLights`): twelve small fixtures along the wrestling ramp's two top edges, each aimed
 across the ramp and a little down, so its beam lands on the ramp and whoever walks it, in the desk's colours and
@@ -849,21 +894,24 @@ With the show lights off they rest in `Config.RampLightIdle` (a dim blue; `false
 
 ## Pyro (ACE `command.arena`)
 
-The pyro of the shows with a stage - wrestling, the concert, MMA - fired from the desk's **Pyro** section (Show tab)
-or chat; every player in the arena sees a cue at the same moment. The desk has a size (Small / Normal / Big) and a
-colour for the next cue; the colour goes to the effects that take one (sparks, comets, bursts).
+The pyro of the shows with a stage - wrestling, the concert, MMA - fired from the desk's **Pyro & fog** tab or chat;
+every player in the arena sees a cue at the same moment. The desk has a size (Small / Normal / Big) and a colour for
+the next cue; the colour goes to the effects that take one (sparks, comets, bursts). Since 1.5.0 it has an **ARM**
+key, as a pyro controller has: on SAFE no cue fires, from the desk, chat, the cue list or a bout (its lamp is green,
+the cues greyed); ARMED, the lamp blinks red. It starts armed (`/arenapyro arm | safe`).
 
 | Command | What it does |
 |---|---|
 | `/arenapyro <cue> [small\|big] [colour]` | fire a cue; the colour is a name from `Config.LightColors`, `#rrggbb`, or `lights` (the show lights' first colour) |
 | `/arenapyro list` | the cues the show that is up can fire (anyone may ask) |
+| `/arenapyro arm` \| `safe` | the ARM key: armed, or on SAFE (nothing fires) |
 
 | Group | Cues |
 |---|---|
-| Stage | `flames`, `firewall` (flames along the whole lip), `blueflames`, `longburn`, `gerbs` (spark fountains), `chase` (comets from the outside in), `sweep` (comets from one end to the other), `smoke` |
+| Stage | `flames`, `firewall` (flames along the whole lip), `flamechase` (flames running along the lip), `blueflames`, `longburn`, `gerbs` (spark fountains), `chase` (comets from the outside in), `sweep` (comets from one end to the other), `smoke`, `co2` (CO2 jets: the nightclubs' blasts of cold white vapour), `co2line` (along the lip), `co2chase` (running along it) |
 | Ramp and ring | `ramp` (sparks down both edges), `rampfire`, `posts` (sparks on the ring or cage posts), `postfire`, `sparklers` |
 | Overhead | `burst`, `shells` (fireworks), `crackle`, `waterfall` (sparks falling from a line over the stage), `sparkrain` (over the ring), `puffs` (smoke), `confetti`, `money` |
-| Sequences | `entrance`, `bighit`, `rapid`, `winner`, `inferno`, `finale` |
+| Sequences | `entrance`, `bighit`, `rapid`, `winner`, `inferno`, `finale`, `drop` (CO2 on the hit, flames, then the bursts) |
 
 A show is offered only the cues it has the places for (the concert has no ramp and no posts). They are the game's own
 particle effects, each name checked against the game's files: nothing burns and nobody is hurt. `Config.Pyro` has
@@ -877,7 +925,14 @@ The truck show comes with six real cars, side by side on the deck between the ju
 vehicles (`Config.ShowCars`: a model per spot picked at random from a list of everyday cars), made by the server, so
 every player sees the same cars in the same state, and locked, because they are there to be driven over. They are
 put down a few seconds after `monster` comes up, once a player is in or at the building, and taken away when
-another show does or the resource stops.
+another show does or the resource stops. Nothing repairs them in between: they stay wrecked until staff reset them.
+
+A car is crushed in the game that owns it. The other players' games are sent where it is and six rough dents (front,
+middle and rear on each side, with its windows, lights and bumpers), not its exact shape - so a truck driving over
+a car another player's game owns would only push it, see it put back where its owner has it, and leave it whole.
+The driver of a vehicle at the cars therefore asks to own the ones within 20 m (`grab`), unless another driver at
+that car owns it already, and each car lets that request through whatever the server's `sv_filterRequestControl`
+is: the cars crumple under the truck that hits them, and everyone else sees the dents.
 
 | Command | What it does |
 |---|---|
@@ -885,14 +940,16 @@ another show does or the resource stops.
 | `/arenacars clear` | take them away; they come back with `reset`, or the next time the show comes up |
 | `/arenacars` | how many are down |
 
-The desk has the same two buttons in a **Cars** section on its Show tab, there only while the show that is up has
-cars. `Config.ShowCars[show]` is `{ models, spots, locked }` (`spots` are `vector4(x, y, z, heading)`, z about half
+The same reset is **Reset the cars** in the `/arena` menu (with ox_lib) and **RESET CARS** in the desk's **CARS**
+section on its CROWD page, next to **CLEAR CARS** - both there only while the show that is up has cars.
+`Config.ShowCars[show]` is `{ models, spots, locked }` (`spots` are `vector4(x, y, z, heading)`, z about half
 a metre over the surface the car stands on: it is where the car's middle goes, and the car settles from there), with
-`range` (how near a player must be before the cars are made, 80 m from the arena's middle) and `delay` (seconds
-after the show comes up, 4) if you want other values; give another show an entry to stand cars on its floor too,
-or set `Config.ShowCars = false` for none. `Config.CarsAccess` is who may reset and clear them (the light desk's
-ACE unless set). Exports (server): `ResetCars()`, `ClearCars()`, `GetCars()` (their entity handles); the state is
-`GlobalState.mzbCars` (`{ show, n }`). Needs OneSync, as the fights' NPCs do.
+`range` (how near a player must be before the cars are made, 80 m from the arena's middle), `delay` (seconds
+after the show comes up, 4) and `grab` (above, 20 m) if you want other values; give another show an entry to stand
+cars on its floor too, or set `Config.ShowCars = false` for none. `Config.CarsAccess` is who may reset and clear them
+(the light desk's ACE unless set). Exports (server): `ResetCars()`, `ClearCars()`, `GetCars()` (their entity
+handles); the state is `GlobalState.mzbCars` (`{ show, n, ids }`, `ids` their network ids). Needs OneSync, as the
+fights' NPCs do.
 
 ## Props of your own (`Config.ShowProps`)
 
@@ -973,6 +1030,153 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.5.0**: a DJ show, a desk that follows the show, more light and more sound - and the main lobby made over.
+  - **The main lobby, made over**: an upper level along its back wall at the height of the walkway behind the upper
+    deck's last row, with two doorways through the wall onto that walkway - each lands on an aisle of the upper deck,
+    with a gap in the walkway's rail and a half step down into the aisle; a steel stair at each end of the lobby up
+    to it (two flights and a landing, on posts; the stairs walk as stairs). A timber baffle ceiling hung over the lobby
+    round a white oval with a lit rim and a ceiling of downlights; white columns that flare out under the upper level
+    (the Forum's own columns); dark terrazzo with brass strips and the arena's mark set in it on the way in; a timber
+    slat wall over the canopy with the shows' artwork framed on it (the Forum's wall of past nights); section 100's
+    entrance in a Maze Bank red portal with its number; an LED ribbon on the upper level's front, a timber drink rail
+    on its glass; guest services' counter lit white, the high tables on bronze cones, a sign and a bin at each
+    stair's foot, screens on the middle columns. The merch stand stands just past the security check on the west
+    side now, its customers facing the people coming through (it was under the west stair). New files:
+    `stream/interior/mzb_concourse_lobby_*.ydr` (five), `mzb_bowl_lobby_aisles.ydr`, `mzb_tx_lobby.ytd`.
+  - **The aisles walk easier**: the rail down the middle of every stepped aisle is gone (it left two lanes of about
+    0.58 m and stood a post at the head of each floor stair), and every aisle walks as a stair - smooth, not step by
+    step: the aisles of both tiers (the front rows' and the stage end's too, in whichever shows have them), the floor
+    stairs up from the event floor, the full riser at the top of each lower aisle into the cross aisle, the three
+    steep risers from the cross aisle up into each upper aisle.
+  - **The DJ show** (`dj`; `/mzb dj`, or `rave`, `edm`, `club`): BASS BEACH with DJ KAYLO on the concert's end
+    stage and standing floor - a 20 m LED wall on its towers, LED columns either side, a 1 m DJ riser with an LED
+    front, and on it GTA's own nightclub DJ booth (the After Hours club's desk, with the CDJs, the mixer, the cable
+    loom and the laptop exactly as Rockstar set them up for Solomun, and the club's DJ wedges either side), wrapped
+    in black on the crowd's side; a ground truss with moving heads in front of the riser, CO2 jets and lasers along
+    the lip, the roof with a truss halo over the booth. The crowd, the pyro, the PA and the stage's own lights are
+    the concert's (`Config.ShowAs`: a show takes the entry of the show it stands in for in any per-show table that
+    does not name it).
+  - **The light desk follows the show**: each kind of show has its own presets in running order (fight night: walk-in,
+    entrance, intros, fight, finisher, winner ...; concert: intro, verse, chorus, ballad, drop, encore; DJ set:
+    warm-up, build-up, drop, visuals; game day, motor show, race day, skate jam), 24 new looks, and the desk changes
+    with the show while it is open. Every look is still a click away under ALL LOOKS (`Config.ShowKinds`,
+    `Config.LightPresetsByKind`).
+  - **More stage lights**: the desk now runs every moving head and wash the stages have (wrestling 41 fixtures
+    instead of 28, the concert 35 instead of 26, MMA 28 instead of 20, the DJ show 38); `Config.LightMaxFixtures`
+    is 64.
+  - **Beams you can see, moving with the desk**: every fixture the desk runs is now drawn as FiveM's own script
+    light with its volume - a visible beam in the air, in the desk's colours and level, aimed and moved by the desk,
+    flashing with the music (`Config.LightBeams`: up to 48 a frame, how strong and how wide the beams are; `false`
+    for lit spots only, as before; a game without these natives gets the spots). The DJ show's rig and stage had
+    their beams baked in, standing still in one colour whatever the desk did: those lights are the script's now
+    (its ring lights and stage lights), as the other shows' were. And while the show lights are on, the rig's beam
+    heads among the ring lights are left to the desk, so no still copy shows under the moving beams.
+  - **Lasers** on the DJ stage (`Config.Lasers`, the desk's Lasers, `/arenalights lasers ...`): its four laser units
+    on the lip each fire a fan of six thin beams - fan, sweep, tunnel, scan or chase, on the beat - in the desk's
+    colours or one colour. The DJ set's looks bring them; the blackout and the reset put them out.
+  - **Bar lights** (`Config.LightBars`, the desk's Bars, `/arenalights bars ...`): LED strips under the roof's trusses
+    (rafters) and along the top of the upper tier's ledge (ledges), a zone of their own - on or off whatever the show
+    lights do. Video takes the colours of the picture on the screens, goes white on its flashes and dims in its dark
+    scenes (also when the rig does not follow it); Steady holds the colours round the bowl, Chase runs them round it
+    on the beat, Pulse flashes them all on the beat; the desk's colours or one colour, a level, all / rafters / ledges.
+    Where they run: `shared/bar_lights.lua` (from the build: `mzb_geo/py/bar_lights.py`). Some looks bring them
+    (Visuals and Drop on Video, Hype, Chorus and Encore on Chase); the blackout and the reset put them out. And on
+    the stage (Stage, or All): the wrestling ramp's two white edge lines light up like the rafters', and the concert
+    stage's lip and the MMA walkway's edges get lines of their own.
+  - **The desk, drawn as a piece of show equipment, simple first** (the Light desk section above): an amber screen
+    with soft keys, page keys, keys with LED windows, the looks as playback keys under masking tape, and a fader wing
+    on every page - LIGHTS with BLACKOUT, SPEED with TAP, HAZE, FOG with BURST, MASTER (the music's volume) with
+    MUTE, GO and BACK; the LIGHTS page is the looks, RANDOM, the zones (every group of lights on / off, where the
+    beams point), sound to light (AUTO, BEAT, MANUAL) and one colour for every light; every group of lights on its
+    own under ADVANCED. New: `html/console.js`; the sections no longer fold (`html/fold.js` is gone).
+  - **The LIGHTS fader and BLACKOUT** (`/arenalights master <0-100>`, `/arenalights bo`): the lights' master scales
+    the beams, the ring, the bars and the lasers at once (not the haze); BLACKOUT takes them all dark, the house
+    lights and the followspot too, with the look kept, and gives them back - so does any look or RANDOM. The desk
+    lights the look fired last (`look` in the light state).
+  - **The bowl goes dark** (`Config.LightDark`): under BLACKOUT, and with the house lights OFF, a time cycle modifier
+    over the bowl's own (`mzb_arena_dark` in `data/mzb_timecycle.xml`) takes away what lit it with every lamp out -
+    the room's fill light, the light the game keeps on every ped, and the picture brightening as the eye gets used to
+    the dark (BLACKOUT all of it, house OFF three quarters). Only while the camera is in the bowl, and never over
+    another resource's modifier.
+  - **New rigs over the ring and the cage, and MMA without its stage** (the user's photos of a fight night and a
+    wrestling TV show): the wrestling ring hangs under a **halo** - a 20 m ring of truss, 13 m up on eight hoists,
+    24 moving heads and washes round it, a PA hang on each diagonal - and the MMA cage under a fight night's
+    **grid** - a 12 m square with a cross, 11.5 m up, two wings off each corner sloping down to 8.5 m with TV
+    lights aimed back at the canvas, washes and moving heads under the square, four PA hangs. Their trusses glow
+    in the desk's BARS colours (the STAGE bars). MMA has no titantron or stage any more: the stage end is
+    seated, the floor chairs run out to it (about 1,750), the fighters walk out of the event tunnel along a
+    black runner between barriers, and each of the bowl's four floor exits has a split black curtain just inside
+    it (no collision: you walk through the split). MMA's video plays on the centre-hung board, its pyro moved to
+    the walkout - flames and the fog machines either side of the tunnel's mouth, a gauntlet in its notch, sparks
+    falling from its lintel in front of the curtain, the runner's edges.
+  - **No more flicker when the house lights change**: the roof's house lights were entity sets of the interior, and
+    switching one rebuilds the whole interior - so a look with its own house setting (most of them), BLACKOUT or
+    the HOUSE key made the arena vanish for a few frames and fade back in. Now the script draws the house lights
+    (`shared/house_lights.lua`: the sets' own 54 / 56 lights, as they were baked) and the sets stay off: the house
+    fades up or down over `Config.HouseLightFade` seconds (1.5), BLACKOUT cuts it at once, and the interior is never
+    rebuilt for it (`Config.HouseLightScale` tunes their brightness).
+  - **The next song brings the lights back**: a video that ended took the show lights out with it, and they
+    stayed out until AUTO was pressed again; now a video or a track that starts switches them on as its sound
+    begins - on AUTO, or after a video took them out.
+  - **The truck show's cars crumple** (Cars to crush, above): the driver at the cars now owns the ones they drive
+    over, so the crush happens in the game that hits them and everyone sees the dents - before, a car another
+    player's game owned was put straight back, whole, as if reset. They stay wrecked until **Reset the cars** (the
+    `/arena` menu, new), **RESET CARS** (the desk's CROWD page) or `/arenacars reset`.
+  - **A hand on the desk takes over from Auto**: a look, an effect, a movement, an aim or colours pressed while the
+    lights follow the music on Auto leave Auto's own looks (the beat stays, as BEAT), and colours pressed leave the
+    video's - before, Auto (on by default) went on picking and the press seemed to do nothing.
+  - **RANDOM** (`/arenalights random`, numpad `*`, `Config.LightRandom`): a new look on every light at once, picked
+    on the server from effects, movements, colour pairs (the ring washes take one of them), aims, bar modes and laser
+    patterns that go with any music.
+  - **Haze and fog** (`Config.Fog`, `/arenalights haze <0-100|off>`, `/arenalights fog <on|off|0-100|burst [s]>`):
+    the nightclubs' own dry ice - their haze clouds hung over the floor and up the bowl, filling in and thinning out
+    slowly (what makes the beams show in the air), and their fog machines at the stage's flame units, blowing over
+    the floor at the desk's output or flat out for a burst. Some looks bring haze (and the Drop and the Entrance a
+    burst); the reset clears it. Each player's game draws it while they are near.
+  - **Pyro**: an ARM key (on SAFE nothing fires; `/arenapyro arm | safe`), CO2 jets (`co2`, `co2line`, `co2chase`),
+    a flame chase along the lip and The drop (CO2 on the hit, flames, then the bursts).
+  - **Gobos** (`Config.LightGobos`, the desk's Gobo, `/arenalights gobo <stars|dots|rings|breakup|bars|off>`): every
+    beam projects a pattern onto the floor and the crowd, turning slowly on the beat (`stream/interior/mzb_tx_gobos.ytd`).
+  - **Auto** (Follow the music > Auto, `/arenalights follow auto`): colour and tempo as Both, and the desk picks its
+    own looks from where the track is - calm, groove, build-up, the drop - as the music plays (`Config.LightAuto`).
+    The desk's follow line names the section.
+  - **Random** movement: every beam glides to a place of its own every two beats, the same for every player.
+  - **The Cues tab** (`/arenacue go|back|<n>|auto|list`): a cue list per kind of show, kept on the server - the set
+    list of a concert or a DJ set (tracks one after another, Auto next when one ends), the entrances of a fight night
+    (a wrestler's theme on the screens with its sound from the speakers, the entrance look, the pyro), the cues of a
+    game. Each cue: a name, a YouTube link or an audio file, a light look, a pyro cue. GO fires the next; every cue
+    can be fired, moved, edited or removed (`Config.Cues`; exports `CueGo`, `GetCues`, `SetCues`).
+  - **The numpad** while the desk is open: 1-9 the show's presets in their running order (the buttons carry the
+    numbers), * RANDOM, 0 BLACKOUT, + / Enter GO, - back, . the beams on / off.
+  - **The lights flash with the video**: following the music, a kick drum's hit throws the rig over full and it dips
+    deeper between hits; with the colours followed, the video's own picture drives it too - a strobe, a white frame
+    or a cut to bright in the video flashes the rig towards white, a dark scene dims it (`Config.LightFollow`:
+    `punch`, `hit`, `flash`, `flashWhite`, `picture`).
+  - **Louder**: about +8 dB in the upper tier at the desk's default (`Config.Music`: `volume` 1.0, `boost` 2.5,
+    `defaultVolume` 85, `refDistance` 16, `rolloff` 0.6; the limiter holds the peaks just under full scale).
+  - **The production control room (ON AIR) and the security control room open**: the casino's keypad door in
+    their doorways would not open; it is hidden and a scripted door swings in its place, pushed open and shut
+    like the rest rooms' stall doors (`Config.SwingDoors`).
+  - **"Going invisible" in the doorways and after a show change**: Rockstar's own collision for the building's
+    outside still reached up to 0.8 m inside the four gateways (at the east gate a kerb 20 cm over the floor). A
+    player standing on it stood "outside" inside the building, and the game drew the interior only through the
+    doors. Those strips are cut out of `sp1_10_0` and `hi@sp1_10_0` (`stream/vanilla_edits`); the arena's own floor
+    runs under all of it. And a show change or a house-light button refreshes the interior, which could drop the
+    players in it (and the crowd, the props, the doors) out of their room until they walked through a doorway:
+    now, for a few seconds after each refresh, once the interior is ready again, whatever it left out of its room
+    is put back - everything this resource put into a room, the player where they stood, and the camera (if its
+    room does not take, by cutting to a copy of the camera for one frame and back). F8 prints a line whenever
+    that was needed. A press that changes no set refreshes nothing. (Flying in with noclip, through a wall instead
+    of a doorway, still leaves you outside the interior until you walk through one: that is how the game tracks
+    interiors.)
+  - **A navmesh inside the arena** (`stream/navmesh`): the game's own four 150 m squares round the building
+    (`navmesh[111][78]`, `[111][81]`, `[114][78]`, `[114][81]`) with the arena's floors added - the event floor and
+    the rooms on its level, and the concourse - so a script's ped can find its way round them (to the ring, along
+    the concourse) instead of walking into walls. Every one of Rockstar's polygons is still there at its own number,
+    so the streets and the neighbouring squares path as before. Known limits: the floor level, the concourse and the
+    street are not joined (no stairs or doors in the navmesh yet), so a ped stays on the level it is on; and another
+    resource that streams any of these four squares conflicts with it (only one of the two loads).
+  Updating from 1.4.0: the whole folder (new stream files for the DJ show); restart the server.
 - **1.4.0**: one glazed wall instead of two, and the building's shell closed round the interior. Rockstar's own
   window wall stood 0.3 - 1 m outside the arena's: doubled mullions, its dark glass and reflections over ours on
   three sides, its kerb across the doors, and between the two walls a ring with no floor in it (10 cm wide at
@@ -1092,7 +1296,7 @@ Take a line out of the list to remove a prop, or move it.
     them folded back, the stage end's telescopic sections fill from row 8, and the truck show's three tarped rows
     stay empty too (`Config.Crowd.ClosedDepth`). The litter follows.
   - **Real cars for the truck show**: six of the game's own vehicles on the deck between the jump's lips, made by
-    the server and locked, there while `monster` is up; `/arenacars reset` (the desk's FRESH CARS) puts six fresh
+    the server and locked, there while `monster` is up; `/arenacars reset` (the desk's RESET CARS) puts six fresh
     ones down after the trucks have flattened them, `/arenacars clear` takes them away (`Config.ShowCars`; the
     `ResetCars` / `ClearCars` exports).
 - **1.1.3**: music only from the speakers (and louder), pyro, a camera feed on the screens, the desk in tabs.

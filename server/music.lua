@@ -87,6 +87,17 @@ local function lead() return math.floor(math.max(0.0, math.min(10.0, tonumber(MU
 -- said how the players can read it (or that they cannot).
 -- screen: the rev of the video on the screens whose sound this is (server/media.lua), or nil; start: that video's
 -- start (the two run on one clock)
+-- (1.5.0) a song that begins brings the show lights on when the desk is on AUTO, or back on after a video took them out
+-- (server/lights.lua): told the moment it starts, if it is still the one playing then
+local function songStart(m)
+    if not MzbLightsSongStart then return end
+    local rev = m.rev
+    MzbLightsSongStart(m.start, function()
+        local now = current()
+        return now.rev == rev and (now.kind == 'youtube' or now.kind == 'file') and not now.paused and not now.fade
+    end)
+end
+
 local function play(input, src, screen, start)
     local url = trackUrl(input)
     if not url then return false, 'not a usable link (http/https, at most 500 characters)' end
@@ -101,6 +112,7 @@ local function play(input, src, screen, start)
                     loop = loop }
         if not id then m.url = url end
         GlobalState.mzbMusic = m
+        songStart(m)
         return true
     end
     local m = { kind = 'loading', title = id and ('YouTube ' .. id) or titleOf(url), paused = false, at = 0.0,
@@ -140,6 +152,7 @@ AddEventHandler('mzb_arena:relayDone', function(rev, ok, info)
     cur.start, cur.at, cur.paused = GetGameTimer() + lead(), 0.0, false
     GlobalState.mzbMusic = cur
     if cur.screen and MzbMediaAudioReady then MzbMediaAudioReady(cur.screen, cur.start) end   -- the picture starts with it
+    songStart(cur)
 end)
 
 local function pause(on)
@@ -218,16 +231,25 @@ end)
 
 -- the end of a looped track (a track that is not looped just ends: it stays what is "playing" until it is stopped,
 -- as before). Not a video's sound: that starts again when its picture does
+local endedRev = nil
 CreateThread(function()
     while true do
         Wait(500)
         local cur = current()
-        if cur.loop and cur.len and not cur.screen and not cur.live and (cur.kind == 'file' or cur.kind == 'youtube')
+        if cur.len and not cur.screen and not cur.live and (cur.kind == 'file' or cur.kind == 'youtube')
            and not cur.paused and not cur.fade and MzbTrackPos(cur) >= cur.len + 0.5 then
-            again()
+            if cur.loop then
+                again()
+            elseif endedRev ~= cur.rev then
+                endedRev = cur.rev
+                TriggerEvent('mzb_arena:musicEnded', cur.rev)                -- (server/cues.lua: a set list goes on)
+            end
         end
     end
 end)
+
+-- (server/cues.lua: a cue's track)
+function MzbMusicPlay(input) return play(input, 0) end
 
 -- the sound of a video on the screens (server/media.lua, Config.Media.sound = 'speakers'): the same video through
 -- the speakers, started, stopped, paused and faded with it - and started again with it when the video is looped

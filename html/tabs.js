@@ -1,7 +1,8 @@
-// mzb_arena - the desk's tabs: Show (the looks, the pyro, the crowd), Lights, Screens & music, Fights. The head - the
-// three big buttons, what is on the screens and in the speakers with its way out, the tabs - stays where it is while
-// a tab scrolls. The tab chosen is remembered; keys 1-4 pick one while no text field has the cursor. A tab with
-// nothing in it (a feature switched off in the config, a show without pyro and without a crowd) is left out.
+// mzb_arena - the desk's tabs: Lights (the simple desk), Pyro & fog, Screens & music, Crowd, Fights, Cues, Advanced
+// (each group of lights on its own). The head - the name, the desk's screen, what is on the screens and in the
+// speakers with its way out, the tabs - and the wing of faders stay where they are while a tab scrolls. The tab chosen
+// is remembered; keys 1-7 pick one while no text field has the cursor. A tab with nothing in it (a feature switched
+// off in the config, a show without pyro) is left out.
 (() => {
   const KEY = 'mzb_desk_tab';
   const desk = document.querySelector('#desk');
@@ -29,12 +30,13 @@
   document.addEventListener('keydown', (e) => {
     if (desk.classList.contains('hidden')) return;
     if (e.target && e.target.closest && e.target.closest('input[type=text], textarea, select')) return;
-    const i = '1234'.indexOf(e.key);
+    if (e.code && e.code.startsWith('Numpad')) return;                  // (the numpad fires presets: app.js)
+    const i = '1234567'.indexOf(e.key);
     if (i >= 0 && e.key.length === 1 && tabs[i] && !tabs[i].classList.contains('hidden')) show(tabs[i].dataset.tab, true);
   });
 
   // sections come and go with the config and the show (the pyro's, the screens', the music's): the tabs follow
-  const again = () => show(cur || 'show');
+  const again = () => show(cur || 'lights');
   const watch = new MutationObserver(again);
   panes.forEach((p) => Array.from(p.children).forEach((c) => watch.observe(c, { attributes: true, attributeFilter: ['class'] })));
   again();

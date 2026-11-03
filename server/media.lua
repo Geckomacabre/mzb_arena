@@ -126,7 +126,16 @@ local function playYoutube(s, src)
     m.start = m.start + lead()
     m.loop = M.loop == true                              -- (what a new video starts with: the desk's Loop changes it)
     setMedia(m)
-    if fromSpeakers() then MzbMusicForScreen(id, src, m.rev, m.start) end
+    if fromSpeakers() then
+        MzbMusicForScreen(id, src, m.rev, m.start)       -- (its sound in the music player: that says when it starts)
+    elseif MzbLightsSongStart then
+        -- (1.5.0) the video plays its own sound: it brings the show lights on, as a track does (server/lights.lua)
+        local rev = m.rev
+        MzbLightsSongStart(m.start, function()
+            local now = current()
+            return now.rev == rev and now.kind == 'youtube' and not now.fade and not now.paused
+        end)
+    end
     return true
 end
 
@@ -244,6 +253,9 @@ local function play(input, src)
     if #parts == 1 and youtubeId(parts[1]) and not looksLikePicture(parts[1]) then return playYoutube(parts[1], src) end
     return playImages(parts, src)
 end
+
+-- (server/cues.lua: a cue's video on the screens)
+function MzbScreenPlay(input) return play(input, 0) end
 
 local LOOKS = {}
 for _, k in ipairs(M.looks or {}) do LOOKS[k] = true end
@@ -409,7 +421,7 @@ CreateThread(function()
         Wait(500)
         local cur = current()
         if cur.kind == 'youtube' and cur.len and not cur.paused and not cur.fade and MzbTrackPos(cur) >= cur.len + 0.5 then
-            if cur.loop then again() else stop() end
+            if cur.loop then again() else stop(); TriggerEvent('mzb_arena:mediaEnded', cur.rev) end   -- (server/cues.lua)
         end
     end
 end)

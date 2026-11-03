@@ -4,6 +4,7 @@
 --   /arenapyro <cue> [small|big] [colour]   fire a cue (Config.Pyro.cues), at a size, in a colour (a name from
 --                                           Config.LightColors, #rrggbb, or "lights": the show lights' first colour)
 --   /arenapyro list                         the cues of the show that is up
+--   /arenapyro arm | safe                   (1.5.0) ARM / SAFE: on SAFE no cue fires (the desk's switch)
 
 local PY = Config.Pyro or {}
 local last = -100000
@@ -12,7 +13,7 @@ local function show() return GlobalState.mzbShow or Config.DefaultShow end
 
 -- the cues the show's units can fire, in the desk's order
 local function cuesFor(s)
-    local units, out = (PY.units or {})[s], {}
+    local units, out = MzbShowAs(PY.units, s), {}
     if not units then return out end
     for _, name in ipairs(PY.order or {}) do
         local c = (PY.cues or {})[name]
@@ -50,6 +51,7 @@ end
 -- fire a cue: true, or false and why not
 local function fire(name, opts)
     if not PY.enabled then return false, 'the pyro is off (Config.Pyro.enabled)' end
+    if GlobalState.mzbPyroSafe then return false, 'the pyro is on SAFE: arm it first (the desk, /arenapyro arm)' end
     local s = show()
     local have = cuesFor(s)
     if #have == 0 then return false, ('the %s show has no pyro'):format(tostring(s)) end
@@ -65,10 +67,19 @@ end
 
 function MzbPyro(name) return fire(name) end          -- the fights' cues (server/fights.lua)
 
+-- (1.5.0) ARM / SAFE, as a real pyro controller has: on SAFE nothing fires (it starts armed)
+GlobalState.mzbPyroSafe = false
+local function setSafe(safe) GlobalState.mzbPyroSafe = safe == true end
+
 local function allowed(src) return MzbAllowed(src, PY.access) end
 
 local function command(src, args)
     local name = args[1] and tostring(args[1]):lower()
+    if name == 'arm' or name == 'safe' then
+        if not MzbAllowed(src, PY.access) then return MzbReply(src, 'pyro', 'you are not allowed to fire the pyro') end
+        setSafe(name == 'safe')
+        return MzbReply(src, 'pyro', name == 'safe' and 'the pyro is on SAFE' or 'the pyro is ARMED')
+    end
     if not name or name == 'list' then
         local have = cuesFor(show())
         return MzbReply(src, 'pyro', #have > 0 and ('cues: ' .. table.concat(have, '  ')) or 'this show has no pyro')
@@ -92,6 +103,11 @@ RegisterNetEvent('mzb_arena:pyro', function(name, opts)
     if throttled(src) or type(name) ~= 'string' or #name > 32 or not allowed(src) then return end
     local ok, err = fire(name, opts)
     if not ok and err then MzbReply(src, 'pyro', err) end
+end)
+RegisterNetEvent('mzb_arena:pyroArm', function(armed)
+    local src = source
+    if throttled(src) or not allowed(src) then return end
+    setSafe(armed ~= true)
 end)
 
 -- other resources: an entrance script, a title win
