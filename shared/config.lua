@@ -94,6 +94,9 @@ Config.Shows = {
     skatepark = { 'mzb_set_skate_park', 'mzb_set_skate_vert', 'mzb_set_skate_dress', 'mzb_set_house_lights',
                   'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
                   'mzb_set_merch_skatepark' },                           -- the skate park: park course and vert ramp
+    paintball = { 'mzb_set_paintball', 'mzb_set_house_lights',
+                  'mzb_set_low_front_stowed', 'mzb_set_low_nw_back',
+                  'mzb_set_merch_arena' },                               -- (1.6.0) a speedball field and a plywood house
 }
 -- (1.5.0) a show that stands on another show's staging takes that show's entry in a per-show table that does not
 -- name it: the crowd's places on the floor and its staff, the pyro's units, the stage's own lights, the screens'
@@ -131,6 +134,7 @@ Config.ShowAliases = {
     kart = 'karting', karts = 'karting', gp = 'karting',
     skate = 'skatepark',
     mx = 'motocross', arenacross = 'motocross', dirtbikes = 'motocross',
+    pb = 'paintball', speedball = 'paintball', airsoft = 'paintball', killhouse = 'paintball',
 }
 
 -- seconds between two show switches (a switch reloads the interior's sets for everyone inside)
@@ -153,7 +157,7 @@ Config.ShowLabels = {
     monster = { 'Monster trucks', 'truck-monster' }, motocross = { 'Arenacross', 'motorcycle' },
     karting = { 'Karting: Grand Prix', 'flag-checkered' },
     sprint = { 'Karting: Sprint', 'stopwatch' }, oval = { 'Karting: Oval', 'rotate' },
-    skatepark = { 'Skate park', 'person-skating' },
+    skatepark = { 'Skate park', 'person-skating' }, paintball = { 'Paintball', 'paintbrush' },
 }
 
 -- ------------------------------------------------------------------ the light desk (client/lights.lua, server/lights.lua)
@@ -372,7 +376,7 @@ Config.LightPresetOrder = { 'walkin', 'entrance', 'goal', 'concert', 'party', 'f
 -- named here (the empty house, the open floor, a show of your own) gets Config.LightPresetOrder.
 Config.ShowKinds = { wrestling = 'fight', mma = 'fight', concert = 'concert', dj = 'dj', hockey = 'sport',
                      basketball = 'sport', tennis = 'sport', monster = 'motor', motocross = 'motor', karting = 'race',
-                     sprint = 'race', oval = 'race', skatepark = 'skate' }
+                     sprint = 'race', oval = 'race', skatepark = 'skate', paintball = 'sport' }
 Config.LightPresetsByKind = {
     fight   = { label = 'Fight night', 'walkin', 'entrance', 'intros', 'fight', 'finisher', 'winner', 'tv', 'inferno', 'hype', 'houseup', 'reset' },
     concert = { label = 'Concert', 'walkin', 'intro', 'verse', 'chorus', 'ballad', 'drop', 'encore', 'concert', 'storm', 'inferno', 'houseup', 'reset' },
@@ -645,18 +649,34 @@ Config.Music = {
 Config.QuietFootsteps = true
 
 -- ------------------------------------------------------------------ the followspot (client/spot.lua, server/spot.lua)
--- One or two operator-run followspots high on the bowl's long sides. Lock them onto a player (every client tracks that
--- ped itself, so it is smooth and costs no traffic) or aim them by hand: grab free aim with the key below and the
--- spot follows your camera (sent at most Config.FollowSpot.sendRate times a second; the others glide after it).
--- Run it from the desk's Followspot section or /arenaspot <on | off | follow <id|me|look> | free | color c | size n |
--- intensity n | status>.
+-- (1.6.0) Two followspots on their stands in the press boxes' open end bays (Config.PressBox): real lamps you can see
+-- turn and tilt to where the beam goes, and the beam leaves their lens. Run one from its box - stand at it and pick
+-- "Operate the followspot" (ox_target / qb-target, else [E]): you look along the lamp and the mouse moves it, LEFT
+-- CLICK locks it onto the player under the crosshair (it then follows them by itself, as for the fights' player
+-- fighters), RIGHT CLICK aims it by hand again, the wheel sizes the beam, E (or Backspace) lets go - the spot stays
+-- where you left it. Both lamps take the same aim. Or from anywhere, as before: lock it onto a player, or grab free aim
+-- with the key below and the spot follows your camera (sent at most Config.FollowSpot.sendRate times a second; the
+-- others glide after it). The desk's Followspot section or /arenaspot <on | off | follow <id|me|look> | free |
+-- color c | size n | intensity n | status>.
 Config.FollowSpot = {
     enabled = true,
     command = 'arenaspot',
     access = nil,                -- an ACE, false = anyone, nil = the same as the lights (Config.LightAccess)
     key = 'F7',                  -- grab / release free aim (players can rebind it: Settings > Key Bindings > FiveM)
-    -- the lamps: just under the roof's house-light positions on the long sides (rig group 3)
-    fixtures = { vector3(-334.807, -1984.162, 51.6), vector3(-313.813, -1953.038, 51.6) },
+    -- the lamps' stands: the arena frame (u along the arena, v across it, z the floor they stand on over the event
+    -- floor) - the press boxes' bays (arena_build/ar_press.py SPOT). An entry may also be a vector3 in the world (as
+    -- before 1.6.0): a beam from that point with no lamp drawn there
+    fixtures = { { u = 4.06, v = 47.30, z = 20.05 }, { u = -4.06, v = -47.30, z = 20.05 } },   -- (1.6.0: at the opening)
+    -- the lamp (stream/props): its three props, the stand's column to the pan bearing, the bearing to the tilt
+    -- axis, the tilt axis to the lens (m); how far it may tilt (deg: down, up)
+    lamp = { stand = 'mzb_spot_stand', yoke = 'mzb_spot_yoke', body = 'mzb_spot_body', column = 1.22, trunnion = 0.40,
+             lens = 0.71, tilt = { -58.0, 12.0 } },
+    -- running it from its box: the pick's reach, how fast the mouse turns it, how far it turns either side of the way
+    -- the box looks (deg), Rockstar's own operator pose (the movie studio light's), where the operator stands (m behind
+    -- the lamp; they look in first person, the lamp following where they look)
+    operate = { distance = 1.4, label = 'Operate the followspot', icon = 'lightbulb', pan = 80.0,
+                anim = { 'amb@prop_human_movie_studio_light@base', 'base' }, stand = 0.85,
+                sight = true },          -- a sight in the middle of the operator's view: where the beam goes
     brightness = 40.0,           -- DrawSpotLight brightness at full intensity
     hardness = 0.75,             -- a followspot has a hard edge (0 = soft)
     falloff = 1.0,
@@ -666,6 +686,22 @@ Config.FollowSpot = {
     sendRate = 8,                -- free aim: points a second at most
     bounds = { radius = 70.0, zMin = 15.0, zMax = 60.0 },   -- where a free-aim point may be: the arena, no further
     lookAngle = 8.0,             -- "follow look": the player nearest your crosshair within this many degrees
+}
+
+-- ------------------------------------------------------------------ the press boxes (client/pressbox.lua)
+-- (1.6.0) Two glazed press boxes at the top of the long sides, centre court (built into the interior: every show),
+-- each entered by its doorway off the top landing beside the aisle: a counter along the glass, a second row a step
+-- up, and in the middle of it the sound board (a console with Rockstar's Record A Studios surface modules). Pick the
+-- sound board (ox_target / qb-target when the server runs one, else [E] at it) and the light desk opens - the same
+-- as /arenalights, so the server still checks who may (Config.LightAccess). The followspot in each box's open bay:
+-- Config.FollowSpot. Places in the arena frame (u, v, z over the event floor), the zone's size (m) along u, v, z.
+Config.PressBox = {
+    enabled = true,
+    desks = { { u = 0.0, v = 49.45, z = 21.35 }, { u = 0.0, v = -49.45, z = 21.35 } },
+    deskSize = vector3(3.8, 1.5, 1.2),
+    distance = 1.8,
+    label = 'Open the light desk',
+    icon = 'sliders',
 }
 
 -- ------------------------------------------------------------------ more stage lights (client/lights.lua)
@@ -1122,25 +1158,22 @@ Config.Pyro = {
 -- Vanilla props put down for a show without CodeWalker: { model, x, y, z, heading [, ground = true] }. x y z is where
 -- the model's own origin goes (CreateObjectNoOffset); ground = true sets it down on the floor under it instead. Local
 -- props, frozen, made while you are in the arena; /arenainfo prints where you stand. room = the interior room a prop
--- stands in when that is not the bowl. Out of the box:
---   * the interview set in the backstage hall (wrestling and MMA): a green screen (the arena's own prop,
---     mzb_bh_green_screen: 3.5 m wide, 2.4 m high, its cloth swept out over the floor) standing off the east wall
---     north of the tunnel, a TV camera on it and two studio lights. The subject stands on the cloth, facing the hall
---   * a camera crane (the movie set's) on the wrestling stage deck, right of the titantron as the house sees it, its
+-- stands in when that is not the bowl. Config.EveryShowProps stand in every show (a show switch leaves them be),
+-- Config.ShowProps[show] only in that show. Out of the box:
+--   * (every show) the interview set in the backstage hall: a green screen (the arena's own prop, mzb_bh_green_screen:
+--     3.5 m wide, 2.4 m high, its cloth swept out over the floor) standing off the east wall north of the tunnel, a TV
+--     camera on it and two studio lights. The subject stands on the cloth, facing the hall
+--   * (wrestling) a camera crane (the movie set's) on the stage deck, right of the titantron as the house sees it, its
 --     arm up over the stage's lip towards the ring
+Config.EveryShowProps = {
+    { 'mzb_bh_green_screen', -360.177, -1926.168, 19.556, 50.0, room = 'backstage' },
+    { 'prop_tv_cam_02', -364.505, -1922.537, 20.562, 50.0, room = 'backstage' },
+    { 'prop_studio_light_02', -364.508, -1925.341, 19.734, 90.1, room = 'backstage' },
+    { 'prop_studio_light_02', -361.744, -1922.047, 19.734, 9.9, room = 'backstage' },
+}
 Config.ShowProps = {
     wrestling = {
         { 'prop_dolly_02', -336.218, -1946.076, 21.273, 320.0 },                                -- the camera crane
-        { 'mzb_bh_green_screen', -360.177, -1926.168, 19.556, 50.0, room = 'backstage' },
-        { 'prop_tv_cam_02', -364.505, -1922.537, 20.562, 50.0, room = 'backstage' },
-        { 'prop_studio_light_02', -364.508, -1925.341, 19.734, 90.1, room = 'backstage' },
-        { 'prop_studio_light_02', -361.744, -1922.047, 19.734, 9.9, room = 'backstage' },
-    },
-    mma = {
-        { 'mzb_bh_green_screen', -360.177, -1926.168, 19.556, 50.0, room = 'backstage' },
-        { 'prop_tv_cam_02', -364.505, -1922.537, 20.562, 50.0, room = 'backstage' },
-        { 'prop_studio_light_02', -364.508, -1925.341, 19.734, 90.1, room = 'backstage' },
-        { 'prop_studio_light_02', -361.744, -1922.047, 19.734, 9.9, room = 'backstage' },
     },
 }
 
@@ -1282,6 +1315,81 @@ Config.Race = {
                              -- (a place of your own: vector4(x, y, the floor's z, heading))
 }
 
+-- ------------------------------------------------------------------ paintball (client/paintball.lua, server/paintball.lua)
+-- (1.6.0) A paintball match in the paintball show: two teams, red and blue, one at each end of the arena's field (a
+-- speedball end in front of each start, the plywood house across the middle, a lane down each side of it). Sign up
+-- at the referees' table by the field's south gate (ox_target / qb-target, else [E]) or with
+-- /arenapaintball join [red | blue]: the first to sign up opens the sign-up for `signup` seconds, and the match starts
+-- when it closes if both teams have someone (the staff can start it sooner, or call it off). Everyone is put in their
+-- team's start box, held there for the countdown, and handed a marker: a weapon whose balls hardly scratch - a hit
+-- puts you out, it does not hurt. Out, you are put in your team's dead box (outside the net behind your start), your
+-- marker locked. The last team with
+-- someone standing takes the round (the clock running out: the team with more standing, else nobody); the first to
+-- win `wins` rounds wins the match. Paint is left where the balls land, in the shooter's team colour. Your own weapons
+-- are put away for the match - ox_inventory's weapon wheel switch when it runs - and the marker's shots do `damage`
+-- of their usual while they play.
+--   /arenapaintball [status] | join [red|blue] | leave             anyone at the arena
+--   /arenapaintball start [map] [wins] | stop                      the staff (access)
+-- Places: the arena frame (u along the arena, v across it, z over the event floor; /arenainfo prints where you are).
+Config.Paintball = {
+    enabled = true,
+    command = 'arenapaintball',
+    access = nil,                -- who may start / stop a match: an ACE, false = anyone, nil = the same as the lights
+    show = 'paintball',          -- the show it is played in: switching away ends the match
+    -- the marker: the ceramic pistol (build 1868; older builds get `fallback`) with a suppressor where it takes one.
+    -- Not the plain pistol: RP medical scripts (qbx_medical, qb-ambulancejob) wound and bleed for the weapons on their
+    -- list, and the ceramic pistol is not on it; dispatch scripts (ps-dispatch) send no "shots fired" for a silenced
+    -- weapon. Evidence scripts still see shots (qbx_evidence's casings, which only police see). While playing, a
+    -- player's LocalPlayer.state.mzbPaintball is their team, for any other resource that wants to leave them alone
+    weapon = 'WEAPON_CERAMICPISTOL', fallback = 'WEAPON_PISTOL', ammo = 250,
+    components = { 'COMPONENT_CERAMICPISTOL_SUPP', 'COMPONENT_AT_PI_SUPP_02' },   -- fitted where the weapon takes them
+    tints = { red = 6, blue = 5 },   -- the marker's tint per team (the game's pistol tints: 6 orange, 5 LSPD blue)
+    damage = 0.1,                -- what a ball does of the weapon's usual damage (a scratch, healed at once: a hit
+                                 -- must still do some for the game to report it)
+    wins = 2,                    -- rounds a team must win (2: best of three)
+    signup = 60,                 -- seconds the sign-up stays open after the first player joins
+    countdown = 5, roundTime = 180, between = 8,       -- seconds
+    maxPlayers = 16,
+    friendlyFire = false,
+    desk = { u = 4.5, v = -16.1, z = 0.9, distance = 2.0, label = 'Join paintball', icon = 'paintbrush' },
+    teams = { red = { label = 'RED', colour = { 225, 45, 30 } }, blue = { label = 'BLUE', colour = { 40, 95, 235 } } },
+    -- each map: a team's start spots (u, v) and dead box spots, the floor's height there (z), what the teams face.
+    -- The arena has one field (arena_build/ar_paintball.py); a map of your own goes here too, for a set of your own
+    maps = {
+        field = { label = 'the paintball arena', z = 0.03,
+                  -- red at the stage end: behind the home brick, which stands across the start box at u -28.1; the
+                  -- dead box outside the end net, north of the start gate. Blue: the same at the other end
+                  red = { start = { { -29.4, -1.4 }, { -29.4, 1.4 }, { -29.4, -2.3 }, { -29.4, 2.3 }, { -29.4, -3.2 },
+                                    { -29.4, 3.2 }, { -26.9, -3.0 }, { -26.9, 3.0 } },
+                          dead = { { -33.3, 6.3 }, { -33.3, 7.7 }, { -33.3, 9.3 }, { -33.3, 10.7 } } },
+                  blue = { start = { { 29.4, 1.4 }, { 29.4, -1.4 }, { 29.4, 2.3 }, { 29.4, -2.3 }, { 29.4, 3.2 },
+                                     { 29.4, -3.2 }, { 26.9, 3.0 }, { 26.9, -3.0 } },
+                           dead = { { 33.3, 6.3 }, { 33.3, 7.7 }, { 33.3, 9.3 }, { 33.3, 10.7 } } },
+                  face = { 0.0, 0.0 } },
+    },
+    map = 'field',               -- the map a match is on unless the staff say
+    lights = { start = 'gameon', point = 'goal', win = 'winner' },   -- the light desk's looks then (false: none)
+}
+
+-- ------------------------------------------------------------------ the scorer's table (client/scoretable.lua)
+-- (1.6.0) The basketball floor's scorer's table - and the shot clocks over the backboards, the same picture - shows
+-- the game's real score and its time left (html/scoretable.html, over the arena's own picture), while the show is up
+-- and a game is being kept: by gk_basketball (its court's board in GlobalState: `feed`) or by any other script
+-- through the server's export (server/scoretable.lua), which wins while it is set:
+--   exports.mzb_arena:SetScoreTable({ home = 'PANIC', away = 'NARCOS', homeScore = 78, awayScore = 74,
+--                                      period = 'QTR 3', clock = '5:12' })      -- nil: let it go
+-- With neither, the table keeps its picture and no browser runs.
+Config.ScoreTable = {
+    enabled = true,
+    show = 'basketball',                -- the show the table is in
+    txd = 'mzb_tx_basketball', texture = 'gtb_mzb_score_basketball',  -- its picture, swapped for the page
+    -- gk_basketball's court 'arena' (its Config.Courts): GlobalState['gk_basketball:arena'] = { state, home, away,
+    -- clock, countdown, limit, labels }. While the resource runs the table is live, 0 - 0 before a game. false: none
+    feed = { resource = 'gk_basketball', bag = 'gk_basketball:arena' },
+    teams = { home = nil, away = nil }, -- the names on the table (nil: the feed's own - gk_basketball's Home, Away)
+    range = 150.0,                      -- m from the arena's middle: the page runs only for players this near
+}
+
 -- ------------------------------------------------------------------ merch (client/merch.lua, server/merch.lua)
 -- The seller at the lobby's merch stand (the stand itself is dressed per show: the mzb_set_merch_<style> entity sets
 -- in Config.Shows). Talking to them lists what the show that is up has for sale; the server looks the item and its
@@ -1298,7 +1406,8 @@ Config.Merch = {
     -- what a stand sells, by the stand's style (a show's style: see styleOf). item = the inventory item's name
     styleOf = { wrestling = 'wrestling', concert = 'concert', mma = 'mma', hockey = 'hockey', basketball = 'basketball',
                 tennis = 'tennis', monster = 'monster', karting = 'racing', sprint = 'racing', oval = 'racing',
-                skatepark = 'skatepark', motocross = 'motocross', house = 'arena', floor = 'arena', dj = 'arena' },
+                skatepark = 'skatepark', motocross = 'motocross', house = 'arena', floor = 'arena', dj = 'arena',
+                paintball = 'arena' },
     -- the stand's name per style (the menu's title); a show that is not in styleOf has the arena's stand
     titles = { wrestling = 'SAPW', concert = 'Sirens of San Andreas - The Neon Coast Tour', mma = 'SAFC - Vespucci Vengeance',
                hockey = 'Los Santos Blizzard', basketball = 'LS Panic', tennis = 'Maze Bank Open', monster = 'Monster Mayhem',
