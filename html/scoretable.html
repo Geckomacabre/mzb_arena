@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<!-- mzb_arena: the basketball floor's scorer's table with the game's real score and time (client/scoretable.lua puts
+     this page on its face and sends { home, away, homeScore, awayScore, period, clock }). Drawn over the arena's own
+     picture of it (gtb_mzb_score_basketball, arena_build/ar_sports_gfx.py scoreboard) with its made-up names and numbers
+     left off (img/scoretable.png): each piece where, how big and in the font it is there, at half the picture's size. -->
+<style>
+    html, body { margin: 0; width: 1024px; height: 512px; overflow: hidden; }
+    body { background: #050507 url('img/scoretable.png') no-repeat; }
+    /* centred on its point, as the picture's text is (its middle, between the font's ascender and descender) */
+    .c { position: absolute; transform: translate(-50%, -50%); white-space: pre; line-height: 1; }
+    .name { top: 102.4px; font-family: 'Arial Black', 'Arial', sans-serif; font-weight: 900; font-size: 55px;
+            text-transform: uppercase; }
+    #homeName { left: 256px; color: rgb(253, 185, 39); }
+    #awayName { left: 768px; color: rgb(236, 64, 70); }
+    .score { top: 266.2px; font-family: 'Bahnschrift', 'Segoe UI', sans-serif; font-size: 165px; color: #fff; }
+    #homeScore { left: 256px; }
+    #awayScore { left: 768px; }
+    #info { left: 512px; top: 430.1px; font-family: 'Segoe UI', 'Arial', sans-serif; font-weight: 700; font-size: 45px;
+            color: rgb(240, 240, 240); }
+</style>
+</head>
+<body>
+    <div id="homeName" class="c name"></div>
+    <div id="awayName" class="c name"></div>
+    <div id="homeScore" class="c score"></div>
+    <div id="awayScore" class="c score"></div>
+    <div id="info" class="c"></div>
+<script>
+    const $ = (id) => document.getElementById(id);
+    const NAME_WIDTH = 409.6;              // the picture's names fit 0.4 of its width
+    const NAME_SIZE = 55;
+
+    // a long name comes down in size until it fits (fitted on every message: the first ones can be measured before
+    // the font is ready)
+    function fit(el, text) {
+        if (el.textContent !== text) el.textContent = text;
+        let size = NAME_SIZE;
+        el.style.fontSize = size + 'px';
+        while (el.offsetWidth > NAME_WIDTH && size > 12) el.style.fontSize = (size *= 0.94) + 'px';
+    }
+
+    function show(m) {
+        if (!m || typeof m !== 'object') return;
+        fit($('homeName'), String(m.home ?? ''));
+        fit($('awayName'), String(m.away ?? ''));
+        $('homeScore').textContent = m.homeScore ?? '';
+        $('awayScore').textContent = m.awayScore ?? '';
+        const period = String(m.period ?? ''), clock = String(m.clock ?? '');
+        $('info').textContent = period && clock ? period + '   ' + clock : period + clock;
+    }
+
+    window.addEventListener('message', (e) => show(e.data));
+</script>
+</body>
+</html>

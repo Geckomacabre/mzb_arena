@@ -204,6 +204,74 @@ local function refresh(id)
     end
 end
 
+-- (1.6.0) the player and the camera kept in a room while a camera of ours takes over and after it lets go (the
+-- followspot's operator view, client/spot.lua): the game puts a script's camera, and its own coming back from one,
+-- wherever a probe down from it lands - in the press boxes that was out of the arena's rooms, and the arena was not
+-- drawn ("when letting go of the followlight everything goes invisible like the mlo isn't there", 2026-11-06). Until
+-- `ms` from now (each call starts it again): the player, while within 2 m of `at`, is held in `room`; the camera is
+-- set to it whenever it is in none of the arena's rooms, every 100 ms for as long as the hold lasts (as Rockstar's
+-- am_mp_arena_box re-sets it while it differs: a cap of 15 tries was spent in the operator view's first 1.5 s, while
+-- its camera blended in, and the view was then lost for good - "the arena breaks", 2026-11-06); after 15 tries in a
+-- row that do not take, one cut of the game's own camera (as after a refresh). A room that is not one of the arena's
+-- means the bowl.
+-- (2026-11-10) `strict`: the player and the camera are held in THAT room, not just in one of the arena's. In a press
+-- box the game can put them in the concourse (the bowl's own floor was cut out under the boxes: the first floor below
+-- is the concourse's), and from the concourse the bowl is drawn only through its doorways - the operator view lost
+-- the far crowd and the centre board, washed out (the user's recording, 2026-11-10), while "one of the arena's rooms"
+-- passed the check all along
+local hold = { id = 0, room = 0, till = 0, at = nil, tries = 0, cut = false, running = false, strict = false }
+-- `extend` (the press boxes' guard, client/pressbox.lua, every 0.5 s): it only ever lengthens a running hold of the
+-- same room, never cuts the followspot's own short.
+function MzbHoldRoom(id, room, ms, at, strict, extend)
+    if not id or id == 0 then return end
+    if not aRoom(id, room) then room = GetHashKey('bowl') end
+    if not aRoom(id, room) then return end
+    local till = GetGameTimer() + (ms or 3000)
+    local same = hold.running and hold.id == id and hold.room == room
+    if extend and same then
+        if hold.till > till then till = hold.till end
+        strict = strict or hold.strict
+    end
+    if not same then hold.tries, hold.cut = 0, false end
+    hold.id, hold.room, hold.at, hold.strict = id, room, at, strict == true
+    hold.till = till
+    if hold.running then return end
+    hold.running = true
+    CreateThread(function()
+        local nextTry, fixed = 0, {}
+        while GetGameTimer() < hold.till do
+            Wait(0)
+            local id_, ped, now = hold.id, PlayerPedId(), GetGameTimer()
+            if IsInteriorReady(id_) then
+                local pRoom = GetInteriorFromEntity(ped) == id_ and GetRoomKeyFromEntity(ped) or 0
+                if not (aRoom(id_, pRoom) and (not hold.strict or pRoom == hold.room))
+                        and hold.at and #(GetEntityCoords(ped) - hold.at) < 2.0 then
+                    ForceRoomForEntity(ped, id_, hold.room)
+                    fixed.player = true
+                end
+                local view = GetInteriorFromPrimaryView() == id_ and GetRoomKeyForGameViewport() or 0
+                if aRoom(id_, view) and (not hold.strict or view == hold.room) then
+                    hold.tries = 0                                       -- (in a row: back in a room starts again)
+                elseif now >= nextTry then
+                    nextTry = now + 100
+                    hold.tries = hold.tries + 1
+                    Citizen.InvokeNative(0x405DC2AEF6AF95B9, hold.room)          -- SET_ROOM_FOR_GAME_VIEWPORT_BY_KEY
+                    fixed.camera = fixed.camera or 'its room'
+                    fixed.times = (fixed.times or 0) + 1
+                    if hold.tries > 15 and not hold.cut and recut() then
+                        hold.cut, fixed.camera = true, 'a cut'
+                    end
+                end
+            end
+        end
+        hold.running = false
+        if fixed.player or fixed.camera then
+            print(('[mzb_arena] kept in the arena\'s room:%s%s'):format(fixed.player and ' the player' or '',
+                fixed.camera and (' the camera (%s, %d times)'):format(fixed.camera, fixed.times or 0) or ''))
+        end
+    end)
+end
+
 -- an interior's sets as the show wants them; refreshed when one changed (or when asked: a newly ready interior)
 local function set(id, on, force)
     local changed = force == true

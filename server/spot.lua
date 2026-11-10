@@ -128,7 +128,7 @@ local function status(src)
         s.on and 'ON' or 'off', aim, s.color[1], s.color[2], s.color[3], s.size, math.floor(s.intensity * 100 + 0.5)))
 end
 
-local HELP = '/%s on | off | follow <id|me|look> | free (grab / release, also key %s) | color <name|#hex> | size <2-15> | intensity <0-100> | status'
+local HELP = '/%s on | off | follow <id|me|look> | free (grab / release, also key %s) | man (at a lamp in a press box) | color <name|#hex> | size <2-15> | intensity <0-100> | status'
 
 local function command(src, args)
     if not FS.enabled then return MzbReply(src, 'spot', 'the followspot is off (Config.FollowSpot.enabled)') end

@@ -2,12 +2,24 @@
 
 **Discord:** [discord.gg/C7gE5SHEzH](https://discord.gg/C7gE5SHEzH) - help, bug reports, requests and update news.
 
+> **Known issue:** going into first person, or running the followspot from a press box, may make the interior (the
+> MLO) disappear. 1.6.0 holds the player and the camera in the bowl inside the press boxes to stop it; if it keeps
+> happening to you, please open a ticket in the [Discord](https://discord.gg/C7gE5SHEzH) and say where you were
+> standing.
+
 A complete, walkable interior for the Maze Bank Arena (Del Perro / La Puerta), built inside the vanilla
 exterior with no changes to the outside. The entire building is open:
 
 - **Seating bowl.** Lower and upper tiers, about 18,650 seats, 11 vomitories, a cross aisle, stairs down to the floor,
   a four-sided centre-hung video board (16:9 screens, corner LED columns, a crown and a score ring, with its own content
   for every show), an LED ribbon, banners and EXIT signs. House lights are switchable (full / dimmed).
+- **Press boxes.** Two glazed press boxes at the top of the long sides, centre court, each entered by a doorway off
+  the top landing beside the aisle: floor-to-ceiling glass in aluminium frames, a long counter along it with monitors,
+  laptops, headsets and table mics, a second row a step up, TVs hung at the glass, carpet, acoustic panels and a
+  black ceiling with downlights. In the middle of the second row stands the **sound board**: a console frame with
+  Rockstar's own studio surface modules set in it as they are in Record A Studios - pick it (ox_target / qb-target,
+  else **E**) and the light desk opens. In each box's open end bay stands a **followspot** on its stand: it turns and
+  tilts to wherever the beam goes, the beam comes out of its lens, and you can run it from there (Followspot, below).
 - **Street-level concourse.** Four glazed gateways with security (metal detectors, bag tables, ticket scanners,
   queue lines), a box office, guest services, concession stands, bars, a team store, men's and women's rest rooms
   (every toilet stall's door swings open as you walk in and closes behind you),
@@ -49,6 +61,7 @@ exterior with no changes to the outside. The entire building is open:
 | `sprint` | **Kart circuit: the Sprint**: 201 m, flat, blue and white barrier blocks, five paddock bays and a pit lane in the corner the stadium section turns round, the grid on the back straight, the podium, race control and the timing board on the infield |
 | `oval` | **Kart circuit: the Oval**: 154 m with banked ends, an outer wall, and the pits on the infield - seven bays under gazebos along a pit road, marker tyres and chevron bales round both ends |
 | `skatepark` | **Skate park**, on the bigger floor: a walled park course with bowled corners (a start wall, a vert wall with a wall ride, box jumps, a spine, a pyramid, a stair plaza with a hand rail and hubbas, ledges and rails) and a 4.1 m vert ramp beside it with railed decks and stairs, a judges' tower between the two |
+| `paintball` | **Paintball**, on the bigger floor: one netted indoor field (61 x 29 m) on artificial turf, laid out as a hybrid field and mirrored about its centre line so both teams have the same. At each end a start box behind the home brick and a speedball end of inflatable bunkers - cans, tall cans, cakes, tombstones, a temple, a maya - red with blue caps and ends, the SPLAT CITY band round them, splattered with paint; across the middle an **OSB shoot house** (open to the roof, 2x4 framing) - a foyer behind each end door, corner rooms, a cross corridor from lane to lane, the tower room on the 50 with a deck over it, a stair up from each side, windows and firing slots, no door in line with another; down each side of it a lane, the snake on the north side and doritos on the south, a 50 bunker in each. A net all round on poles over a padded skirt, a start gate in each end and a gate on each side; outside, each team's dead box and benches, the referees' table, the scoreboard on its truss. Played as a game: see **Paintball** below |
 | `floor` | **The open floor**: the bigger floor with nothing on it and the house lights up, for an event of your own (a car show, a drift night) |
 
 The end-stage shows (wrestling, concert, MMA) mask off the seats behind the stage with black drapes and close the
@@ -58,7 +71,7 @@ wardrobe rails, a video village with monitors, catering, work lights and road ca
 are seated as usual.
 
 The lower tier's **front seven rows fold back** on all four sides for the shows that need room (`monster`,
-`motocross`, the three kart circuits, `skatepark`, `floor`): the event floor grows from 60 x 30 m to 70.6 x 40.6 m, the rows stand as
+`motocross`, the three kart circuits, `skatepark`, `paintball`, `floor`): the event floor grows from 60 x 30 m to 70.6 x 40.6 m, the rows stand as
 a stack against row 8's riser with a guard rail along the top, and all four tunnels open straight onto the floor.
 The stage end's telescopic sections then have rows 8 to 20 out. Every other show has the rows out and seated. No
 vehicles are part of any show: the trucks, the bikes and the karts are yours to bring (or sign up for the race at
@@ -111,7 +124,8 @@ tried on and bought (see "Trying on and buying the tees").
 ## Requirements
 
 - **Game build 2060 or newer** (`sv_enforceGameBuild 2060`). The interior uses vanilla props from the Diamond Casino
-  Heist, After Hours and other DLC packs, and on older builds those props are missing.
+  Heist, After Hours and other DLC packs, and on older builds those props are missing. The press boxes' sound board
+  uses The Contract's studio modules (build 2545): below 2545 its frame stands without them.
 - No framework or other resources. If your server runs **ox_lib**, the arena uses it for a staff menu and its
   notifications (below); without it, everything works from chat. The event desk and the merch stand likewise use
   **ox_target** or **qb-target** when one runs (else an **E** prompt), and **qbx_core**, **qb-core**, **es_extended**
@@ -159,7 +173,7 @@ The quick switch, for staff on the spot:
 ```
 /mzb wrestling        switch the show for everyone (late joiners get it too)
 /mzb basketball       ... wrestling concert mma hockey basketball tennis house
-/mzb monster          ... and the bigger floor's: floor monster motocross karting sprint oval skatepark
+/mzb monster          ... and the bigger floor's: floor monster motocross karting sprint oval skatepark paintball
 /mzb list             the shows, the current one in [brackets]
 /mzb status           the current show and the dock doors
 /mzb dock a open      the loading street's roller doors (a | b | c | all, open | close | toggle)
@@ -202,6 +216,8 @@ exports.mzb_arena:FadeLights(3)             -- the show lights fade out over 3 s
 exports.mzb_arena:GetLights()               -- the desk's current state
 exports.mzb_arena:HideSets({ 'mzb_set_wwe_ring', 'mzb_set_wwe_stage' })   -- leave these pieces out, whatever the show
 exports.mzb_arena:HideSets({})              -- ... and have them back
+exports.mzb_arena:SetScoreTable({ home = 'PANIC', away = 'NARCOS', homeScore = 78, awayScore = 74, period = 'QTR 3',
+                                  clock = '5:12' })   -- the basketball scorer's table (below); nil lets it go
 ```
 
 `HideSets` is for a resource that brings a ring, a stage or a floor of its own: the arena's pieces named (entity
@@ -473,6 +489,64 @@ so a server that blocks client-made entities has to let these through. A full ta
 and qb-vehiclekeys is handed the keys; for anything else the client event `mzb_arena:raceVehicle` (the vehicle, its
 plate) fires when a racer's vehicle is made. Exports (server): `GetRace()`, `CancelRace()`; the state is
 `GlobalState.mzbRace`.
+
+## Paintball
+
+The paintball show (`/mzb paintball`) is played as a game: two teams, red and blue, one at each end of the field.
+
+- **Sign-up**: at the referees' table by the south gate (ox_target / qb-target, else **E**: *Join paintball*) or
+  `/arenapaintball join [red|blue]`. The first to join opens the sign-up for 60 seconds (`Config.Paintball.signup`)
+  and everyone in or at the arena is told; no side asked for puts you on the smaller one. Up to 16 players.
+- **The start**: when the sign-up closes (or the staff start it) with someone on both sides, everyone is put in
+  their team's start box behind the home brick, held there for a 5 second countdown, and handed the marker: the
+  game's ceramic pistol with its suppressor, in their team's tint, its balls a scratch (`damage`: healed at once,
+  armour too). Your own weapons are put away for the match (ox_inventory's own weapon wheel switch while it runs) and
+  given back after, with the health you came with: a match keeps you whole while it lasts, and cures nothing.
+- **On an RP server**: the marker is not the plain pistol, because medical scripts (qbx_medical, qb-ambulancejob) wound
+  and bleed for the guns on their list and the ceramic pistol is not on it; the hit also wipes the game's record of
+  the weapon that did it. Silenced, it sends no "shots fired" to dispatch scripts that skip silenced weapons
+  (ps-dispatch). Evidence scripts still see the shots (qbx_evidence's casings, which only police see). A resource of
+  your own can leave players alone while `LocalPlayer.state.mzbPaintball` is set (their team).
+- **A hit**: a ball that hits you puts you out - your game tells the server who hit you, and it counts only when the
+  round is live, you are both standing, on opposite teams (`friendlyFire`), the weapon is the marker and the shooter
+  is near. Out, you are put in your team's dead box (outside the net behind your start) with your marker locked
+  until the round is over. Paint is left where every ball lands, in the shooter's colour, for everyone at the arena.
+- **Rounds**: the last team with someone standing takes the round; when the clock runs out (`roundTime`, 3 minutes)
+  the side with more standing takes it, else it is a draw. The first to win `wins` rounds (2: best of three) wins the
+  match: the score is at the top of the screen, the light desk fires its looks (`lights`) and the crowd cheers.
+- Switching to another show, or a side left with nobody (gone from the server or the arena), calls the match off.
+
+```
+/arenapaintball                       the match on (or the last result)    anyone
+/arenapaintball join [red|blue]       sign up                              anyone at the arena
+/arenapaintball leave                 leave the match                      anyone in it
+/arenapaintball start [map] [wins]    close the sign-up and go             staff
+/arenapaintball stop                  call the match off                   staff
+```
+
+`Config.Paintball` has the times, the wins, `maxPlayers`, the marker (`weapon`, `fallback`, `components`, `ammo`,
+`tints`, `damage`), the
+teams' names and colours, the referees' table, who may start and stop it (`access`: the light desk's ACE unless set)
+and `maps`: where each team starts and waits when it is out on the field (in the arena's frame; `/arenainfo` prints
+where you stand). Exports (server): `GetPaintball()`, `StopPaintball()`; the state is `GlobalState.mzbPaintball`.
+
+## The scorer's table
+
+In the basketball show the scorer's table in front of the benches - and the shot clocks over the backboards, which
+carry the same picture - shows the game's real score and its time left: the two teams' names and points, and under
+them the time to the tip-off, the game clock, the score to play to, or FINAL. It is the arena's own picture with the
+game's numbers on it (`html/scoretable.html`, put on the table by `client/scoretable.lua` for the players near the
+arena while the show is up).
+
+- **gk_basketball**: its court `arena` (the arena's own baskets) keeps the board up to date by itself. The resource
+  publishes every court's game in `GlobalState['gk_basketball:<court>']` - `{ state, home, away, clock, countdown,
+  limit, labels }`, nothing while no game is on - and the table follows `Config.ScoreTable.feed`. While gk_basketball
+  runs the table is live: 0 - 0 and PRE-GAME before a game, HOME and AWAY (the teams' labels in its config).
+- **Any other script** can put its own game on the table with the server export, which wins while it is set:
+  `exports.mzb_arena:SetScoreTable({ home, away, homeScore, awayScore, period, clock })`, and `SetScoreTable(nil)`
+  to let it go. `GetScoreTable()` reads it back; it is `GlobalState.mzbScoreTable`.
+- With neither, the table keeps its picture and no browser runs. `Config.ScoreTable` has the show, the picture it
+  swaps, the feed, the teams' names (in place of the feed's) and the range.
 
 ## Merch
 
@@ -858,23 +932,52 @@ and no crowd noise of its own: play what you like through the music player, whic
 
 ## Followspot (ACE `command.arena`)
 
-One or two followspots high on the bowl's long sides (`Config.FollowSpot.fixtures`), run by an operator from the
-desk's **Followspot** section or chat:
+Two followspots on their stands in the press boxes' open end bays, right at the opening behind a glass guard
+(`Config.FollowSpot.fixtures`): real lamps (the
+arena's own props: a stand, a yoke that pans on it, the lamp that tilts in the yoke) that turn to wherever the beam
+goes, the beam coming out of their lens. Idle, they look at the floor's middle; both take the same aim.
+
+**Run one from its box**: stand at the lamp and pick **Operate the followspot** (ox_target / qb-target, else **E**;
+or `/arenaspot man` at it). You stand at its handles in first person and the lamp follows where you look (your own
+view of the lamp and of your own body is hidden while you run it - everyone else sees you at it and the lamp turn -
+and a sight in the middle of your view marks where the beam goes; from the opening you see down to the whole floor),
+**left click** locks it
+onto the player under the crosshair (it then follows them by itself), **right click** aims it by hand again, the
+**wheel** sizes the beam, **E** (or Backspace) lets go - the spot stays where you left it. The fights' automatic spot
+(a followspot that is on follows the player fighters) moves the same lamps.
+
+Or run it from the desk's **Followspot** section or chat, from anywhere:
 
 | Command | What it does |
 |---|---|
 | `/arenaspot on` / `off` | |
 | `/arenaspot follow <id \| me \| look>` | lock onto a player: a server id, yourself, or whoever is under your crosshair |
 | `/arenaspot free` or the key **F7** | grab free aim: the spot follows your camera; again to let go (it stays put) |
+| `/arenaspot man` | run the lamp you stand at (in a press box) |
 | `/arenaspot color <name \| #rrggbb>` / `size <2-15>` / `intensity <0-100>` | |
 | `/arenaspot status` | |
 
 Locked onto a player, every client follows that player itself, so it is smooth and sends nothing over the network.
 Free aim sends the operator's aim point at most 8 times a second (`Config.FollowSpot.sendRate`); the server keeps it
-inside the arena and only one operator aims at a time. Players can rebind the key under Settings > Key Bindings >
-FiveM ("Arena followspot").
+inside the arena and only one operator aims at a time (who may: `Config.FollowSpot.access`, the lights' ACE unless
+set). Players can rebind the key under Settings > Key Bindings > FiveM ("Arena followspot"). A `fixtures` entry
+given as a `vector3` (as before 1.6.0) is a beam from that point with no lamp drawn.
 
 Exports (server): `SetFollowSpot(patch)`, `FollowPlayer(serverId)`, `GetFollowSpot()`.
+
+Exports (client), for a show of your own that wants the real lamps on its own peds (peds it made on each client,
+which the server's followspot cannot lock onto) instead of drawing beams from thin air:
+
+```lua
+local t = exports.mzb_arena:SpotTrack({ entity = ped, lamps = { 1 }, color = { 255, 80, 40 }, size = 6.0, ms = 1500 })
+exports.mzb_arena:SpotRetarget(t, { point = vector3(x, y, z) })   -- or { entity = }, { color = }, { size = }
+exports.mzb_arena:SpotRelease(t)
+exports.mzb_arena:SpotReach(point)                                 -- the lamps that can turn to it, e.g. { 2 }
+```
+
+`lamps` is a list of lamp numbers, `'all'`, or (left out) the lamps that can turn to the ped or point. A track lasts
+`ms` (at most 2 minutes; each `SpotRetarget` starts it again), on this client only, and gives way to a player running
+that lamp and to the desk's blackout; it ends with the resource that set it.
 
 ## More stage lights (`Config.LightRigExtra`)
 
@@ -951,14 +1054,15 @@ cars on its floor too, or set `Config.ShowCars = false` for none. `Config.CarsAc
 handles); the state is `GlobalState.mzbCars` (`{ show, n, ids }`, `ids` their network ids). Needs OneSync, as the
 fights' NPCs do.
 
-## Props of your own (`Config.ShowProps`)
+## Props of your own (`Config.EveryShowProps`, `Config.ShowProps`)
 
-Vanilla props put down for a show without CodeWalker: `Config.ShowProps[show]` is a list of
+Vanilla props put down without CodeWalker: `Config.EveryShowProps` stand in every show (a show switch leaves them
+be), `Config.ShowProps[show]` only in that show. Each is a list of
 `{ model, x, y, z, heading, ground = true, room = 'backstage' }` (local props, frozen, made while you are in the
 arena; `ground` drops the prop onto the floor under it, `room` is the interior room it stands in when that is not the
 bowl; `/arenainfo` prints where you stand). Out of the box:
 
-- **The interview set** (wrestling, MMA): a green screen in the backstage hall, off the east wall north of the
+- **The interview set** (every show since 1.6.0): a green screen in the backstage hall, off the east wall north of the
   tunnel, with a TV camera on it and two studio lights. The screen is the arena's own prop (`mzb_bh_green_screen`,
   3.5 m wide and 2.4 m high, its cloth swept out over the floor), yours to put anywhere else too.
 - **A camera crane** on the wrestling stage deck beside the titantron, its arm up over the stage's lip towards the
@@ -1007,7 +1111,10 @@ Take a line out of the list to remove a prop, or move it.
 - `Config.Litter`: the litter (how much, how near, the props).
 - `Config.Fights`: the bouts (rounds, times, the knockout line, the count-out, who may challenge, the NPC fighters'
   models and names, the rings, the cues for the lights and the crowd).
-- `Config.RampLights`: the wrestling ramp's lights. `Config.ShowProps`: props of your own per show.
+- `Config.RampLights`: the wrestling ramp's lights. `Config.EveryShowProps` / `Config.ShowProps`: props of your own
+  in every show / per show.
+- `Config.PressBox`: the press boxes' sound boards (where their zones are, the label, the reach).
+  `Config.FollowSpot`: the followspots (their lamps, running one from its box).
 - `Config.Pyro`: the pyro's units per show, effects, cues and sizes.
 - `Config.LightFollow`: the lights following the music.
 - `Config.Music.loop` / `Config.Media.loop`: whether a new track / a new video starts looped.
@@ -1017,6 +1124,8 @@ Take a line out of the list to remove a prop, or move it.
   fight there.
 - `Config.Race`: the race's sign-up time, countdown, fewest racers, DNF time, fee and prize, where racers are put
   afterwards, its command and who may run it. `Config.Races` (`shared/races.lua`): the tracks.
+- `Config.Paintball`: the paintball game - its times, wins, the marker, the teams, the referees' table, the start and
+  dead box spots, its command and who may run it.
 - `Config.Merch`: the merch seller, which stand a show has (`styleOf`), and each stand's items and prices.
 - `Config.MerchShop`: the tees on the stand's walls: the price, the clothing collections, what goes on with a tee,
   how close to stand, the try-on camera, whether the look is saved, who draws the try-on (`hud`), and where the
@@ -1030,6 +1139,74 @@ Take a line out of the list to remove a prop, or move it.
 
 ## Changes
 
+- **1.6.0**: press boxes, a real followspot, a paintball arena and its game, a live scorer's table, and fixes.
+  - **A paintball show** (`paintball`, `/mzb pb`), on the bigger floor: one netted field laid out as an indoor hybrid
+    field, mirrored for the two teams - a speedball end of inflatable bunkers in front of each start, an OSB shoot
+    house across the middle (rooms, corridors, windows, a deck on the 50 with a stair from each side), a snake lane
+    and a dorito lane down its sides (the shows table above). New files: `stream/interior/mzb_paintball.ydr`,
+    `mzb_tx_paintball.ytd`.
+  - **Paintball, the game** (**Paintball** above): sign up at the referees' table or `/arenapaintball join`, red v
+    blue, a hit puts you out, rounds to a best of three, paint where the balls land, the score on screen. New files:
+    `client/paintball.lua`, `server/paintball.lua`.
+  - **Two press boxes** at the top of the long sides, centre court, built into the interior (every show): they take
+    the place of the top six rows and the landing behind them between the two aisles there, entered by a doorway off
+    the landing. Glass in aluminium frames across the front and over the front row's sides, a counter along the glass,
+    a second row a step up, the sound board in the middle of it, monitors, laptops, headsets, table mics, TVs at the
+    glass, carpet, acoustic panels, a black ceiling with six downlights; a passage down from the second row at each
+    end (two steps). The aisles beside the boxes open onto the landing behind them: a gap in its rail between two
+    posts and a half step notched into its edge, so you walk from the landing down to the floor. New files:
+    `stream/interior/mzb_pressbox_a.ydr`, `mzb_pressbox_b.ydr`; the top rows' seats, rails and the hanging drape's
+    edge cut out where the boxes stand (and the crowd's 13 spots on them).
+  - **The sound board** opens the light desk (ox_target / qb-target, else **E**): `Config.PressBox`. Its surface is
+    Rockstar's own, from Record A Studios (`sf_prop_sf_s_mixer_*`, build 2545), set in the console as they set it.
+  - **A real followspot** in each box's open end bay, on its stand (new props `stream/props/mzb_spot_stand.ydr`,
+    `mzb_spot_yoke.ydr`, `mzb_spot_body.ydr`): it pans and tilts to wherever the beam goes - the fights' automatic
+    spot, a player it is locked onto, an aim by hand - and the beam leaves its lens (before, it came out of thin air
+    under the roof). Run it from its box: **Operate the followspot** or `/arenaspot man` - in first person, the lamp
+    follows where you look, a sight marks where it points - left click locks onto a player, the wheel sizes it, E lets go.
+    The lamp stands at the opening of its bay, which is open down to a 10 cm base behind a glass guard: you see down
+    to the whole floor and the lower bowl.
+  - **The arena stays drawn in a press box in first person** (and while running the lamp): the game could count a
+    player in a box as in the concourse below it, and from there it drew the bowl only through its doorways - the far
+    crowd and the centre board gone, or the whole interior. Anyone inside a box, and their camera, is now kept in the
+    bowl's room.
+  - **Other scripts can run the real lamps** (client exports `SpotTrack`, `SpotRetarget`, `SpotRelease`,
+    `SpotReach`, Followspot below): a show points a press box's lamp at its own ped or a point for a while, in its
+    own colour and size, instead of drawing a beam from the air.
+  - **The centre-hung board hangs 9 m lower** - its screens 17.8 to 22.3 m over the event floor (they were 26.8 to
+    31.3) - and its faces lean out 10 degrees at the top, so they look down at the house: the lower bowl reads it now,
+    not only the top rows. Every show's skin on it and its video faces (`stream/props/mzb_screens_*.ydr`) moved with
+    it.
+  - **The scorer's table keeps the real score** (**The scorer's table** above): in the basketball show it shows the
+    game's teams, points and time left - gk_basketball's game on the arena's court by itself, any other script's
+    through `SetScoreTable` - over its picture. New files: `client/scoretable.lua`, `server/scoretable.lua`,
+    `html/scoretable.html`, `html/img/scoretable.png`.
+  - **No more falling through the floor** (beside the basketball scorer's table, and anywhere on the big floors):
+    the event floor's slab and every show's floor cover were each one polygon cut into a fan of triangles from one
+    corner - up to 56 m long and under 0.6 m wide - and a ragdoll or a ped pressed against something there could
+    slip through them. Every such fan in the arena's collision (the event floor, the floors and ceilings of rooms at both
+    ends, the floor covers of basketball, tennis, MMA, wrestling, the concert and DJ floors, Monster Mayhem,
+    arenacross and the skatepark, the wrestling stage and NW deck) is now cut along a 2 m grid: the same surfaces,
+    no triangle longer than 2.83 m - and so is every other long strip of floor or ceiling in the interior's
+    collision (1,553 triangles over 4 m long and under 0.6 m wide: the concourses, the landings, the event floor's
+    edges). The scorer's table itself had no collision on its court side (its LED front is a
+    screen, and screens have none): walked into from the court you stood inside it. It is a closed box on the floor
+    now.
+  - **The paintball field to the game's scale**: the house in GTA's proportions, not a real building's - walls 3.05 m
+    (they were 2.44), doorways 1.3 x 2.4 m (the ends' 1.8 m), windows 1.1 m, the deck 3.3 m up behind a 1.1 m parapet,
+    stairs 1.2 m wide, the plan 15 % bigger, the bunkers beside it moved out to keep their room; the net's mesh is
+    4 cm (its picture was stretched over each panel: holes of 26 x 11 cm).
+  - **Z-fighting fixed**: the Jonwood logo on the amp heads (its letters lay in the grille's plane), the press boxes'
+    back counters and doorway frame, the paintball field's lines, its OSB house's trims and the bunkers' bands.
+  - **The green screen stays up in every show**: the interview set (green screen, TV camera, two studio lights) in
+    the backstage hall is `Config.EveryShowProps` now, not only wrestling and MMA's.
+  - **No more exploding pit props**: the fire extinguishers and jerry cans are out of the motor shows' pits and
+    paddocks (Monster Mayhem, arenacross and the three kart circuits) - a truck or a shot set them off.
+  - **The invisible wall at the stage-end floor exit is gone** (beside the event tunnel's mouth, every show with the
+    seated front rows): the front rows' collision had been squashed flat onto one line when it was compiled - its
+    centre sat off the box its polygons span, so the compiler pinned everything past half that box to its edge,
+    which left a thin wall there and the rows' collision 0.58 m off the floor all round. Rebuilt with the centre
+    right; a part of the SE lobby's collision (14 cm off at its edges) the same.
 - **1.5.0**: a DJ show, a desk that follows the show, more light and more sound - and the main lobby made over.
   - **The main lobby, made over**: an upper level along its back wall at the height of the walkway behind the upper
     deck's last row, with two doorways through the wall onto that walkway - each lands on an aisle of the upper deck,

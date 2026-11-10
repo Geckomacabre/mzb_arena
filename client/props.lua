@@ -1,17 +1,24 @@
 -- mzb_arena - client: props put down by script while you are in the arena, local objects, frozen:
 --   * Config.ConcourseProps (from the build, client/crowd_slots.lua): every show - the SE lobby's pop-up merch stands;
---   * Config.ShowProps[show] (the owner's own): vanilla props for a show without CodeWalker - a camera crane, a green
---     screen, anything. Another show takes them away;
+--   * Config.EveryShowProps (the owner's own): props in every show - the interview set's green screen. A show switch
+--     leaves them standing;
+--   * Config.ShowProps[show] (the owner's own): vanilla props for a show without CodeWalker - a camera crane, anything.
+--     Another show takes them away;
 --   * Config.StowedProps: what stands in the store rooms while its show is NOT up (the basket units, folded down).
 -- A prop's room = the interior room it is forced into (room = 'concourse'; default Config.Crowd.Room, the bowl).
 
 local defaultRoom = Config.Crowd and Config.Crowd.Room or nil
 local made, madeFor = {}, nil
+local always = nil                    -- Config.EveryShowProps once put down (they stay through a show switch)
 
-local function clear()
-    for _, o in ipairs(made) do
+local function remove(list)
+    for _, o in ipairs(list or {}) do
         if DoesEntityExist(o) then DeleteEntity(o) end
     end
+end
+
+local function clear()
+    remove(made)
     made, madeFor = {}, nil
 end
 
@@ -26,7 +33,7 @@ local function inUse(unless, show)
     return unless == show
 end
 
-local function put(p, interior)
+local function put(p, interior, into)
     local m = GetHashKey(p[1])
     if not IsModelInCdimage(m) then
         print(('[mzb_arena] props: there is no model "%s"'):format(tostring(p[1])))
@@ -46,7 +53,8 @@ local function put(p, interior)
     FreezeEntityPosition(o, true)
     local room = p.room or defaultRoom
     if room and interior ~= 0 then MzbPutInRoom(o, interior, GetHashKey(room)) end
-    made[#made + 1] = o
+    into = into or made
+    into[#into + 1] = o
 end
 
 CreateThread(function()
@@ -54,6 +62,10 @@ CreateThread(function()
         local show = GlobalState.mzbShow or Config.DefaultShow
         local id, ready = MzbInterior()
         local here = ready and GetInteriorFromEntity(PlayerPedId()) == id
+        if here and not always then
+            always = {}
+            for _, p in ipairs(Config.EveryShowProps or {}) do put(p, id, always) end
+        end
         if here and madeFor ~= show then
             clear()
             for _, p in ipairs(Config.ConcourseProps or {}) do put(p, id) end
@@ -62,13 +74,18 @@ CreateThread(function()
                 if not inUse(p.unless, show) then put(p, id) end
             end
             madeFor = show
-        elseif not here and madeFor and #(GetEntityCoords(PlayerPedId()) - Config.InteriorProbe) > 160.0 then
+        elseif not here and (madeFor or always) and #(GetEntityCoords(PlayerPedId()) - Config.InteriorProbe) > 160.0 then
             clear()
+            remove(always)
+            always = nil
         end
         Wait(1000)
     end
 end)
 
 AddEventHandler('onResourceStop', function(res)
-    if res == GetCurrentResourceName() then clear() end
+    if res == GetCurrentResourceName() then
+        clear()
+        remove(always)
+    end
 end)
